@@ -39,6 +39,23 @@ export function MenuTreeSelector({ menus, selectedIds, onChange, readonly = fals
         return buildTree(menus);
     }, [menus]);
 
+    // Auto-expand all parent menus on mount
+    useEffect(() => {
+        const getAllParentIds = (items: MenuTreeItem[]): number[] => {
+            return items.flatMap(item => {
+                const ids: number[] = [];
+                if (item.children && item.children.length > 0) {
+                    ids.push(item.id);
+                    ids.push(...getAllParentIds(item.children));
+                }
+                return ids;
+            });
+        };
+
+        const parentIds = getAllParentIds(menuTree);
+        setExpandedIds(new Set(parentIds));
+    }, [menuTree]);
+
     // Filter tree by search query
     const filteredTree = useMemo(() => {
         if (!searchQuery) return menuTree;

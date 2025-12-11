@@ -64,8 +64,10 @@ export function RoleMenuAssignment({ roleId, roleName }: RoleMenuAssignmentProps
             setInitialMenuIds(selectedMenuIds);
             setSuccess(true);
 
-            // Clear success message after 3 seconds
-            setTimeout(() => setSuccess(false), 3000);
+            // Reload the page after 1 second to refresh sidebar menu
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
         } catch (err: any) {
             console.error('Error assigning menus:', err);
             setError(err.response?.data?.message || 'Failed to assign menus');
