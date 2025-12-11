@@ -34,19 +34,19 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalPr
     return (
         <div className="fixed inset-0 z-50 overflow-y-auto">
             {/* Backdrop */}
-            <div 
+            <div
                 className="fixed inset-0 bg-black bg-opacity-50 transition-opacity duration-200"
                 onClick={onClose}
             />
-            
+
             {/* Modal */}
             <div className="flex min-h-full items-center justify-center p-4">
-                <div 
-                    className={`relative w-full ${sizeClasses[size]} transform overflow-hidden rounded-2xl bg-white shadow-2xl transition-all duration-200`}
+                <div
+                    className={`relative w-full ${sizeClasses[size]} transform rounded-2xl bg-white shadow-2xl transition-all duration-200 max-h-[90vh] flex flex-col`}
                     onClick={(e) => e.stopPropagation()}
                 >
                     {/* Header */}
-                    <div className="border-b border-gray-200 px-6 py-4">
+                    <div className="border-b border-gray-200 px-6 py-4 flex-shrink-0">
                         <div className="flex items-center justify-between">
                             <h3 className="text-xl font-semibold text-gray-900">{title}</h3>
                             <button
@@ -59,9 +59,9 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalPr
                             </button>
                         </div>
                     </div>
-                    
-                    {/* Content */}
-                    <div className="px-6 py-4">
+
+                    {/* Content - Scrollable */}
+                    <div className="px-6 py-4 overflow-y-auto flex-1">
                         {children}
                     </div>
                 </div>
