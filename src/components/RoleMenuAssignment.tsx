@@ -66,11 +66,6 @@ export function RoleMenuAssignment({ roleId, roleName }: RoleMenuAssignmentProps
 
             // Dispatch event to notify sidebar to refresh
             window.dispatchEvent(new Event('menuAssignmentChanged'));
-
-            // Close modal after short delay
-            setTimeout(() => {
-                onClose();
-            }, 1000);
         } catch (err: any) {
             console.error('Error assigning menus:', err);
             setError(err.response?.data?.message || 'Failed to assign menus');
