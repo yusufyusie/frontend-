@@ -23,12 +23,17 @@ export function Sidebar({ isOpen = true, isCollapsed = false, onClose }: Sidebar
     useEffect(() => {
         loadMenus();
 
-        // Auto-refresh menus every 5 seconds to catch changes
-        const interval = setInterval(() => {
+        // Listen for menu assignment changes
+        const handleMenuUpdate = () => {
+            console.log('[Sidebar] Menu assignment changed, refreshing...');
             loadMenus();
-        }, 5000);
+        };
 
-        return () => clearInterval(interval);
+        window.addEventListener('menuAssignmentChanged', handleMenuUpdate);
+
+        return () => {
+            window.removeEventListener('menuAssignmentChanged', handleMenuUpdate);
+        };
     }, []);
 
     const loadMenus = async () => {
