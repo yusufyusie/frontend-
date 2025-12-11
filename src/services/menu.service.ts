@@ -43,6 +43,9 @@ class MenuService {
         return {
             headers: {
                 Authorization: `Bearer ${token}`,
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                'Pragma': 'no-cache',
+                'Expires': '0',
             },
         };
     }
@@ -51,7 +54,9 @@ class MenuService {
      * Get menu for current user (permission-filtered)
      */
     async getUserMenu(): Promise<MenuItem[]> {
-        const response = await axios.get(`${API_URL}/menu/user`, this.getAuthHeaders());
+        // Add timestamp to prevent caching
+        const timestamp = new Date().getTime();
+        const response = await axios.get(`${API_URL}/menu/user?_t=${timestamp}`, this.getAuthHeaders());
         return response.data;
     }
 
