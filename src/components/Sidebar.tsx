@@ -22,6 +22,13 @@ export function Sidebar({ isOpen = true, isCollapsed = false, onClose }: Sidebar
 
     useEffect(() => {
         loadMenus();
+
+        // Auto-refresh menus every 5 seconds to catch changes
+        const interval = setInterval(() => {
+            loadMenus();
+        }, 5000);
+
+        return () => clearInterval(interval);
     }, []);
 
     const loadMenus = async () => {
