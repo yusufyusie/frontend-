@@ -49,6 +49,10 @@ export function RoleMenuAssignment({ roleId, roleName }: RoleMenuAssignmentProps
     };
 
     const handleSave = async () => {
+        console.log('[RoleMenuAssignment] Saving menus for role:', roleId, roleName);
+        console.log('[RoleMenuAssignment] Selected menu IDs:', selectedMenuIds);
+        console.log('[RoleMenuAssignment] Total selected:', selectedMenuIds.length);
+
         if (selectedMenuIds.length === 0) {
             setError('Please select at least one menu');
             return;
@@ -60,6 +64,8 @@ export function RoleMenuAssignment({ roleId, roleName }: RoleMenuAssignmentProps
             setSuccess(false);
 
             await menuService.assignMenusToRole(roleId, selectedMenuIds);
+
+            console.log('[RoleMenuAssignment] Save successful!');
 
             setInitialMenuIds(selectedMenuIds);
             setSuccess(true);
