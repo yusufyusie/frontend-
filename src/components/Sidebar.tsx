@@ -7,38 +7,6 @@ import { menuService, MenuItem } from '@/services/menu.service';
 import * as Icons from 'lucide-react';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 
-// Fallback hardcoded menus with hierarchy
-const FALLBACK_MENUS: MenuItem[] = [
-    { id: 1, name: 'Dashboard', path: '/admin', icon: 'LayoutDashboard', order: 1, isActive: true, level: 0, children: [] },
-    {
-        id: 2,
-        name: 'User Management',
-        icon: 'Users',
-        order: 2,
-        isActive: true,
-        level: 0,
-        children: [
-            { id: 3, name: 'Users', path: '/admin/users', icon: 'User', order: 1, isActive: true, level: 1, parentId: 2, children: [] },
-            { id: 4, name: 'Roles', path: '/admin/roles', icon: 'Shield', order: 2, isActive: true, level: 1, parentId: 2, children: [] },
-            { id: 5, name: 'Permissions', path: '/admin/permissions', icon: 'Lock', order: 3, isActive: true, level: 1, parentId: 2, children: [] },
-            { id: 10, name: 'Menus', path: '/admin/menus', icon: 'Menu', order: 4, isActive: true, level: 1, parentId: 2, children: [] },
-        ]
-    },
-    {
-        id: 6,
-        name: 'Security',
-        icon: 'ShieldCheck',
-        order: 3,
-        isActive: true,
-        level: 0,
-        children: [
-            { id: 7, name: 'Policies', path: '/admin/policies', icon: 'FileText', order: 1, isActive: true, level: 1, parentId: 6, badge: 'New', badgeColor: 'blue', children: [] },
-            { id: 8, name: 'Audit Logs', path: '/admin/audit', icon: 'FileSearch', order: 2, isActive: true, level: 1, parentId: 6, children: [] },
-        ]
-    },
-    { id: 9, name: 'Bookings', path: '/admin/bookings', icon: 'Calendar', order: 4, isActive: true, level: 0, children: [] },
-];
-
 interface SidebarProps {
     isOpen?: boolean;
     isCollapsed?: boolean;
@@ -47,9 +15,9 @@ interface SidebarProps {
 
 export function Sidebar({ isOpen = true, isCollapsed = false, onClose }: SidebarProps) {
     const pathname = usePathname();
-    const [menuItems, setMenuItems] = useState<MenuItem[]>(FALLBACK_MENUS);
-    const [loading, setLoading] = useState(false);
-    const [expandedMenus, setExpandedMenus] = useState<Set<number>>(new Set([2, 6]));
+    const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [expandedMenus, setExpandedMenus] = useState<Set<number>>(new Set());
 
     useEffect(() => {
         loadMenus();
