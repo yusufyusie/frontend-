@@ -64,9 +64,12 @@ export function RoleMenuAssignment({ roleId, roleName }: RoleMenuAssignmentProps
             setInitialMenuIds(selectedMenuIds);
             setSuccess(true);
 
-            // Reload the page after 1 second to refresh sidebar menu
+            // Dispatch event to notify sidebar to refresh
+            window.dispatchEvent(new Event('menuAssignmentChanged'));
+
+            // Close modal after short delay
             setTimeout(() => {
-                window.location.reload();
+                onClose();
             }, 1000);
         } catch (err: any) {
             console.error('Error assigning menus:', err);
