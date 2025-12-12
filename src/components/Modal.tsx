@@ -8,9 +8,10 @@ interface ModalProps {
     title: string;
     children: ReactNode;
     size?: 'sm' | 'md' | 'lg' | 'xl';
+    footer?: ReactNode; // Optional sticky footer
 }
 
-export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalProps) {
+export function Modal({ isOpen, onClose, title, children, size = 'md', footer }: ModalProps) {
     useEffect(() => {
         if (isOpen) {
             document.body.style.overflow = 'hidden';
@@ -45,7 +46,7 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalPr
                     className={`relative w-full ${sizeClasses[size]} transform rounded-2xl bg-white shadow-2xl transition-all duration-200 max-h-[90vh] flex flex-col`}
                     onClick={(e) => e.stopPropagation()}
                 >
-                    {/* Header */}
+                    {/* Header - Fixed */}
                     <div className="border-b border-gray-200 px-6 py-4 flex-shrink-0">
                         <div className="flex items-center justify-between">
                             <h3 className="text-xl font-semibold text-gray-900">{title}</h3>
@@ -64,6 +65,13 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalPr
                     <div className="px-6 py-4 overflow-y-auto flex-1">
                         {children}
                     </div>
+
+                    {/* Footer - Fixed (if provided) */}
+                    {footer && (
+                        <div className="border-t border-gray-200 px-6 py-4 bg-gray-50 flex-shrink-0">
+                            {footer}
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

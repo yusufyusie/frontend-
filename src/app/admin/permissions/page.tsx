@@ -1,26 +1,36 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { permissionsService, type Permission, type CreatePermissionData } from '@/services/permissions.service';
+import { permissionsService, type Permission, type CreatePermissionData, type PermissionStats } from '@/services/permissions.service';
 import { Modal } from '@/components/Modal';
 import { FormInput } from '@/components/FormInput';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { toast } from '@/components/Toast';
 import { PermissionGate } from '@/components/PermissionGate';
+import { PermissionCard } from '@/components/PermissionCard';
+import { PermissionBulkActions } from '@/components/PermissionBulkActions';
+import { getGradientStyle } from '@/utils/color-generator';
 
 export default function AdminPermissionsPage() {
     const [permissions, setPermissions] = useState<Permission[]>([]);
+    const [stats, setStats] = useState<PermissionStats | null>(null);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
+    const [selectedGroup, setSelectedGroup] = useState<string>('all');
+    const [sortBy, setSortBy] = useState<'name' | 'usage' | 'date'>('name');
 
     // Modals
     const [createModalOpen, setCreateModalOpen] = useState(false);
     const [editModalOpen, setEditModalOpen] = useState(false);
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+    const [bulkDeleteConfirmOpen, setBulkDeleteConfirmOpen] = useState(false);
+    const [moveGroupModalOpen, setMoveGroupModalOpen] = useState(false);
 
-    // Selected permission
+    // Selected items
     const [selectedPermission, setSelectedPermission] = useState<Permission | null>(null);
+    const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+    const [newGroupName, setNewGroupName] = useState('');
 
     // Expanded groups
     const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
@@ -32,10 +42,14 @@ export default function AdminPermissionsPage() {
     const fetchData = async () => {
         try {
             setLoading(true);
-            const data = await permissionsService.getAll();
-            setPermissions(data);
+            const [permData, statsData] = await Promise.all([
+                permissionsService.getAll(),
+                permissionsService.getStats(),
+            ]);
+            setPermissions(permData);
+            setStats(statsData);
             // Expand all groups by default
-            const groups = new Set(data.map(p => p.groupName || 'Other'));
+            const groups = new Set(permData.map(p => p.groupName || 'Other'));
             setExpandedGroups(groups);
         } catch (error: any) {
             toast.error('Failed to load permissions: ' + error.message);
@@ -44,11 +58,29 @@ export default function AdminPermissionsPage() {
         }
     };
 
-    const filteredPermissions = permissions.filter(perm =>
-        perm.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        perm.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        perm.groupName.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    // Filter and sort permissions
+    const filteredPermissions = permissions
+        .filter(perm => {
+            const matchesSearch =
+                perm.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                perm.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                perm.groupName.toLowerCase().includes(searchTerm.toLowerCase());
+
+            const matchesGroup = selectedGroup === 'all' || perm.groupName === selectedGroup;
+
+            return matchesSearch && matchesGroup;
+        })
+        .sort((a, b) => {
+            if (sortBy === 'name') {
+                return a.name.localeCompare(b.name);
+            } else if (sortBy === 'usage') {
+                const aCount = a._count?.rolePermissions || 0;
+                const bCount = b._count?.rolePermissions || 0;
+                return bCount - aCount;
+            } else {
+                return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+            }
+        });
 
     const groupedPermissions = filteredPermissions.reduce((acc, perm) => {
         const group = perm.groupName || 'Other';
@@ -67,6 +99,53 @@ export default function AdminPermissionsPage() {
         setExpandedGroups(newExpanded);
     };
 
+    const handleSelectPermission = (id: number) => {
+        const newSelected = new Set(selectedIds);
+        if (newSelected.has(id)) {
+            newSelected.delete(id);
+        } else {
+            newSelected.add(id);
+        }
+        setSelectedIds(newSelected);
+    };
+
+    const handleSelectAll = () => {
+        setSelectedIds(new Set(filteredPermissions.map(p => p.id)));
+    };
+
+    const handleDeselectAll = () => {
+        setSelectedIds(new Set());
+    };
+
+    const handleBulkDelete = async () => {
+        if (selectedIds.size === 0) return;
+
+        try {
+            const result = await permissionsService.bulkDelete(Array.from(selectedIds));
+            toast.success(result.message);
+            setSelectedIds(new Set());
+            setBulkDeleteConfirmOpen(false);
+            fetchData();
+        } catch (error: any) {
+            toast.error('Failed to delete permissions: ' + error.message);
+        }
+    };
+
+    const handleBulkMoveGroup = async () => {
+        if (selectedIds.size === 0 || !newGroupName) return;
+
+        try {
+            const result = await permissionsService.bulkUpdateGroup(Array.from(selectedIds), newGroupName);
+            toast.success(result.message);
+            setSelectedIds(new Set());
+            setMoveGroupModalOpen(false);
+            setNewGroupName('');
+            fetchData();
+        } catch (error: any) {
+            toast.error('Failed to move permissions: ' + error.message);
+        }
+    };
+
     const handleDeletePermission = async () => {
         if (!selectedPermission) return;
         try {
@@ -78,6 +157,24 @@ export default function AdminPermissionsPage() {
         }
     };
 
+    const handleExport = async () => {
+        try {
+            const data = await permissionsService.exportPermissions();
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `permissions-export-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            toast.success('Permissions exported successfully');
+        } catch (error: any) {
+            toast.error('Failed to export permissions: ' + error.message);
+        }
+    };
+
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-[400px]">
@@ -86,112 +183,195 @@ export default function AdminPermissionsPage() {
         );
     }
 
-    const groupColors: Record<string, string> = {
-        'User': 'from-blue-500 to-cyan-500',
-        'Role': 'from-purple-500 to-pink-500',
-        'Permission': 'from-green-500 to-teal-500',
-        'Booking': 'from-orange-500 to-red-500',
-        'Other': 'from-gray-500 to-gray-600'
-    };
+    const uniqueGroups = Array.from(new Set(permissions.map(p => p.groupName)));
 
     return (
         <div className="space-y-6 animate-fade-in">
             {/* Header */}
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-start">
                 <div>
                     <h1 className="text-4xl font-bold text-gradient">Permissions Management</h1>
-                    <p className="text-gray-600 mt-2">Define and organize system permissions</p>
+                    <p className="text-gray-600 mt-2">Define and organize system permissions dynamically</p>
                 </div>
                 <PermissionGate permission="Permission.Create">
-                    <button
-                        onClick={() => setCreateModalOpen(true)}
-                        className="btn btn-primary flex items-center gap-2"
-                    >
-                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                        </svg>
-                        Add Permission
-                    </button>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={handleExport}
+                            className="btn btn-secondary flex items-center gap-2"
+                        >
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            </svg>
+                            Export
+                        </button>
+                        <button
+                            onClick={() => setCreateModalOpen(true)}
+                            className="btn btn-primary flex items-center gap-2"
+                        >
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                            </svg>
+                            Add Permission
+                        </button>
+                    </div>
                 </PermissionGate>
             </div>
 
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="card">
-                    <div className="flex items-center gap-3">
-                        <div className="p-3 bg-blue-100 rounded-lg">
-                            <svg className="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                            </svg>
-                        </div>
-                        <div>
-                            <p className="text-2xl font-bold text-gray-900">{permissions.length}</p>
-                            <p className="text-sm text-gray-600">Total Permissions</p>
-                        </div>
-                    </div>
-                </div>
-                <div className="card">
-                    <div className="flex items-center gap-3">
-                        <div className="p-3 bg-purple-100 rounded-lg">
-                            <svg className="w-6 h-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
-                            </svg>
-                        </div>
-                        <div>
-                            <p className="text-2xl font-bold text-gray-900">{Object.keys(groupedPermissions).length}</p>
-                            <p className="text-sm text-gray-600">Permission Groups</p>
+            {/* Enhanced Stats Cards */}
+            {stats && (
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div className="card relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-500/10 to-transparent rounded-full -mr-16 -mt-16" />
+                        <div className="relative flex items-center gap-3">
+                            <div className="p-3 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl shadow-lg">
+                                <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <p className="text-3xl font-bold text-gray-900">{stats.totalPermissions}</p>
+                                <p className="text-sm text-gray-600">Total Permissions</p>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </div>
 
-            {/* Search Bar */}
+                    <div className="card relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-500/10 to-transparent rounded-full -mr-16 -mt-16" />
+                        <div className="relative flex items-center gap-3">
+                            <div className="p-3 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl shadow-lg">
+                                <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <p className="text-3xl font-bold text-gray-900">{stats.totalGroups}</p>
+                                <p className="text-sm text-gray-600">Permission Groups</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="card relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-green-500/10 to-transparent rounded-full -mr-16 -mt-16" />
+                        <div className="relative flex items-center gap-3">
+                            <div className="p-3 bg-gradient-to-br from-green-500 to-teal-500 rounded-xl shadow-lg">
+                                <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <p className="text-3xl font-bold text-gray-900">{stats.recentlyCreated}</p>
+                                <p className="text-sm text-gray-600">Added This Week</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="card relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-orange-500/10 to-transparent rounded-full -mr-16 -mt-16" />
+                        <div className="relative flex items-center gap-3">
+                            <div className="p-3 bg-gradient-to-br from-orange-500 to-red-500 rounded-xl shadow-lg">
+                                <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                                </svg>
+                            </div>
+                            <div>
+                                <p className="text-3xl font-bold text-gray-900">{selectedIds.size}</p>
+                                <p className="text-sm text-gray-600">Selected Items</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Bulk Actions */}
+            <PermissionBulkActions
+                selectedCount={selectedIds.size}
+                totalCount={filteredPermissions.length}
+                onSelectAll={handleSelectAll}
+                onDeselectAll={handleDeselectAll}
+                onBulkDelete={() => setBulkDeleteConfirmOpen(true)}
+                onBulkMoveGroup={() => setMoveGroupModalOpen(true)}
+            />
+
+            {/* Filters */}
             <div className="card">
-                <div className="relative">
-                    <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                    <input
-                        type="text"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        placeholder="Search permissions..."
-                        className="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none"
-                    />
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {/* Search */}
+                    <div className="relative col-span-2">
+                        <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                        <input
+                            type="text"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            placeholder="Search permissions by name, description, or group..."
+                            className="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none"
+                        />
+                    </div>
+
+                    {/* Group Filter */}
+                    <div className="flex gap-2">
+                        <select
+                            value={selectedGroup}
+                            onChange={(e) => setSelectedGroup(e.target.value)}
+                            className="flex-1 px-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none"
+                        >
+                            <option value="all">All Groups</option>
+                            {uniqueGroups.map(group => (
+                                <option key={group} value={group}>{group}</option>
+                            ))}
+                        </select>
+
+                        {/* Sort */}
+                        <select
+                            value={sortBy}
+                            onChange={(e) => setSortBy(e.target.value as any)}
+                            className="px-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none"
+                        >
+                            <option value="name">Sort by Name</option>
+                            <option value="usage">Sort by Usage</option>
+                            <option value="date">Sort by Date</option>
+                        </select>
+                    </div>
                 </div>
             </div>
 
             {/* Grouped Permissions */}
             <div className="space-y-4">
                 {Object.keys(groupedPermissions).length === 0 ? (
-                    <div className="card text-center p-8 text-gray-500">
-                        No permissions found
+                    <div className="card text-center p-12">
+                        <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                        </svg>
+                        <p className="text-gray-500 text-lg">No permissions found matching your criteria</p>
                     </div>
                 ) : (
                     Object.entries(groupedPermissions).sort(([a], [b]) => a.localeCompare(b)).map(([group, perms]) => {
                         const isExpanded = expandedGroups.has(group);
-                        const colorClass = groupColors[group] || groupColors['Other'];
 
                         return (
                             <div key={group} className="card overflow-hidden">
                                 {/* Group Header */}
                                 <button
                                     onClick={() => toggleGroup(group)}
-                                    className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+                                    className="w-full flex items-center justify-between p-5 hover:bg-gray-50 transition-colors"
                                 >
-                                    <div className="flex items-center gap-3">
-                                        <div className={`p-2 bg-gradient-to-r ${colorClass} rounded-lg`}>
-                                            <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <div className="flex items-center gap-4">
+                                        <div
+                                            className="p-3 rounded-xl shadow-md"
+                                            style={getGradientStyle(group)}
+                                        >
+                                            <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                                             </svg>
                                         </div>
                                         <div className="text-left">
-                                            <h2 className="text-xl font-semibold text-gray-900">{group}</h2>
-                                            <p className="text-sm text-gray-600">{perms.length} permission{perms.length !== 1 ? 's' : ''}</p>
+                                            <h2 className="text-2xl font-bold text-gray-900">{group}</h2>
+                                            <p className="text-sm text-gray-600 mt-0.5">{perms.length} permission{perms.length !== 1 ? 's' : ''}</p>
                                         </div>
                                     </div>
                                     <svg
-                                        className={`w-5 h-5 text-gray-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                                        className={`w-6 h-6 text-gray-400 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
                                         fill="none"
                                         viewBox="0 0 24 24"
                                         stroke="currentColor"
@@ -200,53 +380,25 @@ export default function AdminPermissionsPage() {
                                     </svg>
                                 </button>
 
-                                {/* Permissions List */}
+                                {/* Permissions Grid */}
                                 {isExpanded && (
-                                    <div className="border-t border-gray-100">
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 p-4">
+                                    <div className="border-t border-gray-100 p-5 bg-gray-50/50">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                             {perms.map((perm) => (
-                                                <div
+                                                <PermissionCard
                                                     key={perm.id}
-                                                    className="p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:shadow-md transition-all bg-white"
-                                                >
-                                                    <div className="flex justify-between items-start mb-2">
-                                                        <div className="flex-1">
-                                                            <h3 className="font-semibold text-gray-900 mb-1">{perm.name}</h3>
-                                                            <p className="text-sm text-gray-600">{perm.description}</p>
-                                                        </div>
-                                                        <PermissionGate permission="Permission.Create">
-                                                            <div className="flex gap-1 ml-2">
-                                                                <button
-                                                                    onClick={() => {
-                                                                        setSelectedPermission(perm);
-                                                                        setEditModalOpen(true);
-                                                                    }}
-                                                                    className="p-1.5 hover:bg-gray-100 rounded transition-colors"
-                                                                    title="Edit"
-                                                                >
-                                                                    <svg className="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                                                    </svg>
-                                                                </button>
-                                                                <button
-                                                                    onClick={() => {
-                                                                        setSelectedPermission(perm);
-                                                                        setDeleteConfirmOpen(true);
-                                                                    }}
-                                                                    className="p-1.5 hover:bg-red-50 rounded transition-colors"
-                                                                    title="Delete"
-                                                                >
-                                                                    <svg className="w-4 h-4 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                                    </svg>
-                                                                </button>
-                                                            </div>
-                                                        </PermissionGate>
-                                                    </div>
-                                                    <div className="text-xs text-gray-400">
-                                                        ID: {perm.id}
-                                                    </div>
-                                                </div>
+                                                    permission={perm}
+                                                    isSelected={selectedIds.has(perm.id)}
+                                                    onSelect={handleSelectPermission}
+                                                    onEdit={() => {
+                                                        setSelectedPermission(perm);
+                                                        setEditModalOpen(true);
+                                                    }}
+                                                    onDelete={() => {
+                                                        setSelectedPermission(perm);
+                                                        setDeleteConfirmOpen(true);
+                                                    }}
+                                                />
                                             ))}
                                         </div>
                                     </div>
@@ -265,6 +417,7 @@ export default function AdminPermissionsPage() {
                     setCreateModalOpen(false);
                     fetchData();
                 }}
+                existingGroups={uniqueGroups}
             />
 
             {selectedPermission && (
@@ -276,6 +429,7 @@ export default function AdminPermissionsPage() {
                         setEditModalOpen(false);
                         fetchData();
                     }}
+                    existingGroups={uniqueGroups}
                 />
             )}
 
@@ -288,15 +442,72 @@ export default function AdminPermissionsPage() {
                 confirmText="Delete"
                 type="danger"
             />
+
+            <ConfirmDialog
+                isOpen={bulkDeleteConfirmOpen}
+                onClose={() => setBulkDeleteConfirmOpen(false)}
+                onConfirm={handleBulkDelete}
+                title="Delete Multiple Permissions"
+                message={`Are you sure you want to delete ${selectedIds.size} permission(s)? This action cannot be undone.`}
+                confirmText="Delete All"
+                type="danger"
+            />
+
+            {/* Move Group Modal */}
+            <Modal
+                isOpen={moveGroupModalOpen}
+                onClose={() => {
+                    setMoveGroupModalOpen(false);
+                    setNewGroupName('');
+                }}
+                title="Move to Group"
+            >
+                <div className="mb-4">
+                    <p className="text-gray-600 mb-4">
+                        Move {selectedIds.size} selected permission(s) to a new group:
+                    </p>
+                    <FormInput
+                        label="Group Name"
+                        value={newGroupName}
+                        onChange={(e) => setNewGroupName(e.target.value)}
+                        placeholder="Enter group name..."
+                        list="existing-groups"
+                    />
+                    <datalist id="existing-groups">
+                        {uniqueGroups.map(group => (
+                            <option key={group} value={group} />
+                        ))}
+                    </datalist>
+                </div>
+                <div className="flex gap-3 justify-end">
+                    <button
+                        onClick={() => {
+                            setMoveGroupModalOpen(false);
+                            setNewGroupName('');
+                        }}
+                        className="btn btn-secondary"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        onClick={handleBulkMoveGroup}
+                        className="btn btn-primary"
+                        disabled={!newGroupName}
+                    >
+                        Move
+                    </button>
+                </div>
+            </Modal>
         </div>
     );
 }
 
 // Create Permission Modal Component
-function CreatePermissionModal({ isOpen, onClose, onSuccess }: {
+function CreatePermissionModal({ isOpen, onClose, onSuccess, existingGroups }: {
     isOpen: boolean;
     onClose: () => void;
     onSuccess: () => void;
+    existingGroups: string[];
 }) {
     const [formData, setFormData] = useState<CreatePermissionData>({
         name: '',
@@ -353,7 +564,13 @@ function CreatePermissionModal({ isOpen, onClose, onSuccess }: {
                     placeholder="e.g., Report, Invoice, User"
                     required
                     disabled={submitting}
+                    list="group-suggestions"
                 />
+                <datalist id="group-suggestions">
+                    {existingGroups.map(group => (
+                        <option key={group} value={group} />
+                    ))}
+                </datalist>
 
                 <div className="mb-4">
                     <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -395,11 +612,12 @@ function CreatePermissionModal({ isOpen, onClose, onSuccess }: {
 }
 
 // Edit Permission Modal Component
-function EditPermissionModal({ isOpen, permission, onClose, onSuccess }: {
+function EditPermissionModal({ isOpen, permission, onClose, onSuccess, existingGroups }: {
     isOpen: boolean;
     permission: Permission;
     onClose: () => void;
     onSuccess: () => void;
+    existingGroups: string[];
 }) {
     const [formData, setFormData] = useState({
         name: permission.name,
@@ -439,7 +657,13 @@ function EditPermissionModal({ isOpen, permission, onClose, onSuccess }: {
                     onChange={(e) => setFormData({ ...formData, groupName: e.target.value })}
                     required
                     disabled={submitting}
+                    list="edit-group-suggestions"
                 />
+                <datalist id="edit-group-suggestions">
+                    {existingGroups.map(group => (
+                        <option key={group} value={group} />
+                    ))}
+                </datalist>
 
                 <div className="mb-4">
                     <label className="block text-sm font-medium text-gray-700 mb-1">

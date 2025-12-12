@@ -127,15 +127,17 @@ export function RoleMenuAssignment({ roleId, roleName }: RoleMenuAssignmentProps
             )}
 
             {/* Menu Tree Selector */}
-            <MenuTreeSelector
-                menus={allMenus}
-                selectedIds={selectedMenuIds}
-                onChange={setSelectedMenuIds}
-            />
+            <div className="max-h-[500px] overflow-y-auto custom-scrollbar border border-gray-200 rounded-lg">
+                <MenuTreeSelector
+                    menus={allMenus}
+                    selectedIds={selectedMenuIds}
+                    onChange={setSelectedMenuIds}
+                />
+            </div>
 
-            {/* Action Buttons */}
+            {/* Action Buttons - Always visible at bottom */}
             {hasChanges && (
-                <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-200">
+                <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-200 bg-white sticky bottom-0">
                     <button
                         onClick={handleCancel}
                         disabled={saving}

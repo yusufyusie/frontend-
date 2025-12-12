@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { menuService, MenuItem } from '@/services/menu.service';
+import { menuService, MenuItem, MenuStats } from '@/services/menu.service';
 import { permissionsService, Permission } from '@/services/permissions.service';
 import { DataTable } from '@/components/DataTable';
+import { MenuBulkActions } from '@/components/MenuBulkActions';
 import { Modal } from '@/components/Modal';
 import { FormInput } from '@/components/FormInput';
 import { DynamicSelect } from '@/components/DynamicSelect';
@@ -11,20 +12,26 @@ import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { toast } from '@/components/Toast';
 import { PermissionGate } from '@/components/PermissionGate';
+import { getGradientStyle } from '@/utils/color-generator';
 import * as Icons from 'lucide-react';
-import { Plus, Edit, Trash2, Menu as MenuIcon, ChevronRight } from 'lucide-react';
 
 export default function MenuManagementPage() {
     const [menus, setMenus] = useState<MenuItem[]>([]);
     const [permissions, setPermissions] = useState<Permission[]>([]);
+    const [availableIcons, setAvailableIcons] = useState<string[]>([]);
+    const [stats, setStats] = useState<MenuStats | null>(null);
     const [loading, setLoading] = useState(true);
-    const [searchTerm, setSearchTerm] = useState('');
+    const [filterLevel, setFilterLevel] = useState<number | null>(null);
 
     // Modals
     const [createModalOpen, setCreateModalOpen] = useState(false);
     const [editModalOpen, setEditModalOpen] = useState(false);
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+    const [bulkDeleteConfirmOpen, setBulkDeleteConfirmOpen] = useState(false);
     const [selectedMenu, setSelectedMenu] = useState<MenuItem | null>(null);
+
+    // Selection
+    const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
 
     useEffect(() => {
         fetchData();
@@ -33,26 +40,16 @@ export default function MenuManagementPage() {
     const fetchData = async () => {
         try {
             setLoading(true);
-            const [menusData, permissionsData] = await Promise.all([
-                menuService.getAllMenusFlat().catch(() => {
-                    // Fallback menu data
-                    return [
-                        { id: 1, name: 'Dashboard', path: '/admin', icon: 'LayoutDashboard', order: 1, isActive: true, level: 0, children: [], _count: { children: 0 } },
-                        { id: 2, name: 'User Management', icon: 'Users', order: 2, isActive: true, level: 0, children: [], _count: { children: 4 } },
-                        { id: 3, name: 'Users', path: '/admin/users', icon: 'User', order: 1, isActive: true, level: 1, parentId: 2, parent: { id: 2, name: 'User Management' }, children: [], _count: { children: 0 } },
-                        { id: 4, name: 'Roles', path: '/admin/roles', icon: 'Shield', order: 2, isActive: true, level: 1, parentId: 2, parent: { id: 2, name: 'User Management' }, children: [], _count: { children: 0 } },
-                        { id: 5, name: 'Permissions', path: '/admin/permissions', icon: 'Lock', order: 3, isActive: true, level: 1, parentId: 2, parent: { id: 2, name: 'User Management' }, children: [], _count: { children: 0 } },
-                        { id: 10, name: 'Menus', path: '/admin/menus', icon: 'Menu', order: 4, isActive: true, level: 1, parentId: 2, parent: { id: 2, name: 'User Management' }, children: [], _count: { children: 0 } },
-                        { id: 6, name: 'Security', icon: 'ShieldCheck', order: 3, isActive: true, level: 0, children: [], _count: { children: 2 } },
-                        { id: 7, name: 'Policies', path: '/admin/policies', icon: 'FileText', order: 1, isActive: true, level: 1, parentId: 6, parent: { id: 6, name: 'Security' }, badge: 'New', badgeColor: 'blue', children: [], _count: { children: 0 } },
-                        { id: 8, name: 'Audit Logs', path: '/admin/audit', icon: 'FileSearch', order: 2, isActive: true, level: 1, parentId: 6, parent: { id: 6, name: 'Security' }, children: [], _count: { children: 0 } },
-                        { id: 9, name: 'Bookings', path: '/admin/bookings', icon: 'Calendar', order: 4, isActive: true, level: 0, children: [], _count: { children: 0 } },
-                    ] as MenuItem[];
-                }),
+            const [menusData, permissionsData, iconsData, statsData] = await Promise.all([
+                menuService.getAllMenusFlat(),
                 permissionsService.getAll(),
+                menuService.getAvailableIcons(),
+                menuService.getStats(),
             ]);
             setMenus(menusData);
             setPermissions(permissionsData);
+            setAvailableIcons(iconsData);
+            setStats(statsData);
         } catch (error: any) {
             toast.error('Failed to load data: ' + error.message);
         } finally {
@@ -60,36 +57,148 @@ export default function MenuManagementPage() {
         }
     };
 
-    const handleDelete = async () => {
+    const handleSelectMenu = (id: number) => {
+        const newSelected = new Set(selectedIds);
+        if (newSelected.has(id)) {
+            newSelected.delete(id);
+        } else {
+            newSelected.add(id);
+        }
+        setSelectedIds(newSelected);
+    };
+
+    const handleSelectAll = () => {
+        setSelectedIds(new Set(menus.map(m => m.id)));
+    };
+
+    const handleDeselectAll = () => {
+        setSelectedIds(new Set());
+    };
+
+    const handleBulkDelete = async () => {
+        if (selectedIds.size === 0) return;
+        try {
+            const result = await menuService.bulkDelete(Array.from(selectedIds));
+            toast.success(result.message);
+            setSelectedIds(new Set());
+            setBulkDeleteConfirmOpen(false);
+            fetchData();
+        } catch (error: any) {
+            toast.error('Failed to delete menus: ' + error.message);
+        }
+    };
+
+    const handleBulkToggleStatus = async (isActive: boolean) => {
+        if (selectedIds.size === 0) return;
+        try {
+            const result = await menuService.bulkToggleStatus(Array.from(selectedIds), isActive);
+            toast.success(result.message);
+            setSelectedIds(new Set());
+            fetchData();
+        } catch (error: any) {
+            toast.error('Failed to update menus: ' + error.message);
+        }
+    };
+
+    const handleDeleteMenu = async () => {
         if (!selectedMenu) return;
         try {
             await menuService.deleteMenuItem(selectedMenu.id);
             toast.success(`Menu "${selectedMenu.name}" deleted successfully`);
+            setDeleteConfirmOpen(false);
             fetchData();
         } catch (error: any) {
             toast.error('Failed to delete menu: ' + error.message);
         }
     };
 
+    const handleExport = async () => {
+        try {
+            const data = await menuService.exportMenus();
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `menus-export-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            toast.success('Menus exported successfully');
+        } catch (error: any) {
+            toast.error('Failed to export menus: ' + error.message);
+        }
+    };
+
+    // Filter menus by level if selected
+    const filteredMenus = filterLevel === null
+        ? menus
+        : menus.filter(m => m.level === filterLevel);
+
+    const uniqueLevels = Array.from(new Set(menus.map(m => m.level))).sort((a, b) => a - b);
+
+    // Table columns configuration
     const columns = [
+        {
+            key: 'select',
+            header: (
+                <input
+                    type="checkbox"
+                    checked={selectedIds.size === filteredMenus.length && filteredMenus.length > 0}
+                    onChange={() => selectedIds.size === filteredMenus.length ? handleDeselectAll() : handleSelectAll()}
+                    className="w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                />
+            ),
+            render: (menu: MenuItem) => (
+                <input
+                    type="checkbox"
+                    checked={selectedIds.has(menu.id)}
+                    onChange={() => handleSelectMenu(menu.id)}
+                    className="w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                />
+            ),
+        },
         {
             key: 'name',
             header: 'Menu Name',
             sortable: true,
-            render: (menu: MenuItem) => (
-                <div className="flex items-center gap-2">
-                    <div className="text-gray-600">
-                        {menu.icon && (() => {
-                            const Icon = (Icons as any)[menu.icon];
-                            return Icon ? <Icon className="w-4 h-4" /> : null;
-                        })()}
+            render: (menu: MenuItem) => {
+                const Icon = menu.icon ? (Icons as any)[menu.icon] : null;
+                return (
+                    <div className="flex items-center gap-3">
+                        <div
+                            className="p-2 rounded-lg shadow-sm"
+                            style={getGradientStyle(menu.name)}
+                        >
+                            {Icon ? (
+                                <Icon className="w-4 h-4 text-white" />
+                            ) : (
+                                <Icons.Menu className="w-4 h-4 text-white" />
+                            )}
+                        </div>
+                        <div>
+                            <div className="font-medium text-gray-900">{menu.name}</div>
+                            {menu.path && <div className="text-xs text-gray-500 font-mono">{menu.path}</div>}
+                        </div>
                     </div>
-                    <div>
-                        <div className="font-medium text-gray-900">{menu.name}</div>
-                        {menu.path && <div className="text-xs text-gray-500">{menu.path}</div>}
+                );
+            },
+        },
+        {
+            key: 'level',
+            header: 'Level',
+            sortable: true,
+            render: (menu: MenuItem) => {
+                const levelStyle = getGradientStyle(`Level-${menu.level}`);
+                return (
+                    <div
+                        className="inline-flex px-3 py-1 rounded-full font-medium text-sm shadow-sm"
+                        style={levelStyle}
+                    >
+                        <span className="text-white">L{menu.level}</span>
                     </div>
-                </div>
-            ),
+                );
+            },
         },
         {
             key: 'parent',
@@ -97,43 +206,54 @@ export default function MenuManagementPage() {
             sortable: true,
             render: (menu: MenuItem) => (
                 menu.parent ? (
-                    <div className="flex items-center gap-1 text-sm text-gray-600">
-                        <ChevronRight className="w-3 h-3" />
+                    <div className="flex items-center gap-1 text-sm text-gray-700">
+                        <Icons.Folder className="w-4 h-4 text-gray-400" />
                         {menu.parent.name}
                     </div>
                 ) : (
-                    <span className="text-xs text-gray-400">Root</span>
-                )
-            ),
-        },
-        {
-            key: 'level',
-            header: 'Level',
-            sortable: true,
-            render: (menu: MenuItem) => (
-                <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded">
-                    L{menu.level}
-                </span>
-            ),
-        },
-        {
-            key: 'permission',
-            header: 'Permission',
-            render: (menu: MenuItem) => (
-                menu.permission ? (
-                    <span className="text-sm text-gray-700">{menu.permission.name}</span>
-                ) : (
-                    <span className="text-xs text-gray-400">None</span>
+                    <span className="text-xs text-gray-400 italic">Root</span>
                 )
             ),
         },
         {
             key: 'children',
             header: 'Children',
+            render: (menu: MenuItem) => {
+                const count = menu._count?.children || 0;
+                return (
+                    <div className="flex items-center gap-1 text-sm text-gray-600">
+                        <Icons.List className="w-4 h-4 text-gray-400" />
+                        <span>{count}</span>
+                    </div>
+                );
+            },
+        },
+        {
+            key: 'order',
+            header: 'Order',
+            sortable: true,
             render: (menu: MenuItem) => (
-                <span className="text-sm text-gray-600">
-                    {menu._count?.children || 0}
-                </span>
+                <span className="text-sm text-gray-700 font-medium">{menu.order}</span>
+            ),
+        },
+        {
+            key: 'badge',
+            header: 'Badge',
+            render: (menu: MenuItem) => (
+                menu.badge ? (
+                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${menu.badgeColor === 'blue' ? 'bg-blue-100 text-blue-800' :
+                        menu.badgeColor === 'green' ? 'bg-green-100 text-green-800' :
+                            menu.badgeColor === 'red' ? 'bg-red-100 text-red-800' :
+                                menu.badgeColor === 'yellow' ? 'bg-yellow-100 text-yellow-800' :
+                                    menu.badgeColor === 'purple' ? 'bg-purple-100 text-purple-800' :
+                                        menu.badgeColor === 'pink' ? 'bg-pink-100 text-pink-800' :
+                                            'bg-gray-100 text-gray-800'
+                        }`}>
+                        {menu.badge}
+                    </span>
+                ) : (
+                    <span className="text-xs text-gray-400">-</span>
+                )
             ),
         },
         {
@@ -141,7 +261,7 @@ export default function MenuManagementPage() {
             header: 'Status',
             sortable: true,
             render: (menu: MenuItem) => (
-                <span className={`px-2 py-1 text-xs rounded ${menu.isActive
+                <span className={`px-3 py-1 text-xs rounded-full font-medium ${menu.isActive
                     ? 'bg-green-100 text-green-700'
                     : 'bg-gray-100 text-gray-700'
                     }`}>
@@ -154,7 +274,7 @@ export default function MenuManagementPage() {
             header: 'Actions',
             render: (menu: MenuItem) => (
                 <PermissionGate permission="Menu.Create">
-                    <div className="flex gap-2">
+                    <div className="flex gap-1">
                         <button
                             onClick={() => {
                                 setSelectedMenu(menu);
@@ -163,7 +283,7 @@ export default function MenuManagementPage() {
                             className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                             title="Edit"
                         >
-                            <Edit className="w-4 h-4" />
+                            <Icons.Edit className="w-4 h-4" />
                         </button>
                         <button
                             onClick={() => {
@@ -173,7 +293,7 @@ export default function MenuManagementPage() {
                             className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                             title="Delete"
                         >
-                            <Trash2 className="w-4 h-4" />
+                            <Icons.Trash2 className="w-4 h-4" />
                         </button>
                     </div>
                 </PermissionGate>
@@ -192,25 +312,128 @@ export default function MenuManagementPage() {
     return (
         <div className="space-y-6 animate-fade-in">
             {/* Header */}
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-start">
                 <div>
                     <h1 className="text-4xl font-bold text-gradient">Menu Management</h1>
                     <p className="text-gray-600 mt-2">Configure application menu structure and hierarchy</p>
                 </div>
                 <PermissionGate permission="Menu.Create">
-                    <button
-                        onClick={() => setCreateModalOpen(true)}
-                        className="btn btn-primary flex items-center gap-2"
-                    >
-                        <Plus className="w-5 h-5" />
-                        Add Menu Item
-                    </button>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={handleExport}
+                            className="btn btn-secondary flex items-center gap-2"
+                        >
+                            <Icons.Download className="w-5 h-5" />
+                            Export
+                        </button>
+                        <button
+                            onClick={() => setCreateModalOpen(true)}
+                            className="btn btn-primary flex items-center gap-2"
+                        >
+                            <Icons.Plus className="w-5 h-5" />
+                            Add Menu Item
+                        </button>
+                    </div>
                 </PermissionGate>
             </div>
 
-            {/* DataTable */}
+            {/* Enhanced Stats Cards */}
+            {stats && (
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div className="card relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-500/10 to-transparent rounded-full -mr-16 -mt-16" />
+                        <div className="relative flex items-center gap-3">
+                            <div className="p-3 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl shadow-lg">
+                                <Icons.Menu className="w-6 h-6 text-white" />
+                            </div>
+                            <div>
+                                <p className="text-3xl font-bold text-gray-900">{stats.totalMenus}</p>
+                                <p className="text-sm text-gray-600">Total Menus</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="card relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-green-500/10 to-transparent rounded-full -mr-16 -mt-16" />
+                        <div className="relative flex items-center gap-3">
+                            <div className="p-3 bg-gradient-to-br from-green-500 to-teal-500 rounded-xl shadow-lg">
+                                <Icons.Check className="w-6 h-6 text-white" />
+                            </div>
+                            <div>
+                                <p className="text-3xl font-bold text-gray-900">{stats.activeMenus}</p>
+                                <p className="text-sm text-gray-600">Active</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="card relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-500/10 to-transparent rounded-full -mr-16 -mt-16" />
+                        <div className="relative flex items-center gap-3">
+                            <div className="p-3 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl shadow-lg">
+                                <Icons.Layers className="w-6 h-6 text-white" />
+                            </div>
+                            <div>
+                                <p className="text-3xl font-bold text-gray-900">{stats.maxHierarchyDepth + 1}</p>
+                                <p className="text-sm text-gray-600">Max Depth</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="card relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-orange-500/10 to-transparent rounded-full -mr-16 -mt-16" />
+                        <div className="relative flex items-center gap-3">
+                            <div className="p-3 bg-gradient-to-br from-orange-500 to-red-500 rounded-xl shadow-lg">
+                                <Icons.Target className="w-6 h-6 text-white" />
+                            </div>
+                            <div>
+                                <p className="text-3xl font-bold text-gray-900">{selectedIds.size}</p>
+                                <p className="text-sm text-gray-600">Selected</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Bulk Actions */}
+            <MenuBulkActions
+                selectedCount={selectedIds.size}
+                totalCount={filteredMenus.length}
+                onSelectAll={handleSelectAll}
+                onDeselectAll={handleDeselectAll}
+                onBulkDelete={() => setBulkDeleteConfirmOpen(true)}
+                onBulkToggleStatus={handleBulkToggleStatus}
+            />
+
+            {/* Level Filter */}
+            {uniqueLevels.length > 1 && (
+                <div className="card">
+                    <div className="flex items-center gap-4">
+                        <label className="text-sm font-medium text-gray-700">Filter by Level:</label>
+                        <select
+                            value={filterLevel === null ? '' : String(filterLevel)}
+                            onChange={(e) => setFilterLevel(e.target.value === '' ? null : Number(e.target.value))}
+                            className="px-4 py-2 rounded-lg border border-gray-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all outline-none"
+                        >
+                            <option value="">All Levels</option>
+                            {uniqueLevels.map(level => (
+                                <option key={level} value={level}>Level {level}</option>
+                            ))}
+                        </select>
+                        {filterLevel !== null && (
+                            <button
+                                onClick={() => setFilterLevel(null)}
+                                className="text-sm text-purple-600 hover:text-purple-700 font-medium"
+                            >
+                                Clear Filter
+                            </button>
+                        )}
+                    </div>
+                </div>
+            )}
+
+            {/* DataTable with Pagination */}
             <DataTable
-                data={menus}
+                data={filteredMenus}
                 columns={columns}
                 pageSize={10}
             />
@@ -225,38 +448,48 @@ export default function MenuManagementPage() {
                 }}
                 menus={menus}
                 permissions={permissions}
+                availableIcons={availableIcons}
             />
 
             {selectedMenu && (
-                <>
-                    <MenuFormModal
-                        isOpen={editModalOpen}
-                        onClose={() => setEditModalOpen(false)}
-                        onSuccess={() => {
-                            setEditModalOpen(false);
-                            fetchData();
-                        }}
-                        menu={selectedMenu}
-                        menus={menus}
-                        permissions={permissions}
-                    />
-                </>
+                <MenuFormModal
+                    isOpen={editModalOpen}
+                    onClose={() => setEditModalOpen(false)}
+                    onSuccess={() => {
+                        setEditModalOpen(false);
+                        fetchData();
+                    }}
+                    menu={selectedMenu}
+                    menus={menus}
+                    permissions={permissions}
+                    availableIcons={availableIcons}
+                />
             )}
 
             <ConfirmDialog
                 isOpen={deleteConfirmOpen}
                 onClose={() => setDeleteConfirmOpen(false)}
-                onConfirm={handleDelete}
+                onConfirm={handleDeleteMenu}
                 title="Delete Menu Item"
                 message={`Are you sure you want to delete "${selectedMenu?.name}"? This will also delete all child menu items.`}
                 confirmText="Delete"
+                type="danger"
+            />
+
+            <ConfirmDialog
+                isOpen={bulkDeleteConfirmOpen}
+                onClose={() => setBulkDeleteConfirmOpen(false)}
+                onConfirm={handleBulkDelete}
+                title="Delete Multiple Menus"
+                message={`Are you sure you want to delete ${selectedIds.size} menu item(s)? This action cannot be undone.`}
+                confirmText="Delete All"
                 type="danger"
             />
         </div>
     );
 }
 
-// Menu Form Modal Component
+// Menu Form Modal Component (same as before)
 function MenuFormModal({
     isOpen,
     onClose,
@@ -264,6 +497,7 @@ function MenuFormModal({
     menu,
     menus,
     permissions,
+    availableIcons,
 }: {
     isOpen: boolean;
     onClose: () => void;
@@ -271,6 +505,7 @@ function MenuFormModal({
     menu?: MenuItem;
     menus: MenuItem[];
     permissions: Permission[];
+    availableIcons: string[];
 }) {
     const [formData, setFormData] = useState({
         name: menu?.name || '',
@@ -280,12 +515,45 @@ function MenuFormModal({
         permissionId: menu?.permissionId || null,
         order: menu?.order || 0,
         isActive: menu?.isActive ?? true,
-        description: menu?.description || '',
         badge: menu?.badge || '',
         badgeColor: menu?.badgeColor || '',
         isExternal: menu?.isExternal || false,
     });
     const [submitting, setSubmitting] = useState(false);
+    const [iconSearch, setIconSearch] = useState('');
+
+    // Update form data when menu prop changes
+    useEffect(() => {
+        if (menu) {
+            setFormData({
+                name: menu.name,
+                path: menu.path || '',
+                icon: menu.icon || '',
+                parentId: menu.parentId || null,
+                permissionId: menu.permissionId || null,
+                order: menu.order,
+                isActive: menu.isActive,
+                badge: menu.badge || '',
+                badgeColor: menu.badgeColor || '',
+                isExternal: menu.isExternal || false,
+            });
+        } else {
+            // Reset form for create mode
+            setFormData({
+                name: '',
+                path: '',
+                icon: '',
+                parentId: null,
+                permissionId: null,
+                order: 0,
+                isActive: true,
+                badge: '',
+                badgeColor: '',
+                isExternal: false,
+            });
+        }
+        setIconSearch('');
+    }, [menu, isOpen]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -306,15 +574,10 @@ function MenuFormModal({
         }
     };
 
-    // Icon options
-    const iconOptions = [
-        'LayoutDashboard', 'Users', 'User', 'Shield', 'Lock', 'Menu',
-        'Settings', 'FileText', 'FileSearch', 'Calendar', 'Briefcase',
-        'ShieldCheck', 'Database', 'Server', 'Cloud', 'Activity',
-        'BarChart', 'PieChart', 'TrendingUp', 'Home', 'Folder',
-    ];
+    const filteredIcons = iconSearch
+        ? availableIcons.filter(icon => icon.toLowerCase().includes(iconSearch.toLowerCase()))
+        : availableIcons;
 
-    // Parent menu options (exclude current menu and its descendants)
     const parentOptions = menus
         .filter(m => !menu || m.id !== menu.id)
         .map(m => ({
@@ -327,6 +590,8 @@ function MenuFormModal({
         label: p.name,
     }));
 
+    const badgeColors = ['blue', 'green', 'red', 'yellow', 'purple', 'pink', 'indigo', 'gray'];
+
     return (
         <Modal
             isOpen={isOpen}
@@ -336,7 +601,6 @@ function MenuFormModal({
         >
             <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
-                    {/* Name */}
                     <FormInput
                         label="Menu Name"
                         value={formData.name}
@@ -345,37 +609,38 @@ function MenuFormModal({
                         required
                         disabled={submitting}
                     />
-
-                    {/* Path */}
                     <FormInput
                         label="Route Path"
                         value={formData.path || ''}
                         onChange={(e) => setFormData({ ...formData, path: e.target.value })}
-                        placeholder="e.g., /admin/users (optional for parents)"
+                        placeholder="e.g., /admin/users"
                         disabled={submitting}
                     />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                    {/* Icon */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Icon
-                        </label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Icon</label>
+                        <input
+                            type="text"
+                            value={iconSearch}
+                            onChange={(e) => setIconSearch(e.target.value)}
+                            placeholder="Search icons..."
+                            className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all outline-none mb-2"
+                        />
                         <select
                             value={formData.icon || ''}
                             onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
-                            className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none"
+                            className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all outline-none"
                             disabled={submitting}
                         >
                             <option value="">No Icon</option>
-                            {iconOptions.map(icon => (
+                            {filteredIcons.map(icon => (
                                 <option key={icon} value={icon}>{icon}</option>
                             ))}
                         </select>
                     </div>
 
-                    {/* Parent */}
                     <DynamicSelect
                         label="Parent Menu"
                         value={formData.parentId ? [String(formData.parentId)] : []}
@@ -388,7 +653,6 @@ function MenuFormModal({
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                    {/* Permission */}
                     <DynamicSelect
                         label="Required Permission"
                         value={formData.permissionId ? [String(formData.permissionId)] : []}
@@ -398,8 +662,6 @@ function MenuFormModal({
                         disabled={submitting}
                         multiple={false}
                     />
-
-                    {/* Order */}
                     <FormInput
                         label="Display Order"
                         type="number"
@@ -409,23 +671,7 @@ function MenuFormModal({
                     />
                 </div>
 
-                {/* Description */}
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Description
-                    </label>
-                    <textarea
-                        value={formData.description || ''}
-                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                        placeholder="Optional tooltip or description"
-                        rows={2}
-                        className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none"
-                        disabled={submitting}
-                    />
-                </div>
-
                 <div className="grid grid-cols-2 gap-4">
-                    {/* Badge */}
                     <FormInput
                         label="Badge Text"
                         value={formData.badge || ''}
@@ -433,67 +679,50 @@ function MenuFormModal({
                         placeholder="e.g., New, Beta"
                         disabled={submitting}
                     />
-
-                    {/* Badge Color */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Badge Color
-                        </label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Badge Color</label>
                         <select
                             value={formData.badgeColor || ''}
                             onChange={(e) => setFormData({ ...formData, badgeColor: e.target.value })}
-                            className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none"
+                            className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all outline-none"
                             disabled={submitting}
                         >
                             <option value="">Default</option>
-                            <option value="blue">Blue</option>
-                            <option value="green">Green</option>
-                            <option value="red">Red</option>
-                            <option value="yellow">Yellow</option>
+                            {badgeColors.map(color => (
+                                <option key={color} value={color}>{color.charAt(0).toUpperCase() + color.slice(1)}</option>
+                            ))}
                         </select>
                     </div>
                 </div>
 
-                {/* Checkboxes */}
                 <div className="flex gap-6">
                     <label className="flex items-center gap-2">
                         <input
                             type="checkbox"
                             checked={formData.isActive}
                             onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-                            className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                            className="w-4 h-4 text-purple-600 rounded focus:ring-2 focus:ring-purple-500"
                             disabled={submitting}
                         />
                         <span className="text-sm text-gray-700">Active</span>
                     </label>
-
                     <label className="flex items-center gap-2">
                         <input
                             type="checkbox"
                             checked={formData.isExternal}
                             onChange={(e) => setFormData({ ...formData, isExternal: e.target.checked })}
-                            className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                            className="w-4 h-4 text-purple-600 rounded focus:ring-2 focus:ring-purple-500"
                             disabled={submitting}
                         />
                         <span className="text-sm text-gray-700">External Link</span>
                     </label>
                 </div>
 
-                {/* Buttons */}
                 <div className="flex gap-3 justify-end mt-6 pt-4 border-t border-gray-200">
-                    <button
-                        type="button"
-                        onClick={onClose}
-                        className="btn btn-secondary"
-                        disabled={submitting}
-                    >
+                    <button type="button" onClick={onClose} className="btn btn-secondary" disabled={submitting}>
                         Cancel
                     </button>
-                    <button
-                        type="submit"
-                        className="btn btn-primary"
-                        disabled={submitting}
-                    >
+                    <button type="submit" className="btn btn-primary" disabled={submitting}>
                         {submitting ? 'Saving...' : menu ? 'Update Menu' : 'Create Menu'}
                     </button>
                 </div>

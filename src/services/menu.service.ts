@@ -33,6 +33,23 @@ export interface MenuItem {
     };
 }
 
+export interface MenuStats {
+    totalMenus: number;
+    activeMenus: number;
+    inactiveMenus: number;
+    rootMenus: number;
+    maxHierarchyDepth: number;
+    menusWithPermissions: number;
+    menusWithBadges: number;
+    menusByLevel: LevelDistribution[];
+}
+
+export interface LevelDistribution {
+    level: number;
+    count: number;
+    percentage: number;
+}
+
 class MenuService {
     private getAuthHeaders() {
         // Check both possible token keys
@@ -149,6 +166,54 @@ class MenuService {
      */
     async reorderMenuItems(items: Array<{ id: number; order: number }>): Promise<void> {
         await axios.post(`${API_URL}/menu/reorder`, items, this.getAuthHeaders());
+    }
+
+    /**
+     * Get menu statistics
+     */
+    async getStats(): Promise<MenuStats> {
+        const response = await axios.get(`${API_URL}/menu/stats/overview`, this.getAuthHeaders());
+        return response.data;
+    }
+
+    /**
+     * Get available icon names
+     */
+    async getAvailableIcons(): Promise<string[]> {
+        const response = await axios.get(`${API_URL}/menu/icons/list`, this.getAuthHeaders());
+        return response.data;
+    }
+
+    /**
+     * Bulk delete menu items
+     */
+    async bulkDelete(ids: number[]): Promise<{ message: string; deletedCount: number }> {
+        const response = await axios.post(`${API_URL}/menu/bulk/delete`, { ids }, this.getAuthHeaders());
+        return response.data;
+    }
+
+    /**
+     * Bulk toggle menu status
+     */
+    async bulkToggleStatus(ids: number[], isActive: boolean): Promise<{ message: string; updatedCount: number }> {
+        const response = await axios.post(`${API_URL}/menu/bulk/toggle-status`, { ids, isActive }, this.getAuthHeaders());
+        return response.data;
+    }
+
+    /**
+     * Export menus to JSON
+     */
+    async exportMenus(): Promise<any> {
+        const response = await axios.get(`${API_URL}/menu/export/all`, this.getAuthHeaders());
+        return response.data;
+    }
+
+    /**
+     * Import menus from JSON
+     */
+    async importMenus(data: any): Promise<{ created: number; updated: number; skipped: number; errors: any[] }> {
+        const response = await axios.post(`${API_URL}/menu/import/data`, data, this.getAuthHeaders());
+        return response.data;
     }
 }
 
