@@ -6,6 +6,9 @@ import { permissionsService, type Permission } from '@/services/permissions.serv
 import { Modal } from '@/components/Modal';
 import { FormInput } from '@/components/FormInput';
 import { PermissionMatrix } from '@/components/PermissionMatrix';
+import { ResourceActionMatrix } from '@/components/ResourceActionMatrix';
+import { PermissionTemplates } from '@/components/PermissionTemplates';
+import { PermissionImpactPreview } from '@/components/PermissionImpactPreview';
 import { RoleMenuAssignment } from '@/components/RoleMenuAssignment';
 import { RoleCard } from '@/components/RoleCard';
 import { RoleBulkActions } from '@/components/RoleBulkActions';
@@ -570,7 +573,7 @@ function EditRoleModal({ isOpen, role, onClose, onSuccess }: {
     );
 }
 
-// Assign Permissions Modal Component with PermissionMatrix
+// Assign Permissions Modal Component with Enhanced Features
 function AssignPermissionsModal({ isOpen, role, permissions, onClose, onSuccess }: {
     isOpen: boolean;
     role: Role | null;
@@ -580,6 +583,9 @@ function AssignPermissionsModal({ isOpen, role, permissions, onClose, onSuccess 
 }) {
     const [selectedPermissionIds, setSelectedPermissionIds] = useState<number[]>([]);
     const [initialPermissionIds, setInitialPermissionIds] = useState<number[]>([]);
+    const [viewMode, setViewMode] = useState<'matrix' | 'list'>('matrix');
+    const [showTemplates, setShowTemplates] = useState(true);
+    const [showImpactPreview, setShowImpactPreview] = useState(false);
     const [submitting, setSubmitting] = useState(false);
 
     useEffect(() => {
@@ -591,10 +597,22 @@ function AssignPermissionsModal({ isOpen, role, permissions, onClose, onSuccess 
             setSelectedPermissionIds([]);
             setInitialPermissionIds([]);
         }
-    }, [role]);
+        // Reset states when modal opens
+        setShowTemplates(true);
+        setShowImpactPreview(false);
+    }, [role, isOpen]);
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleApplyTemplate = (permissionIds: number[]) => {
+        setSelectedPermissionIds(permissionIds);
+        setShowTemplates(false);
+        toast.success('Template applied successfully');
+    };
+
+    const handlePreviewChanges = () => {
+        setShowImpactPreview(true);
+    };
+
+    const handleConfirmChanges = async () => {
         if (!role) return;
 
         try {
@@ -602,6 +620,7 @@ function AssignPermissionsModal({ isOpen, role, permissions, onClose, onSuccess 
             await rolesService.assignPermissions(role.id, selectedPermissionIds);
             toast.success('Permissions assigned successfully');
             setInitialPermissionIds(selectedPermissionIds);
+            setShowImpactPreview(false);
             onClose();
             onSuccess();
         } catch (error: any) {
@@ -613,49 +632,163 @@ function AssignPermissionsModal({ isOpen, role, permissions, onClose, onSuccess 
 
     const handleCancel = () => {
         setSelectedPermissionIds(initialPermissionIds);
+        setShowTemplates(true);
     };
 
     // Check if there are changes
     const hasChanges = JSON.stringify([...selectedPermissionIds].sort()) !== JSON.stringify([...initialPermissionIds].sort());
 
+    // Get affected users count (from role data)
+    const affectedUsersCount = role?._count?.userRoles || 0;
+
     if (!role) return null;
 
     return (
-        <Modal
-            isOpen={isOpen}
-            onClose={onClose}
-            title={`Assign Permissions: ${role.name}`}
-            size="xl"
-            footer={hasChanges ? (
-                <div className="flex gap-3 justify-end">
-                    <button
-                        type="button"
-                        onClick={handleCancel}
-                        className="btn btn-secondary"
-                        disabled={submitting}
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        type="submit"
-                        form="assign-permissions-form"
-                        className="btn btn-primary"
-                        disabled={submitting}
-                    >
-                        {submitting ? 'Saving...' : 'Save Permissions'}
-                    </button>
+        <>
+            <Modal
+                isOpen={isOpen}
+                onClose={onClose}
+                title={`Assign Permissions: ${role.name}`}
+                size="xl"
+            >
+                <div className="space-y-6">
+                    {/* Header with View Toggle and Actions */}
+                    <div className="flex items-center justify-between pb-4 border-b">
+                        <div className="flex items-center gap-4">
+                            {/* View Mode Toggle */}
+                            <div className="flex items-center gap-2 bg-gray-100 p-1 rounded-lg">
+                                <button
+                                    onClick={() => setViewMode('matrix')}
+                                    className={`px-4 py-2 rounded-md transition-all font-medium ${viewMode === 'matrix'
+                                        ? 'bg-white shadow-sm text-purple-600'
+                                        : 'text-gray-600 hover:text-gray-900'
+                                        }`}
+                                >
+                                    <div className="flex items-center gap-2">
+                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                                        </svg>
+                                        Matrix View
+                                    </div>
+                                </button>
+                                <button
+                                    onClick={() => setViewMode('list')}
+                                    className={`px-4 py-2 rounded-md transition-all font-medium ${viewMode === 'list'
+                                        ? 'bg-white shadow-sm text-purple-600'
+                                        : 'text-gray-600 hover:text-gray-900'
+                                        }`}
+                                >
+                                    <div className="flex items-center gap-2">
+                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                                        </svg>
+                                        List View
+                                    </div>
+                                </button>
+                            </div>
+
+                            {/* Templates Toggle */}
+                            <button
+                                onClick={() => setShowTemplates(!showTemplates)}
+                                className={`px-4 py-2 rounded-lg font-medium transition-all ${showTemplates
+                                    ? 'bg-purple-100 text-purple-700 hover:bg-purple-200'
+                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                    }`}
+                            >
+                                <div className="flex items-center gap-2">
+                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                    </svg>
+                                    {showTemplates ? 'Hide Templates' : 'Show Templates'}
+                                </div>
+                            </button>
+                        </div>
+
+                        {/* Permission Counter */}
+                        <div className="flex items-center gap-3">
+                            <div className="text-sm">
+                                <span className="text-gray-600">Selected:</span>
+                                <span className="font-bold text-purple-600 ml-2">{selectedPermissionIds.length}</span>
+                                <span className="text-gray-400 mx-1">/</span>
+                                <span className="text-gray-600">{permissions.length}</span>
+                            </div>
+                            {hasChanges && (
+                                <div className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium">
+                                    Unsaved Changes
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Permission Templates */}
+                    {showTemplates && (
+                        <div className="animate-fade-in">
+                            <PermissionTemplates
+                                permissions={permissions}
+                                onApplyTemplate={handleApplyTemplate}
+                            />
+                        </div>
+                    )}
+
+                    {/* Permission Selection (Matrix or List) */}
+                    <div className="border-t pt-6">
+                        {viewMode === 'matrix' ? (
+                            <ResourceActionMatrix
+                                permissions={permissions}
+                                selectedPermissions={selectedPermissionIds}
+                                onChange={setSelectedPermissionIds}
+                            />
+                        ) : (
+                            <PermissionMatrix
+                                permissions={permissions}
+                                selectedPermissions={selectedPermissionIds}
+                                onChange={setSelectedPermissionIds}
+                                disabled={submitting}
+                            />
+                        )}
+                    </div>
+
+                    {/* Actions */}
+                    {hasChanges && (
+                        <div className="flex gap-3 justify-end pt-4 border-t bg-gray-50 -mx-6 -mb-6 px-6 py-4">
+                            <button
+                                type="button"
+                                onClick={handleCancel}
+                                className="px-5 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+                                disabled={submitting}
+                            >
+                                Reset Changes
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handlePreviewChanges}
+                                className="px-6 py-2.5 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-lg font-medium transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                                disabled={submitting}
+                            >
+                                <div className="flex items-center gap-2">
+                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    Preview & Save Changes
+                                </div>
+                            </button>
+                        </div>
+                    )}
                 </div>
-            ) : undefined}
-        >
-            <form id="assign-permissions-form" onSubmit={handleSubmit}>
-                <PermissionMatrix
-                    permissions={permissions}
-                    selectedPermissions={selectedPermissionIds}
-                    onChange={setSelectedPermissionIds}
-                    disabled={submitting}
-                />
-            </form>
-        </Modal>
+            </Modal>
+
+            {/* Impact Preview Modal */}
+            <PermissionImpactPreview
+                isOpen={showImpactPreview}
+                onClose={() => setShowImpactPreview(false)}
+                onConfirm={handleConfirmChanges}
+                roleName={role.name}
+                permissions={permissions}
+                originalPermissionIds={initialPermissionIds}
+                newPermissionIds={selectedPermissionIds}
+                affectedUsersCount={affectedUsersCount}
+            />
+        </>
     );
 }
 

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { permissionsService, type Permission, type CreatePermissionData, type PermissionStats } from '@/services/permissions.service';
+import { rolesService } from '@/services/roles.service';
 import { Modal } from '@/components/Modal';
 import { FormInput } from '@/components/FormInput';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
@@ -10,6 +11,7 @@ import { toast } from '@/components/Toast';
 import { PermissionGate } from '@/components/PermissionGate';
 import { PermissionCard } from '@/components/PermissionCard';
 import { PermissionBulkActions } from '@/components/PermissionBulkActions';
+import { PermissionDetailsDrawer } from '@/components/PermissionDetailsDrawer';
 import { getGradientStyle } from '@/utils/color-generator';
 
 export default function AdminPermissionsPage() {
@@ -26,14 +28,18 @@ export default function AdminPermissionsPage() {
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
     const [bulkDeleteConfirmOpen, setBulkDeleteConfirmOpen] = useState(false);
     const [moveGroupModalOpen, setMoveGroupModalOpen] = useState(false);
+    const [detailsDrawerOpen, setDetailsDrawerOpen] = useState(false);
 
     // Selected items
     const [selectedPermission, setSelectedPermission] = useState<Permission | null>(null);
     const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
     const [newGroupName, setNewGroupName] = useState('');
+    const [rolesForPermission, setRolesForPermission] = useState<{ id: number; name: string }[]>([]);
 
     // Expanded groups
     const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
+
+
 
     useEffect(() => {
         fetchData();
@@ -397,6 +403,20 @@ export default function AdminPermissionsPage() {
                                                     onDelete={() => {
                                                         setSelectedPermission(perm);
                                                         setDeleteConfirmOpen(true);
+                                                    }}
+                                                    onViewDetails={async () => {
+                                                        setSelectedPermission(perm);
+                                                        // Fetch roles using this permission
+                                                        try {
+                                                            const allRoles = await rolesService.getAll();
+                                                            const rolesWithPerm = allRoles.filter(role =>
+                                                                role.permissions?.some(p => p.id === perm.id)
+                                                            ).map(r => ({ id: r.id, name: r.name }));
+                                                            setRolesForPermission(rolesWithPerm);
+                                                        } catch (error) {
+                                                            setRolesForPermission([]);
+                                                        }
+                                                        setDetailsDrawerOpen(true);
                                                     }}
                                                 />
                                             ))}

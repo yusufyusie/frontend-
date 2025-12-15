@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { auditLogService, AuditLog, AuditLogStats, AuditLogFilter } from '@/services/auditlog.service';
 import { DataTable } from '@/components/DataTable';
-import { Modal } from '@/components/Modal';
+import { AuditLogDetailsDrawer } from '@/components/AuditLogDetailsDrawer';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { toast } from '@/components/Toast';
 import { PermissionGate } from '@/components/PermissionGate';
@@ -16,7 +16,7 @@ export default function AuditLogsPage() {
     const [filter, setFilter] = useState<AuditLogFilter>({ page: 1, limit: 10 });
     const [totalPages, setTotalPages] = useState(1);
     const [selectedLog, setSelectedLog] = useState<AuditLog | null>(null);
-    const [detailsModalOpen, setDetailsModalOpen] = useState(false);
+    const [drawerOpen, setDrawerOpen] = useState(false);
 
     useEffect(() => {
         // Wait a bit for permissions to load to avoid race condition
@@ -104,13 +104,16 @@ export default function AuditLogsPage() {
             key: 'resource',
             header: 'Resource',
             render: (log: AuditLog) => (
-                log.resource ? (
-                    <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-700 font-medium">
-                        {log.resource}
-                    </span>
-                ) : (
-                    <span className="text-sm text-gray-400">-</span>
-                )
+                <div className="flex items-center gap-1.5">
+                    <Icons.Package className="w-3.5 h-3.5 text-gray-400" />
+                    {log.resource ? (
+                        <span className="px-2.5 py-1 text-xs rounded-md bg-gradient-to-r from-blue-50 to-cyan-50 text-blue-700 font-semibold border border-blue-200">
+                            {log.resource}
+                        </span>
+                    ) : (
+                        <span className="text-xs text-gray-400 italic">No resource</span>
+                    )}
+                </div>
             ),
         },
         {
@@ -127,7 +130,16 @@ export default function AuditLogsPage() {
             key: 'ipAddress',
             header: 'IP Address',
             render: (log: AuditLog) => (
-                <span className="text-sm text-gray-700 font-mono">{log.ipAddress || '-'}</span>
+                <div className="flex items-center gap-1.5">
+                    <Icons.Globe className="w-3.5 h-3.5 text-gray-400" />
+                    {log.ipAddress ? (
+                        <span className="text-sm text-gray-900 font-mono bg-gray-100 px-2 py-0.5 rounded border border-gray-200">
+                            {log.ipAddress}
+                        </span>
+                    ) : (
+                        <span className="text-xs text-gray-400 italic">Not recorded</span>
+                    )}
+                </div>
             ),
         },
         {
@@ -137,11 +149,12 @@ export default function AuditLogsPage() {
                 <button
                     onClick={() => {
                         setSelectedLog(log);
-                        setDetailsModalOpen(true);
+                        setDrawerOpen(true);
                     }}
-                    className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                    className="flex items-center gap-1 px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm font-medium transition-colors"
                 >
-                    View Details
+                    <Icons.FileText className="w-4 h-4" />
+                    Details
                 </button>
             ),
         },
@@ -268,65 +281,12 @@ export default function AuditLogsPage() {
                 onPageChange={(page) => setFilter({ ...filter, page })}
             />
 
-            {selectedLog && (
-                <Modal
-                    isOpen={detailsModalOpen}
-                    onClose={() => setDetailsModalOpen(false)}
-                    title="Audit Log Details"
-                    size="lg"
-                >
-                    <div className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="text-sm font-medium text-gray-500">Timestamp</label>
-                                <p className="text-gray-900">{new Date(selectedLog.createdAt).toLocaleString()}</p>
-                            </div>
-                            <div>
-                                <label className="text-sm font-medium text-gray-500">User</label>
-                                <p className="text-gray-900">{selectedLog.user?.username || 'System'}</p>
-                            </div>
-                            <div>
-                                <label className="text-sm font-medium text-gray-500">Action</label>
-                                <p className="text-gray-900">{selectedLog.action}</p>
-                            </div>
-                            <div>
-                                <label className="text-sm font-medium text-gray-500">Result</label>
-                                <span className={`px-3 py-1 text-xs rounded-full font-medium ${getResultBadge(selectedLog.result)}`}>
-                                    {selectedLog.result || 'N/A'}
-                                </span>
-                            </div>
-                            <div>
-                                <label className="text-sm font-medium text-gray-500">IP Address</label>
-                                <p className="text-gray-900 font-mono">{selectedLog.ipAddress || '-'}</p>
-                            </div>
-                            <div>
-                                <label className="text-sm font-medium text-gray-500">Resource</label>
-                                <p className="text-gray-900">{selectedLog.resource || '-'}</p>
-                            </div>
-                        </div>
-                        {selectedLog.reason && (
-                            <div>
-                                <label className="text-sm font-medium text-gray-500">Reason</label>
-                                <p className="text-gray-900">{selectedLog.reason}</p>
-                            </div>
-                        )}
-                        {selectedLog.details && (
-                            <div>
-                                <label className="text-sm font-medium text-gray-500">Details</label>
-                                <pre className="mt-2 p-4 bg-gray-50 rounded-lg text-sm overflow-auto max-h-64">
-                                    {JSON.stringify(selectedLog.details, null, 2)}
-                                </pre>
-                            </div>
-                        )}
-                        {selectedLog.userAgent && (
-                            <div>
-                                <label className="text-sm font-medium text-gray-500">User Agent</label>
-                                <p className="text-gray-900 text-sm font-mono">{selectedLog.userAgent}</p>
-                            </div>
-                        )}
-                    </div>
-                </Modal>
-            )}
+            {/* Audit Log Details Drawer */}
+            <AuditLogDetailsDrawer
+                log={selectedLog}
+                isOpen={drawerOpen}
+                onClose={() => setDrawerOpen(false)}
+            />
         </div>
     );
 }
