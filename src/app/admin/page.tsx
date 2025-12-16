@@ -32,7 +32,7 @@ export default function AdminDashboard() {
 
             setStats({
                 totalUsers: users.length,
-                activeUsers: users.filter(u => u.status === 'active').length,
+                activeUsers: users.filter(u => u.isActive).length,
                 totalRoles: roles.length,
                 totalPermissions: permissions.length,
                 loading: false

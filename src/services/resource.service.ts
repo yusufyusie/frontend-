@@ -7,6 +7,8 @@ export interface Resource {
     description?: string;
     category?: string;
     icon?: string;
+    iconName?: string;
+    actions: string[];
     isActive: boolean;
     isSystem: boolean;
     createdAt: string;
@@ -17,6 +19,17 @@ export interface Resource {
         menus: number;
     };
 }
+
+export interface CreateResourceData {
+    name: string;
+    displayName: string;
+    description?: string;
+    category?: string;
+    iconName?: string;
+    actions: string[];
+    isActive: boolean;
+}
+
 
 export interface ResourceAction {
     id: number;
@@ -56,12 +69,12 @@ class ResourceService {
         return response.data;
     }
 
-    async create(data: Partial<Resource>): Promise<Resource> {
+    async create(data: CreateResourceData): Promise<Resource> {
         const response = await api.post('/resources', data);
         return response.data;
     }
 
-    async update(id: number, data: Partial<Resource>): Promise<Resource> {
+    async update(id: number, data: Partial<CreateResourceData>): Promise<Resource> {
         const response = await api.patch(`/resources/${id}`, data);
         return response.data;
     }

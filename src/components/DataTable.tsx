@@ -6,7 +6,7 @@ import { ChevronUp, ChevronDown, Search, ChevronLeft, ChevronRight } from 'lucid
 // End of file (technically not needed but satisfies the tool)
 export interface Column<T> {
     key: string;
-    header: string;
+    header: React.ReactNode;
     sortable?: boolean;
     render?: (row: T) => React.ReactNode;
     className?: string;

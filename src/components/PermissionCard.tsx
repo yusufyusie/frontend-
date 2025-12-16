@@ -8,6 +8,7 @@ interface PermissionCardProps {
     onSelect: (id: number) => void;
     onEdit: () => void;
     onDelete: () => void;
+    onViewDetails: () => void;
 }
 
 export function PermissionCard({
@@ -16,6 +17,7 @@ export function PermissionCard({
     onSelect,
     onEdit,
     onDelete,
+    onViewDetails,
 }: PermissionCardProps) {
     const usageCount = permission._count?.rolePermissions || 0;
 
@@ -58,6 +60,15 @@ export function PermissionCard({
                     >
                         <svg className="w-4 h-4 text-gray-500 group-hover:text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                    </button>
+                    <button
+                        onClick={onViewDetails}
+                        className="p-1.5 hover:bg-purple-50 rounded-lg transition-colors group"
+                        title="View Details"
+                    >
+                        <svg className="w-4 h-4 text-gray-500 group-hover:text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </button>
                     <button

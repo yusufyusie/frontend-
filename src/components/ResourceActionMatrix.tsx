@@ -230,7 +230,7 @@ export function ResourceActionMatrix({ permissions, selectedPermissions, onChang
                                 {isExpanded && (
                                     <div className="space-y-1">
                                         {resources.map(resource => {
-                                            const IconComponent = (Icons as any)[resource.icon] || Icons.Box;
+                                            const IconComponent = (Icons as any)[resource.icon || 'Box'] || Icons.Box;
                                             const resourcePermissions = Object.values(resource.actions).filter((p): p is Permission => p !== null);
                                             const allSelected = resourcePermissions.length > 0 && resourcePermissions.every(p => selectedPermissions.includes(p.id));
                                             const someSelected = resourcePermissions.some(p => selectedPermissions.includes(p.id));
