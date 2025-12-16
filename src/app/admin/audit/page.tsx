@@ -171,122 +171,125 @@ export default function AuditLogsPage() {
     const successRate = stats ? Math.round((stats.successCount / stats.totalLogs) * 100) : 0;
 
     return (
-        <div className="space-y-6 animate-fade-in">
-            <div>
-                <h1 className="text-4xl font-bold text-gradient">Audit Logs</h1>
-                <p className="text-gray-600 mt-2">Monitor system activity and security events</p>
-            </div>
+        <PermissionGate permission="AuditLog.View">
+            <div className="space-y-6 animate-fade-in">
+                <div>
+                    <h1 className="text-4xl font-bold text-gradient">Audit Logs</h1>
+                    <p className="text-gray-600 mt-2">Monitor system activity and security events</p>
+                </div>
 
-            {stats && (
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div className="card relative overflow-hidden">
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-500/10 to-transparent rounded-full -mr-16 -mt-16" />
-                        <div className="relative flex items-center gap-3">
-                            <div className="p-3 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl shadow-lg">
-                                <Icons.Activity className="w-6 h-6 text-white" />
+                {stats && (
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div className="card relative overflow-hidden">
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-500/10 to-transparent rounded-full -mr-16 -mt-16" />
+                            <div className="relative flex items-center gap-3">
+                                <div className="p-3 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl shadow-lg">
+                                    <Icons.Activity className="w-6 h-6 text-white" />
+                                </div>
+                                <div>
+                                    <p className="text-3xl font-bold text-gray-900">{stats.totalLogs}</p>
+                                    <p className="text-sm text-gray-600">Total Logs</p>
+                                </div>
                             </div>
-                            <div>
-                                <p className="text-3xl font-bold text-gray-900">{stats.totalLogs}</p>
-                                <p className="text-sm text-gray-600">Total Logs</p>
+                        </div>
+                        <div className="card relative overflow-hidden">
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-green-500/10 to-transparent rounded-full -mr-16 -mt-16" />
+                            <div className="relative flex items-center gap-3">
+                                <div className="p-3 bg-gradient-to-br from-green-500 to-teal-500 rounded-xl shadow-lg">
+                                    <Icons.CheckCircle className="w-6 h-6 text-white" />
+                                </div>
+                                <div>
+                                    <p className="text-3xl font-bold text-gray-900">{successRate}%</p>
+                                    <p className="text-sm text-gray-600">Success Rate</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="card relative overflow-hidden">
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-red-500/10 to-transparent rounded-full -mr-16 -mt-16" />
+                            <div className="relative flex items-center gap-3">
+                                <div className="p-3 bg-gradient-to-br from-red-500 to-orange-500 rounded-xl shadow-lg">
+                                    <Icons.XCircle className="w-6 h-6 text-white" />
+                                </div>
+                                <div>
+                                    <p className="text-3xl font-bold text-gray-900">{stats.deniedCount}</p>
+                                    <p className="text-sm text-gray-600">Access Denied</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="card relative overflow-hidden">
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-500/10 to-transparent rounded-full -mr-16 -mt-16" />
+                            <div className="relative flex items-center gap-3">
+                                <div className="p-3 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl shadow-lg">
+                                    <Icons.Users className="w-6 h-6 text-white" />
+                                </div>
+                                <div>
+                                    <p className="text-3xl font-bold text-gray-900">{stats.uniqueUsers}</p>
+                                    <p className="text-sm text-gray-600">Unique Users</p>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div className="card relative overflow-hidden">
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-green-500/10 to-transparent rounded-full -mr-16 -mt-16" />
-                        <div className="relative flex items-center gap-3">
-                            <div className="p-3 bg-gradient-to-br from-green-500 to-teal-500 rounded-xl shadow-lg">
-                                <Icons.CheckCircle className="w-6 h-6 text-white" />
-                            </div>
-                            <div>
-                                <p className="text-3xl font-bold text-gray-900">{successRate}%</p>
-                                <p className="text-sm text-gray-600">Success Rate</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="card relative overflow-hidden">
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-red-500/10 to-transparent rounded-full -mr-16 -mt-16" />
-                        <div className="relative flex items-center gap-3">
-                            <div className="p-3 bg-gradient-to-br from-red-500 to-orange-500 rounded-xl shadow-lg">
-                                <Icons.XCircle className="w-6 h-6 text-white" />
-                            </div>
-                            <div>
-                                <p className="text-3xl font-bold text-gray-900">{stats.deniedCount}</p>
-                                <p className="text-sm text-gray-600">Access Denied</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="card relative overflow-hidden">
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-500/10 to-transparent rounded-full -mr-16 -mt-16" />
-                        <div className="relative flex items-center gap-3">
-                            <div className="p-3 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl shadow-lg">
-                                <Icons.Users className="w-6 h-6 text-white" />
-                            </div>
-                            <div>
-                                <p className="text-3xl font-bold text-gray-900">{stats.uniqueUsers}</p>
-                                <p className="text-sm text-gray-600">Unique Users</p>
-                            </div>
-                        </div>
+                )}
+
+                <div className="card p-4">
+                    <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                        <input
+                            type="text"
+                            placeholder="Search action..."
+                            value={filter.action || ''}
+                            onChange={(e) => setFilter({ ...filter, action: e.target.value, page: 1 })}
+                            className="px-4 py-2 rounded-lg border border-gray-300 focus:border-purple-500"
+                        />
+                        <select
+                            value={filter.result || ''}
+                            onChange={(e) => setFilter({ ...filter, result: e.target.value, page: 1 })}
+                            className="px-4 py-2 rounded-lg border border-gray-300 focus:border-purple-500"
+                        >
+                            <option value="">All Results</option>
+                            <option value="SUCCESS">Success</option>
+                            <option value="DENIED">Denied</option>
+                            <option value="ERROR">Error</option>
+                        </select>
+                        <input
+                            type="date"
+                            value={filter.startDate || ''}
+                            onChange={(e) => setFilter({ ...filter, startDate: e.target.value, page: 1 })}
+                            className="px-4 py-2 rounded-lg border border-gray-300 focus:border-purple-500"
+                            placeholder="Start Date"
+                        />
+                        <input
+                            type="date"
+                            value={filter.endDate || ''}
+                            onChange={(e) => setFilter({ ...filter, endDate: e.target.value, page: 1 })}
+                            className="px-4 py-2 rounded-lg border border-gray-300 focus:border-purple-500"
+                            placeholder="End Date"
+                        />
+                        <button
+                            onClick={() => setFilter({ page: 1, limit: 10 })}
+                            className="btn btn-secondary"
+                        >
+                            <Icons.RefreshCw className="w-4 h-4 mr-2" /> Reset
+                        </button>
                     </div>
                 </div>
-            )}
 
-            <div className="card p-4">
-                <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-                    <input
-                        type="text"
-                        placeholder="Search action..."
-                        value={filter.action || ''}
-                        onChange={(e) => setFilter({ ...filter, action: e.target.value, page: 1 })}
-                        className="px-4 py-2 rounded-lg border border-gray-300 focus:border-purple-500"
-                    />
-                    <select
-                        value={filter.result || ''}
-                        onChange={(e) => setFilter({ ...filter, result: e.target.value, page: 1 })}
-                        className="px-4 py-2 rounded-lg border border-gray-300 focus:border-purple-500"
-                    >
-                        <option value="">All Results</option>
-                        <option value="SUCCESS">Success</option>
-                        <option value="DENIED">Denied</option>
-                        <option value="ERROR">Error</option>
-                    </select>
-                    <input
-                        type="date"
-                        value={filter.startDate || ''}
-                        onChange={(e) => setFilter({ ...filter, startDate: e.target.value, page: 1 })}
-                        className="px-4 py-2 rounded-lg border border-gray-300 focus:border-purple-500"
-                        placeholder="Start Date"
-                    />
-                    <input
-                        type="date"
-                        value={filter.endDate || ''}
-                        onChange={(e) => setFilter({ ...filter, endDate: e.target.value, page: 1 })}
-                        className="px-4 py-2 rounded-lg border border-gray-300 focus:border-purple-500"
-                        placeholder="End Date"
-                    />
-                    <button
-                        onClick={() => setFilter({ page: 1, limit: 10 })}
-                        className="btn btn-secondary"
-                    >
-                        <Icons.RefreshCw className="w-4 h-4 mr-2" /> Reset
-                    </button>
-                </div>
+                <DataTable
+                    data={logs}
+                    columns={columns}
+                    pageSize={filter.limit || 10}
+                    currentPage={filter.page}
+                    totalPages={totalPages}
+                    onPageChange={(page) => setFilter({ ...filter, page })}
+                    searchable={false}
+                />
+
+                {/* Audit Log Details Drawer */}
+                <AuditLogDetailsDrawer
+                    log={selectedLog}
+                    isOpen={drawerOpen}
+                    onClose={() => setDrawerOpen(false)}
+                />
             </div>
-
-            <DataTable
-                data={logs}
-                columns={columns}
-                pageSize={filter.limit || 10}
-                currentPage={filter.page}
-                totalPages={totalPages}
-                onPageChange={(page) => setFilter({ ...filter, page })}
-            />
-
-            {/* Audit Log Details Drawer */}
-            <AuditLogDetailsDrawer
-                log={selectedLog}
-                isOpen={drawerOpen}
-                onClose={() => setDrawerOpen(false)}
-            />
-        </div>
+        </PermissionGate>
     );
 }

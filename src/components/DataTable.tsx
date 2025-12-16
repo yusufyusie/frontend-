@@ -3,6 +3,7 @@
 import React, { useState, useMemo } from 'react';
 import { ChevronUp, ChevronDown, Search, ChevronLeft, ChevronRight } from 'lucide-react';
 
+// End of file (technically not needed but satisfies the tool)
 export interface Column<T> {
     key: string;
     header: string;
@@ -19,6 +20,9 @@ interface DataTableProps<T> {
     pageSize?: number;
     emptyMessage?: string;
     className?: string;
+    currentPage?: number;
+    totalPages?: number;
+    onPageChange?: (page: number) => void;
 }
 
 export function DataTable<T extends Record<string, any>>({
@@ -29,11 +33,17 @@ export function DataTable<T extends Record<string, any>>({
     pageSize = 10,
     emptyMessage = 'No data available',
     className = '',
+    currentPage: externalPage,
+    totalPages: externalTotalPages,
+    onPageChange,
 }: DataTableProps<T>) {
     const [searchTerm, setSearchTerm] = useState('');
     const [sortColumn, setSortColumn] = useState<string | null>(null);
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
-    const [currentPage, setCurrentPage] = useState(1);
+    const [internalPage, setInternalPage] = useState(1);
+
+    const isControlled = externalPage !== undefined && externalTotalPages !== undefined && onPageChange !== undefined;
+    const currentPage = isControlled ? externalPage : internalPage;
 
     // Filter data based on search term
     const filteredData = useMemo(() => {
@@ -62,13 +72,15 @@ export function DataTable<T extends Record<string, any>>({
         });
     }, [filteredData, sortColumn, sortDirection]);
 
-    // Paginate data
-    const paginatedData = useMemo(() => {
+    // Paginate data - ONLY if not controlled. Controlled means data is ALREADY paginated.
+    const displayData = useMemo(() => {
+        if (isControlled) return sortedData;
+
         const startIndex = (currentPage - 1) * pageSize;
         return sortedData.slice(startIndex, startIndex + pageSize);
-    }, [sortedData, currentPage, pageSize]);
+    }, [sortedData, currentPage, pageSize, isControlled]);
 
-    const totalPages = Math.ceil(sortedData.length / pageSize);
+    const totalPages = isControlled ? externalTotalPages : Math.ceil(sortedData.length / pageSize);
 
     const handleSort = (columnKey: string) => {
         if (sortColumn === columnKey) {
@@ -80,7 +92,12 @@ export function DataTable<T extends Record<string, any>>({
     };
 
     const handlePageChange = (page: number) => {
-        setCurrentPage(Math.max(1, Math.min(page, totalPages)));
+        const newPage = Math.max(1, Math.min(page, totalPages));
+        if (isControlled) {
+            onPageChange(newPage);
+        } else {
+            setInternalPage(newPage);
+        }
     };
 
     const renderSortIcon = (columnKey: string) => {
@@ -105,7 +122,7 @@ export function DataTable<T extends Record<string, any>>({
                         value={searchTerm}
                         onChange={(e) => {
                             setSearchTerm(e.target.value);
-                            setCurrentPage(1); // Reset to first page on search
+                            if (!isControlled) setInternalPage(1);
                         }}
                         className="input pl-10"
                     />
@@ -133,14 +150,14 @@ export function DataTable<T extends Record<string, any>>({
                         </tr>
                     </thead>
                     <tbody>
-                        {paginatedData.length === 0 ? (
+                        {displayData.length === 0 ? (
                             <tr>
                                 <td colSpan={columns.length} className="text-center py-12 text-gray-500">
                                     {emptyMessage}
                                 </td>
                             </tr>
                         ) : (
-                            paginatedData.map((row, rowIndex) => (
+                            displayData.map((row, rowIndex) => (
                                 <tr key={rowIndex} className="table-row">
                                     {columns.map((column) => (
                                         <td key={column.key} className={column.className || ''}>
@@ -159,7 +176,7 @@ export function DataTable<T extends Record<string, any>>({
                 <div className="flex items-center justify-between">
                     <div className="text-sm text-gray-600">
                         Showing {(currentPage - 1) * pageSize + 1} to{' '}
-                        {Math.min(currentPage * pageSize, sortedData.length)} of {sortedData.length} results
+                        {Math.min(currentPage * pageSize, isControlled ? totalPages * pageSize : sortedData.length)} of {isControlled ? totalPages * pageSize : sortedData.length} results
                     </div>
 
                     <div className="pagination">

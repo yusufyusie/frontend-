@@ -31,21 +31,14 @@ export const useAccessStore = create<AccessState>((set, get) => ({
     isLoading: true,
 
     setUser: (user) => set({ user }),
-    setPermissions: (permissions) => {
-        console.log('📝 Setting permissions:', permissions);
-        set({ permissions });
-    },
+    setPermissions: (permissions) => set({ permissions }),
     setRoles: (roles) => set({ roles }),
     setClaims: (claims) => set({ claims }),
     setLoading: (isLoading) => set({ isLoading }),
 
     hasPermission: (permission: string) => {
         const permissions = get().permissions;
-        const has = permissions.includes(permission);
-        if (!has) {
-            console.log(`⚠️  Permission "${permission}" not found in:`, permissions);
-        }
-        return has;
+        return permissions.includes(permission);
     },
 
     hasRole: (role: string) => {

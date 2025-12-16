@@ -3,6 +3,7 @@
 import { AuditLog } from '@/services/auditlog.service';
 import * as Icons from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import React from 'react';
 
 interface AuditLogDetailsDrawerProps {
     log: AuditLog | null;
@@ -265,5 +266,4 @@ function InfoItem({
     );
 }
 
-// Add React import for useState
-import React from 'react';
+// End of file
