@@ -85,15 +85,16 @@ export default function AdminUsersPage() {
             {/* Header */}
             <div className="flex justify-between items-center">
                 <div>
-                    <h1 className="text-4xl font-bold text-gradient">Users Management</h1>
+                    <h1 className="text-4xl font-bold text-primary">Users Management</h1>
                     <p className="text-gray-600 mt-2">Manage user accounts, roles, and permissions</p>
                 </div>
                 <PermissionGate permission="User.Create">
                     <button
                         onClick={() => setCreateModalOpen(true)}
                         className="btn btn-primary flex items-center gap-2"
+                        aria-label="Add New User"
                     >
-                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                         </svg>
                         Add User
@@ -104,7 +105,7 @@ export default function AdminUsersPage() {
             {/* Search Bar */}
             <div className="card">
                 <div className="relative">
-                    <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                     <input
@@ -112,7 +113,8 @@ export default function AdminUsersPage() {
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         placeholder="Search users by name or email..."
-                        className="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-300 focus:border-teal-500 focus:ring-2 focus:ring-teal-200 transition-all outline-none"
+                        className="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-300 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none"
+                        aria-label="Search users"
                     />
                 </div>
             </div>
@@ -142,7 +144,7 @@ export default function AdminUsersPage() {
                                     <tr key={user.id} className="table-row">
                                         <td className="p-4">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-teal-600 to-mint-500 flex items-center justify-center text-white font-semibold">
+                                                <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-semibold">
                                                     {user.username.substring(0, 2).toUpperCase()}
                                                 </div>
                                                 <div>

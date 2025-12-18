@@ -35,11 +35,11 @@ export function Navbar({ onToggleSidebar }: NavbarProps) {
                     </button>
 
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gradient-to-br from-secondary-500 to-primary-500 rounded-lg flex items-center justify-center shadow-md">
+                        <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center shadow-md">
                             <span className="text-white font-bold text-lg">ET</span>
                         </div>
                         <div className="hidden md:block">
-                            <h1 className="text-xl font-bold bg-gradient-to-r from-secondary-500 to-primary-500 bg-clip-text text-transparent">
+                            <h1 className="text-xl font-bold text-secondary">
                                 Ethiopian IT Park
                             </h1>
                             <p className="text-xs text-gray-500">Access Control System</p>
@@ -90,7 +90,7 @@ export function Navbar({ onToggleSidebar }: NavbarProps) {
                                 </div>
                                 <div className="text-xs text-gray-500">{user?.email}</div>
                             </div>
-                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-white font-semibold shadow-md">
+                            <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-semibold shadow-md">
                                 {user?.username?.substring(0, 2).toUpperCase() || 'U'}
                             </div>
                             <ChevronDown className="w-4 h-4 text-gray-600 hidden sm:block" />

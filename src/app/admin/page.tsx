@@ -120,7 +120,7 @@ export default function AdminDashboard() {
             <div className="card-gradient p-6">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-4xl font-bold text-gradient mb-2">
+                        <h1 className="text-4xl font-bold text-primary mb-2">
                             Welcome back, {user?.username}! 👋
                         </h1>
                         <p className="text-gray-600 text-lg">
@@ -128,7 +128,7 @@ export default function AdminDashboard() {
                         </p>
                     </div>
                     <div className="hidden md:block">
-                        <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-white text-5xl shadow-lg">
+                        <div className="w-24 h-24 rounded-full bg-[#0C7C92] flex items-center justify-center text-white text-5xl shadow-lg" aria-hidden="true">
                             {user?.username?.substring(0, 2).toUpperCase()}
                         </div>
                     </div>
@@ -141,7 +141,7 @@ export default function AdminDashboard() {
                     <Link key={index} href={stat.link}>
                         <div className="card hover-lift cursor-pointer group">
                             <div className="flex items-center justify-between mb-4">
-                                <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center text-3xl shadow-lg group-hover:scale-110 transition-transform`}>
+                                <div className="w-14 h-14 rounded-xl bg-primary flex items-center justify-center text-3xl shadow-lg group-hover:scale-110 transition-transform" aria-hidden="true">
                                     {stat.icon}
                                 </div>
                                 <svg className="w-6 h-6 text-gray-400 group-hover:text-primary-600 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -162,7 +162,7 @@ export default function AdminDashboard() {
                     {quickActions.map((action, index) => (
                         <Link key={index} href={action.link}>
                             <div className="card hover-lift cursor-pointer group">
-                                <div className={`w-16 h-16 rounded-xl bg-gradient-to-br ${action.color} flex items-center justify-center text-4xl mb-4 group-hover:scale-110 transition-transform shadow-lg`}>
+                                <div className="w-16 h-16 rounded-xl bg-primary-dark flex items-center justify-center text-4xl mb-4 group-hover:scale-110 transition-transform shadow-lg" aria-hidden="true">
                                     {action.icon}
                                 </div>
                                 <h3 className="text-xl font-semibold text-gray-900 mb-2 group-hover:text-primary-600 transition-colors">
@@ -227,7 +227,7 @@ export default function AdminDashboard() {
             </div>
 
             {/* Feature Highlights */}
-            <div className="card bg-gradient-to-r from-primary-50 to-accent-50 border-2 border-primary-200">
+            <div className="card bg-primary-50 border-2 border-primary">
                 <div className="flex items-start gap-4">
                     <div className="text-5xl">🎯</div>
                     <div>

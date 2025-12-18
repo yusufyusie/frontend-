@@ -101,10 +101,11 @@ export function Sidebar({ isOpen = true, isCollapsed = false, onClose }: Sidebar
                 key={item.id}
                 href={item.path || '#'}
                 className={`flex items-center justify-center p-3 rounded-lg transition-all group relative ${isActive
-                    ? 'bg-gradient-to-r from-primary-500 to-accent-500 text-white shadow-lg'
+                    ? 'bg-primary text-white shadow-lg'
                     : 'text-gray-300 hover:bg-gray-800/50 hover:text-white'
                     }`}
                 title={item.name}
+                aria-label={item.name}
             >
                 {getIcon(item.icon)}
                 {item.badge && (
@@ -162,11 +163,12 @@ export function Sidebar({ isOpen = true, isCollapsed = false, onClose }: Sidebar
                     target={item.isExternal ? '_blank' : undefined}
                     rel={item.isExternal ? 'noopener noreferrer' : undefined}
                     className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group ${isActive
-                        ? 'bg-gradient-to-r from-primary-500 to-accent-500 text-white shadow-lg shadow-primary-500/30'
+                        ? 'bg-primary text-white shadow-lg'
                         : hasActivePath
                             ? 'bg-gray-800/50 text-white'
                             : 'text-gray-300 hover:bg-gray-800/50 hover:text-white'
                         } ${depth > 0 ? 'ml-6' : ''}`}
+                    aria-current={isActive ? 'page' : undefined}
                 >
                     <div className="flex-shrink-0">{getIcon(item.icon)}</div>
                     <span className="flex-1 font-medium text-sm">{item.name}</span>
@@ -195,7 +197,7 @@ export function Sidebar({ isOpen = true, isCollapsed = false, onClose }: Sidebar
             )}
 
             {/* Sidebar */}
-            <aside className={`fixed left-0 top-16 bottom-0 bg-gradient-to-b from-secondary-900 via-secondary-800 to-gray-950 text-white shadow-2xl border-r border-primary-900 z-40 transition-all duration-300 ${isCollapsed ? 'w-20' : 'w-72'
+            <aside className={`fixed left-0 top-16 bottom-0 bg-secondary text-white shadow-2xl border-r border-gray-700 z-40 transition-all duration-300 ${isCollapsed ? 'w-20' : 'w-72'
                 } ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
 
                 <nav className="h-full p-4 overflow-y-auto custom-scrollbar pb-20">
@@ -232,9 +234,9 @@ export function Sidebar({ isOpen = true, isCollapsed = false, onClose }: Sidebar
 
                 {/* Footer */}
                 {!isCollapsed && (
-                    <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-primary-900 bg-secondary-900/50 backdrop-blur-sm">
+                    <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-700 bg-secondary/80 backdrop-blur-sm">
                         <div className="text-xs text-gray-400 text-center">
-                            <div className="font-semibold text-accent-400">Ethiopian IT Park</div>
+                            <div className="font-semibold text-accent">Ethiopian IT Park</div>
                             <div>Access Control v1.0</div>
                         </div>
                     </div>
