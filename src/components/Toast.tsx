@@ -1,12 +1,14 @@
 'use client';
 
 import { create } from 'zustand';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { CheckCircle, XCircle, AlertCircle, Info, X } from 'lucide-react';
 
 interface Toast {
     id: string;
     type: 'success' | 'error' | 'info' | 'warning';
     message: string;
+    duration?: number;
 }
 
 interface ToastStore {
@@ -19,15 +21,18 @@ export const useToastStore = create<ToastStore>((set) => ({
     toasts: [],
     addToast: (toast) => {
         const id = Math.random().toString(36).substring(7);
+        const duration = toast.duration || 5000;
+
         set((state) => ({
-            toasts: [...state.toasts, { ...toast, id }]
+            toasts: [...state.toasts, { ...toast, id, duration }]
         }));
-        // Auto remove after 5 seconds
+
+        // Auto remove after duration
         setTimeout(() => {
             set((state) => ({
                 toasts: state.toasts.filter((t) => t.id !== id)
             }));
-        }, 5000);
+        }, duration);
     },
     removeToast: (id) => set((state) => ({
         toasts: state.toasts.filter((t) => t.id !== id)
@@ -38,65 +43,127 @@ export function ToastContainer() {
     const { toasts, removeToast } = useToastStore();
 
     return (
-        <div className="fixed top-4 right-4 z-50 space-y-2">
-            {toasts.map((toast) => (
-                <Toast key={toast.id} toast={toast} onClose={() => removeToast(toast.id)} />
+        <div
+            className="fixed top-20 right-4 z-50 space-y-3 max-w-md"
+            role="region"
+            aria-label="Notifications"
+        >
+            {toasts.map((toast, index) => (
+                <Toast
+                    key={toast.id}
+                    toast={toast}
+                    onClose={() => removeToast(toast.id)}
+                    index={index}
+                />
             ))}
         </div>
     );
 }
 
-function Toast({ toast, onClose }: { toast: Toast; onClose: () => void }) {
-    const styles = {
-        success: 'bg-green-50 border-green-500 text-green-900',
-        error: 'bg-red-50 border-red-500 text-red-900',
-        warning: 'bg-yellow-50 border-yellow-500 text-yellow-900',
-        info: 'bg-primary-50 border-primary-500 text-blue-900'
+function Toast({ toast, onClose, index }: { toast: Toast; onClose: () => void; index: number }) {
+    const [progress, setProgress] = useState(100);
+    const duration = toast.duration || 5000;
+
+    // Progress bar animation
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setProgress((prev) => {
+                const decrease = (100 / duration) * 50; // Update every 50ms
+                return Math.max(0, prev - decrease);
+            });
+        }, 50);
+
+        return () => clearInterval(interval);
+    }, [duration]);
+
+    const variants = {
+        success: {
+            bg: 'bg-accent-50 border-accent',
+            icon: <CheckCircle className="w-6 h-6 text-accent flex-shrink-0" aria-hidden="true" />,
+            progress: 'bg-accent'
+        },
+        error: {
+            bg: 'bg-error-50 border-error',
+            icon: <XCircle className="w-6 h-6 text-error flex-shrink-0" aria-hidden="true" />,
+            progress: 'bg-error'
+        },
+        warning: {
+            bg: 'bg-warning-50 border-warning',
+            icon: <AlertCircle className="w-6 h-6 text-warning flex-shrink-0" aria-hidden="true" />,
+            progress: 'bg-warning'
+        },
+        info: {
+            bg: 'bg-primary-50 border-primary',
+            icon: <Info className="w-6 h-6 text-primary flex-shrink-0" aria-hidden="true" />,
+            progress: 'bg-primary'
+        }
     };
 
-    const icons = {
-        success: (
-            <svg className="w-5 h-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
-        ),
-        error: (
-            <svg className="w-5 h-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-        ),
-        warning: (
-            <svg className="w-5 h-5 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-        ),
-        info: (
-            <svg className="w-5 h-5 text-primary-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-        )
-    };
+    const variant = variants[toast.type];
+    const delay = index * 100; // Stagger animation
 
     return (
-        <div className={`flex items-center gap-3 p-4 rounded-lg border-l-4 shadow-lg ${styles[toast.type]} animate-slide-in-right min-w-[300px] max-w-[400px]`}>
-            {icons[toast.type]}
-            <p className="flex-1 font-medium">{toast.message}</p>
-            <button
-                onClick={onClose}
-                className="hover:opacity-70 transition-opacity"
-            >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-            </button>
+        <div
+            className={`
+                ${variant.bg} 
+                border-l-4 
+                rounded-lg 
+                shadow-xl 
+                backdrop-blur-sm 
+                overflow-hidden
+                animate-slide-in-right
+                hover:shadow-2xl
+                transition-shadow
+                duration-300
+            `}
+            style={{ animationDelay: `${delay}ms` }}
+            role="alert"
+            aria-live="polite"
+        >
+            <div className="flex items-start gap-3 p-4">
+                {/* Icon with circular background */}
+                <div className="flex-shrink-0">
+                    {variant.icon}
+                </div>
+
+                {/* Message */}
+                <p className="flex-1 text-sm font-medium text-gray-900 leading-relaxed pt-0.5">
+                    {toast.message}
+                </p>
+
+                {/* Close button */}
+                <button
+                    onClick={onClose}
+                    className="flex-shrink-0 rounded-lg p-1 hover:bg-gray-900/10 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-400"
+                    aria-label="Close notification"
+                >
+                    <X className="w-4 h-4 text-gray-600" aria-hidden="true" />
+                </button>
+            </div>
+
+            {/* Progress bar */}
+            <div className="h-1 bg-gray-200/50">
+                <div
+                    className={`h-full ${variant.progress} transition-all duration-100 ease-linear`}
+                    style={{ width: `${progress}%` }}
+                    role="progressbar"
+                    aria-valuenow={progress}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                />
+            </div>
         </div>
     );
 }
 
 // Helper function to show toasts from anywhere
 export const toast = {
-    success: (message: string) => useToastStore.getState().addToast({ type: 'success', message }),
-    error: (message: string) => useToastStore.getState().addToast({ type: 'error', message }),
-    info: (message: string) => useToastStore.getState().addToast({ type: 'info', message }),
-    warning: (message: string) => useToastStore.getState().addToast({ type: 'warning', message })
+    success: (message: string, duration?: number) =>
+        useToastStore.getState().addToast({ type: 'success', message, duration }),
+    error: (message: string, duration?: number) =>
+        useToastStore.getState().addToast({ type: 'error', message, duration }),
+    info: (message: string, duration?: number) =>
+        useToastStore.getState().addToast({ type: 'info', message, duration }),
+    warning: (message: string, duration?: number) =>
+        useToastStore.getState().addToast({ type: 'warning', message, duration })
 };
