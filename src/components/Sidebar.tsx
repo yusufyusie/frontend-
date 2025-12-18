@@ -97,7 +97,7 @@ export function Sidebar({ isOpen = true, isCollapsed = false, onClose }: Sidebar
     const renderMenuItem = (item: MenuItem, depth: number = 0) => {
         const hasChildren = item.children && item.children.length > 0;
         const isExpanded = expandedMenus.has(item.id);
-        const isActiveItem = isActive(item.path);
+        const isActiveItem = isActive(item.path ?? null);
         const hasActivePath = hasActiveChild(item);
         const Icon = item.icon ? (Icons as any)[item.icon] : null;
 
