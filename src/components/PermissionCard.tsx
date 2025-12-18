@@ -27,7 +27,7 @@ export function PermissionCard({
                 relative p-4 border-2 rounded-xl transition-all duration-200
                 hover:shadow-lg hover:-translate-y-0.5
                 ${isSelected
-                    ? 'border-blue-500 bg-blue-50 shadow-md'
+                    ? 'border-primary-500 bg-primary-50 shadow-md'
                     : 'border-gray-200 bg-white hover:border-blue-200'
                 }
             `}
@@ -38,7 +38,7 @@ export function PermissionCard({
                     type="checkbox"
                     checked={isSelected}
                     onChange={() => onSelect(permission.id)}
-                    className="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                    className="w-5 h-5 rounded border-gray-300 text-primary-600 focus:ring-primary-500 cursor-pointer"
                 />
             </div>
 
@@ -58,7 +58,7 @@ export function PermissionCard({
                         className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors group"
                         title="Edit"
                     >
-                        <svg className="w-4 h-4 text-gray-500 group-hover:text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg className="w-4 h-4 text-gray-500 group-hover:text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                         </svg>
                     </button>

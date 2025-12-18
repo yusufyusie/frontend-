@@ -112,7 +112,7 @@ export default function AdminUsersPage() {
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         placeholder="Search users by name or email..."
-                        className="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none"
+                        className="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-300 focus:border-teal-500 focus:ring-2 focus:ring-teal-200 transition-all outline-none"
                     />
                 </div>
             </div>
@@ -142,7 +142,7 @@ export default function AdminUsersPage() {
                                     <tr key={user.id} className="table-row">
                                         <td className="p-4">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold">
+                                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-teal-600 to-mint-500 flex items-center justify-center text-white font-semibold">
                                                     {user.username.substring(0, 2).toUpperCase()}
                                                 </div>
                                                 <div>
@@ -185,7 +185,7 @@ export default function AdminUsersPage() {
                                                             setSelectedUser(user);
                                                             setAssignRolesModalOpen(true);
                                                         }}
-                                                        className="px-3 py-1.5 text-sm bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors"
+                                                        className="px-3 py-1.5 text-sm bg-teal-50 text-teal-700 rounded-lg hover:bg-teal-100 transition-colors"
                                                         title="Assign Roles"
                                                     >
                                                         Roles
@@ -429,7 +429,7 @@ function EditUserModal({ isOpen, user, onClose, onSuccess }: {
                     <select
                         value={formData.isActive ? 'active' : 'inactive'}
                         onChange={(e) => setFormData({ ...formData, isActive: e.target.value === 'active' })}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 outline-none"
                         disabled={submitting}
                     >
                         <option value="active">Active</option>
@@ -474,14 +474,14 @@ function AssignRolesModal({ isOpen, user, roles, onClose, onSuccess }: {
     useEffect(() => {
         if (isOpen && user.roles) {
             const currentRoleIds = user.roles.map(r => r.id);
-            console.log('Setting selected roles for user:', user.username, 'roles:', currentRoleIds);
+            // Roles set for user
             setSelectedRoleIds(currentRoleIds);
         }
     }, [isOpen, user]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        console.log('Submitting role assignment:', selectedRoleIds);
+        // Submitting role assignment
         try {
             setSubmitting(true);
             await usersService.assignRoles(user.id, selectedRoleIds);

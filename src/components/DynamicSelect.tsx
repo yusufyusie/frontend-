@@ -117,7 +117,7 @@ export function DynamicSelect({
                 className={`min-h-[44px] px-3 py-2 border rounded-lg cursor-pointer transition-all ${disabled
                     ? 'bg-gray-100 cursor-not-allowed'
                     : isOpen
-                        ? 'border-blue-500 ring-2 ring-blue-200'
+                        ? 'border-primary-500 ring-2 ring-blue-200'
                         : error
                             ? 'border-red-500'
                             : 'border-gray-300 hover:border-gray-400'
@@ -128,7 +128,7 @@ export function DynamicSelect({
                         selectedOptions.map(option => (
                             <span
                                 key={option.value}
-                                className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-100 text-blue-800 text-sm rounded-md border border-blue-200"
+                                className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-primary-100 text-primary-800 text-sm rounded-md border border-blue-200"
                             >
                                 <span className="font-medium">{option.label}</span>
                                 {!disabled && (
@@ -166,7 +166,7 @@ export function DynamicSelect({
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                     placeholder="Search..."
-                                    className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                                    className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
                                 />
                             </div>
                         </div>
@@ -177,7 +177,7 @@ export function DynamicSelect({
                         <div className="flex gap-2 p-3 border-b border-gray-200 bg-gray-50">
                             <button
                                 onClick={handleSelectAll}
-                                className="flex-1 px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 rounded border border-blue-200 transition-colors"
+                                className="flex-1 px-3 py-1.5 text-xs font-medium text-primary-700 bg-primary-50 hover:bg-primary-100 rounded border border-blue-200 transition-colors"
                             >
                                 Select All
                             </button>
@@ -209,12 +209,12 @@ export function DynamicSelect({
                                             className={`w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors ${option.disabled
                                                 ? 'opacity-50 cursor-not-allowed'
                                                 : isSelected
-                                                    ? 'bg-blue-50 text-blue-900'
+                                                    ? 'bg-primary-50 text-blue-900'
                                                     : 'hover:bg-gray-50'
                                                 }`}
                                         >
                                             <div className={`flex-shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${isSelected
-                                                ? 'bg-blue-600 border-blue-600'
+                                                ? 'bg-primary-600 border-primary-600'
                                                 : 'border-gray-300'
                                                 }`}>
                                                 {isSelected && <Check className="w-3 h-3 text-white" />}

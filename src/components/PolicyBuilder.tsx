@@ -106,7 +106,7 @@ export function PolicyBuilder({ value, onChange, level = 0 }: PolicyBuilderProps
 
     const indentClass = level === 0 ? '' : 'ml-8';
     const borderColor = level % 2 === 0 ? 'border-blue-200' : 'border-purple-200';
-    const bgColor = level % 2 === 0 ? 'bg-blue-50/30' : 'bg-purple-50/30';
+    const bgColor = level % 2 === 0 ? 'bg-primary-50/30' : 'bg-purple-50/30';
 
     return (
         <div className={`${indentClass} space-y-4`}>
@@ -120,7 +120,7 @@ export function PolicyBuilder({ value, onChange, level = 0 }: PolicyBuilderProps
                                 key={op}
                                 onClick={() => updateOperator(op)}
                                 className={`px-4 py-2 rounded-lg font-semibold transition-all ${value.operator === op
-                                        ? 'bg-blue-600 text-white shadow-md'
+                                        ? 'bg-primary-600 text-white shadow-md'
                                         : 'bg-white border-2 border-gray-200 text-gray-700 hover:border-blue-300'
                                     }`}
                             >

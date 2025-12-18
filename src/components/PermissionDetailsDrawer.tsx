@@ -35,7 +35,7 @@ export function PermissionDetailsDrawer({ permission, isOpen, onClose, roles = [
                     {/* Header */}
                     <div className="flex items-center justify-between p-6 border-b bg-gradient-to-r from-purple-50 to-pink-50">
                         <div className="flex items-center gap-3">
-                            <div className="p-2 bg-gradient-to-br from-purple-600 to-pink-600 rounded-lg">
+                            <div className="p-2 bg-gradient-to-br from-secondary-600 to-accent-600 rounded-lg">
                                 <Icons.Shield className="w-6 h-6 text-white" />
                             </div>
                             <div>
@@ -88,10 +88,10 @@ export function PermissionDetailsDrawer({ permission, isOpen, onClose, roles = [
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="p-4 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl border border-blue-200">
                                     <div className="flex items-center gap-2 mb-2">
-                                        <Icons.Users className="w-5 h-5 text-blue-600" />
+                                        <Icons.Users className="w-5 h-5 text-primary-600" />
                                         <span className="text-sm font-medium text-gray-700">Roles Using</span>
                                     </div>
-                                    <p className="text-3xl font-bold text-blue-600">{usageCount}</p>
+                                    <p className="text-3xl font-bold text-primary-600">{usageCount}</p>
                                 </div>
 
                                 <div className="p-4 bg-gradient-to-br from-green-50 to-teal-50 rounded-xl border border-green-200">
@@ -129,7 +129,7 @@ export function PermissionDetailsDrawer({ permission, isOpen, onClose, roles = [
                                             key={role.id}
                                             className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200 hover:border-purple-300 transition-colors"
                                         >
-                                            <div className="p-2 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg">
+                                            <div className="p-2 bg-gradient-to-br from-secondary-500 to-accent-500 rounded-lg">
                                                 <Icons.Users className="w-4 h-4 text-white" />
                                             </div>
                                             <div>

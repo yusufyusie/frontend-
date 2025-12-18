@@ -109,12 +109,12 @@ export function UserDetailsDrawer({ userId, isOpen, onClose, onUpdate }: UserDet
             <div className="fixed right-0 top-0 h-full w-full md:w-[600px] bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out overflow-y-auto">
                 {loading ? (
                     <div className="flex items-center justify-center h-full">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
                     </div>
                 ) : user ? (
                     <div className="flex flex-col h-full">
                         {/* Header */}
-                        <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-6">
+                        <div className="bg-gradient-to-r from-primary-500 to-accent-500 p-6">
                             <div className="flex items-start justify-between mb-4">
                                 <h2 className="text-2xl font-bold text-white">User Details</h2>
                                 <button
@@ -156,7 +156,7 @@ export function UserDetailsDrawer({ userId, isOpen, onClose, onUpdate }: UserDet
                                         key={tab.id}
                                         onClick={() => setActiveTab(tab.id as Tab)}
                                         className={`px-4 py-3 font-medium text-sm transition-colors border-b-2 ${activeTab === tab.id
-                                            ? 'border-blue-600 text-blue-600'
+                                            ? 'border-primary-600 text-primary-600'
                                             : 'border-transparent text-gray-600 hover:text-gray-900'
                                             }`}
                                     >
@@ -176,7 +176,7 @@ export function UserDetailsDrawer({ userId, isOpen, onClose, onUpdate }: UserDet
                                         {!isEditing ? (
                                             <button
                                                 onClick={() => setIsEditing(true)}
-                                                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                                                className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors text-sm font-medium"
                                             >
                                                 Edit
                                             </button>
@@ -206,7 +206,7 @@ export function UserDetailsDrawer({ userId, isOpen, onClose, onUpdate }: UserDet
                                                     type="text"
                                                     value={editForm.username}
                                                     onChange={(e) => setEditForm({ ...editForm, username: e.target.value })}
-                                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
                                                 />
                                             </div>
                                             <div>
@@ -215,7 +215,7 @@ export function UserDetailsDrawer({ userId, isOpen, onClose, onUpdate }: UserDet
                                                     type="email"
                                                     value={editForm.email}
                                                     onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
-                                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
                                                 />
                                             </div>
                                             <div>
@@ -223,7 +223,7 @@ export function UserDetailsDrawer({ userId, isOpen, onClose, onUpdate }: UserDet
                                                 <select
                                                     value={editForm.isActive ? 'active' : 'inactive'}
                                                     onChange={(e) => setEditForm({ ...editForm, isActive: e.target.value === 'active' })}
-                                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
                                                 >
                                                     <option value="active">Active</option>
                                                     <option value="inactive">Inactive</option>
@@ -236,7 +236,7 @@ export function UserDetailsDrawer({ userId, isOpen, onClose, onUpdate }: UserDet
                                             <div className="grid grid-cols-3 gap-4">
                                                 <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg border border-blue-200">
                                                     <div className="text-2xl font-bold text-blue-900">{user.roles?.length || 0}</div>
-                                                    <div className="text-sm text-blue-700">Roles</div>
+                                                    <div className="text-sm text-primary-700">Roles</div>
                                                 </div>
                                                 <div className="p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-lg border border-green-200">
                                                     <div className="text-2xl font-bold text-green-900">
@@ -268,7 +268,7 @@ export function UserDetailsDrawer({ userId, isOpen, onClose, onUpdate }: UserDet
                                                         {user.roles.map(role => (
                                                             <span
                                                                 key={role.id}
-                                                                className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium"
+                                                                className="px-3 py-1 bg-primary-100 text-primary-800 rounded-full text-sm font-medium"
                                                             >
                                                                 {role.name}
                                                             </span>
@@ -286,7 +286,7 @@ export function UserDetailsDrawer({ userId, isOpen, onClose, onUpdate }: UserDet
                                     <h3 className="text-lg font-semibold text-gray-900">Assigned Roles</h3>
                                     <div className="space-y-3">
                                         {user.roles?.map(role => (
-                                            <div key={role.id} className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                                            <div key={role.id} className="p-4 bg-primary-50 rounded-lg border border-blue-200">
                                                 <div className="flex items-start justify-between">
                                                     <div className="flex-1">
                                                         <div className="font-semibold text-gray-900">{role.name}</div>
@@ -327,7 +327,7 @@ export function UserDetailsDrawer({ userId, isOpen, onClose, onUpdate }: UserDet
                                                     <button
                                                         key={role.id}
                                                         onClick={() => handleAddRole(role.id)}
-                                                        className="w-full text-left p-3 bg-gray-50 rounded-lg hover:bg-blue-50 hover:border-blue-300 border border-gray-200 transition-colors"
+                                                        className="w-full text-left p-3 bg-gray-50 rounded-lg hover:bg-primary-50 hover:border-blue-300 border border-gray-200 transition-colors"
                                                     >
                                                         <div className="font-medium text-gray-900">{role.name}</div>
                                                         <div className="text-sm text-gray-600">{role.description}</div>
@@ -352,11 +352,11 @@ export function UserDetailsDrawer({ userId, isOpen, onClose, onUpdate }: UserDet
                                                 role.permissions && role.permissions.length > 0 && (
                                                     <div key={role.id} className="border border-gray-200 rounded-lg p-4">
                                                         <div className="flex items-center gap-2 mb-3">
-                                                            <svg className="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <svg className="w-5 h-5 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                                                             </svg>
                                                             <h4 className="font-semibold text-gray-900">From: {role.name}</h4>
-                                                            <span className="ml-auto px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">
+                                                            <span className="ml-auto px-2 py-1 bg-primary-100 text-primary-700 text-xs rounded-full">
                                                                 {role.permissions.length} permission{role.permissions.length !== 1 ? 's' : ''}
                                                             </span>
                                                         </div>

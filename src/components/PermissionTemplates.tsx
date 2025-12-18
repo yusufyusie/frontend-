@@ -99,7 +99,7 @@ export function PermissionTemplates({ permissions, onApplyTemplate }: Permission
                         </div>
 
                         {/* Hover Effect */}
-                        <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 to-pink-500 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
+                        <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-secondary-500 to-accent-500 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
                     </button>
                 ))}
 
@@ -126,8 +126,8 @@ export function PermissionTemplates({ permissions, onApplyTemplate }: Permission
             </div>
 
             {/* Info */}
-            <div className="flex items-start gap-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                <Icons.Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+            <div className="flex items-start gap-2 p-3 bg-primary-50 border border-blue-200 rounded-lg">
+                <Icons.Info className="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
                 <div className="text-sm text-blue-900">
                     <strong>Tip:</strong> Templates provide a quick starting point. You can always fine-tune permissions after applying a template.
                 </div>

@@ -46,7 +46,7 @@ export function MultiSelect({ label, options, selectedIds, onChange, placeholder
                     selectedOptions.map(option => (
                         <span
                             key={option.id}
-                            className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-sm"
+                            className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-primary-100 text-primary-700 text-sm"
                         >
                             {option.name}
                             <button
@@ -70,7 +70,7 @@ export function MultiSelect({ label, options, selectedIds, onChange, placeholder
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     onFocus={() => setIsOpen(true)}
-                    className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 outline-none"
+                    className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-primary-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 outline-none"
                 />
 
                 {isOpen && (
@@ -95,8 +95,8 @@ export function MultiSelect({ label, options, selectedIds, onChange, placeholder
                                         onClick={() => toggleOption(option.id)}
                                         className={`
                                             px-4 py-3 cursor-pointer transition-colors
-                                            hover:bg-blue-50
-                                            ${selectedIds.includes(option.id) ? 'bg-blue-50 border-l-4 border-blue-500' : ''}
+                                            hover:bg-primary-50
+                                            ${selectedIds.includes(option.id) ? 'bg-primary-50 border-l-4 border-primary-500' : ''}
                                         `}
                                     >
                                         <div className="flex items-center justify-between">
@@ -107,7 +107,7 @@ export function MultiSelect({ label, options, selectedIds, onChange, placeholder
                                                 )}
                                             </div>
                                             {selectedIds.includes(option.id) && (
-                                                <svg className="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <svg className="w-5 h-5 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                                 </svg>
                                             )}

@@ -176,7 +176,7 @@ export function ResourceActionMatrix({ permissions, selectedPermissions, onChang
     const getActionColor = (action: string) => {
         const colorMap: { [key: string]: string } = {
             'Create': 'text-green-600',
-            'View': 'text-blue-600',
+            'View': 'text-primary-600',
             'Edit': 'text-yellow-600',
             'Delete': 'text-red-600',
             'Export': 'text-purple-600',
@@ -257,7 +257,7 @@ export function ResourceActionMatrix({ permissions, selectedPermissions, onChang
                                                             onChange={() => { }}
                                                             className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
                                                         />
-                                                        <div className="p-2 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg">
+                                                        <div className="p-2 bg-gradient-to-br from-secondary-500 to-accent-500 rounded-lg">
                                                             <IconComponent className="w-4 h-4 text-white" />
                                                         </div>
                                                         <span className="font-medium text-gray-900">{resource.resource}</span>
@@ -305,7 +305,7 @@ export function ResourceActionMatrix({ permissions, selectedPermissions, onChang
                     <span className="text-gray-600">Create</span>
                 </div>
                 <div className="flex items-center gap-2">
-                    <Icons.Eye className="w-4 h-4 text-blue-600" />
+                    <Icons.Eye className="w-4 h-4 text-primary-600" />
                     <span className="text-gray-600">View</span>
                 </div>
                 <div className="flex items-center gap-2">

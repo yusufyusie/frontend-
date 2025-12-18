@@ -25,7 +25,7 @@ export function MenuBulkActions({
             <div className="flex items-center justify-between p-4">
                 <div className="flex items-center gap-4">
                     <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 text-white flex items-center justify-center font-semibold text-sm">
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-secondary-500 to-accent-500 text-white flex items-center justify-center font-semibold text-sm">
                             {selectedCount}
                         </div>
                         <span className="font-medium text-gray-900">

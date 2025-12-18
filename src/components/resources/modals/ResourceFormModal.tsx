@@ -120,7 +120,7 @@ export function ResourceFormModal({
                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                         placeholder="Describe this resource..."
                         rows={3}
-                        className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 outline-none"
+                        className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-primary-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 outline-none"
                         disabled={submitting}
                     />
                 </div>
@@ -144,7 +144,7 @@ export function ResourceFormModal({
                                 type="button"
                                 onClick={() => setFormData({ ...formData, iconName: icon })}
                                 className={`p-3 rounded-lg border-2 transition-all ${formData.iconName === icon
-                                    ? 'border-blue-500 bg-blue-50'
+                                    ? 'border-primary-500 bg-primary-50'
                                     : 'border-gray-200 hover:border-gray-300'
                                     }`}
                                 disabled={submitting}

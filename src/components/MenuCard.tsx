@@ -54,7 +54,7 @@ export function MenuCard({
                     )}
                 </div>
                 {menu.badge && (
-                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${menu.badgeColor === 'blue' ? 'bg-blue-100 text-blue-800' :
+                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${menu.badgeColor === 'blue' ? 'bg-primary-100 text-primary-800' :
                             menu.badgeColor === 'green' ? 'bg-green-100 text-green-800' :
                                 menu.badgeColor === 'red' ? 'bg-red-100 text-red-800' :
                                     menu.badgeColor === 'yellow' ? 'bg-yellow-100 text-yellow-800' :
@@ -119,7 +119,7 @@ export function MenuCard({
             <div className="flex gap-2 pt-4 border-t border-gray-200">
                 <button
                     onClick={onEdit}
-                    className="flex-1 px-4 py-2 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors font-medium text-sm flex items-center justify-center gap-2"
+                    className="flex-1 px-4 py-2 bg-primary-50 text-primary-700 rounded-lg hover:bg-primary-100 transition-colors font-medium text-sm flex items-center justify-center gap-2"
                 >
                     <Icons.Edit className="w-4 h-4" />
                     Edit

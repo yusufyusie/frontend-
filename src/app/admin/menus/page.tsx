@@ -241,7 +241,7 @@ export default function MenuManagementPage() {
             header: 'Badge',
             render: (menu: MenuItem) => (
                 menu.badge ? (
-                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${menu.badgeColor === 'blue' ? 'bg-blue-100 text-blue-800' :
+                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${menu.badgeColor === 'blue' ? 'bg-teal-100 text-teal-800' :
                         menu.badgeColor === 'green' ? 'bg-green-100 text-green-800' :
                             menu.badgeColor === 'red' ? 'bg-red-100 text-red-800' :
                                 menu.badgeColor === 'yellow' ? 'bg-yellow-100 text-yellow-800' :
@@ -280,7 +280,7 @@ export default function MenuManagementPage() {
                                 setSelectedMenu(menu);
                                 setEditModalOpen(true);
                             }}
-                            className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                            className="p-2 text-teal-600 hover:bg-teal-50 rounded-lg transition-colors"
                             title="Edit"
                         >
                             <Icons.Edit className="w-4 h-4" />
@@ -343,7 +343,7 @@ export default function MenuManagementPage() {
                     <div className="card relative overflow-hidden">
                         <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-500/10 to-transparent rounded-full -mr-16 -mt-16" />
                         <div className="relative flex items-center gap-3">
-                            <div className="p-3 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl shadow-lg">
+                            <div className="p-3 bg-gradient-to-br from-secondary-500 to-accent-500 rounded-xl shadow-lg">
                                 <Icons.Menu className="w-6 h-6 text-white" />
                             </div>
                             <div>
@@ -369,7 +369,7 @@ export default function MenuManagementPage() {
                     <div className="card relative overflow-hidden">
                         <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-500/10 to-transparent rounded-full -mr-16 -mt-16" />
                         <div className="relative flex items-center gap-3">
-                            <div className="p-3 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl shadow-lg">
+                            <div className="p-3 bg-gradient-to-br from-teal-600 to-mint-500 rounded-xl shadow-lg">
                                 <Icons.Layers className="w-6 h-6 text-white" />
                             </div>
                             <div>

@@ -1,20 +1,36 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+/* Ethiopian IT Park Brand Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700;900&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  /* Primary Colors */
-  --primary: #3B82F6;
-  --primary-dark: #2563EB;
-  --primary-light: #60A5FA;
+  /* Ethiopian IT Park Brand Colors */
+  --brand-navy: #16284F;
+  --brand-teal: #0C7C92;
+  --brand-mint: #6EC9C4;
+
+  /* Primary Color (Teal Blue - Main Brand) */
+  --primary: #0C7C92;
+  --primary-dark: #085868;
+  --primary-light: #1ab7c9;
+
+  /* Secondary Color (Navy Blue) */
+  --secondary: #16284F;
+  --secondary-dark: #0e1a35;
+  --secondary-light: #586c97;
+
+  /* Accent Color (Mint Green) */
+  --accent: #6EC9C4;
+  --accent-dark: #4e9f9a;
+  --accent-light: #99ded7;
 
   /* Status Colors */
   --success: #10B981;
   --danger: #EF4444;
   --warning: #F59E0B;
-  --info: #3B82F6;
+  --info: #0C7C92;
 
   /* Neutral Colors */
   --gray-50: #F9FAFB;
@@ -34,7 +50,7 @@
 }
 
 * {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
 body {
@@ -57,11 +73,19 @@ body {
   }
 
   .btn-primary {
-    @apply bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800;
+    @apply bg-gradient-to-r from-primary-500 to-primary-700 text-white hover:from-primary-600 hover:to-primary-800 shadow-md hover:shadow-lg;
   }
 
   .btn-secondary {
-    @apply bg-white border-2 border-gray-200 text-gray-700 hover:border-gray-300 hover:bg-gray-50;
+    @apply bg-gradient-to-r from-secondary-500 to-secondary-700 text-white hover:from-secondary-600 hover:to-secondary-800 shadow-md hover:shadow-lg;
+  }
+
+  .btn-accent {
+    @apply bg-gradient-to-r from-accent-500 to-accent-700 text-white hover:from-accent-600 hover:to-accent-800 shadow-md hover:shadow-lg;
+  }
+
+  .btn-outline-primary {
+    @apply border-2 border-primary-500 text-primary-500 bg-transparent hover:bg-primary-500 hover:text-white;
   }
 
   .btn-danger {
@@ -77,15 +101,15 @@ body {
   }
 
   .btn-info {
-    @apply bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700;
+    @apply bg-gradient-to-r from-primary-500 to-primary-600 text-white hover:from-primary-600 hover:to-primary-700;
   }
 
   .btn-outline {
-    @apply border-2 border-current bg-transparent hover:bg-current hover:text-white;
+    @apply border-2 border-gray-300 text-gray-700 bg-white hover:border-primary-500 hover:text-primary-500;
   }
 
   .btn-ghost {
-    @apply bg-transparent hover:bg-gray-100 text-gray-700;
+    @apply bg-transparent hover:bg-primary-50 text-gray-700 hover:text-primary-600;
   }
 
   /* Card Styles */
@@ -107,7 +131,7 @@ body {
 
   /* Input Styles */
   .input {
-    @apply w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all duration-200 bg-white;
+    @apply w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all duration-200 bg-white;
   }
 
   .input-error {
@@ -132,16 +156,16 @@ body {
 
   /* Select Styles */
   .select {
-    @apply w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all duration-200 bg-white cursor-pointer;
+    @apply w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all duration-200 bg-white cursor-pointer;
   }
 
   /* Checkbox and Radio */
   .checkbox {
-    @apply w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 cursor-pointer;
+    @apply w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500 focus:ring-2 cursor-pointer;
   }
 
   .radio {
-    @apply w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500 focus:ring-2 cursor-pointer;
+    @apply w-4 h-4 text-primary-600 border-gray-300 focus:ring-primary-500 focus:ring-2 cursor-pointer;
   }
 
   /* Badge Styles */
@@ -166,11 +190,15 @@ body {
   }
 
   .badge-info {
-    @apply bg-blue-100 text-blue-700;
+    @apply bg-primary-100 text-primary-700;
   }
 
   .badge-primary {
-    @apply bg-blue-100 text-blue-700;
+    @apply bg-primary-100 text-primary-700;
+  }
+
+  .badge-accent {
+    @apply bg-accent-100 text-accent-700;
   }
 
   .badge-secondary {
@@ -195,7 +223,7 @@ body {
   }
 
   .table-row {
-    @apply border-b border-gray-100 hover:bg-blue-50/50 transition-colors duration-150;
+    @apply border-b border-gray-100 hover:bg-primary-50/50 transition-colors duration-150;
   }
 
   .table-row td {
@@ -230,7 +258,7 @@ body {
   }
 
   .tab-active {
-    @apply text-blue-600 border-blue-600;
+    @apply text-primary-600 border-primary-600;
   }
 
   /* Alert Styles */
@@ -251,7 +279,7 @@ body {
   }
 
   .alert-info {
-    @apply bg-blue-50 border-blue-200 text-blue-800;
+    @apply bg-primary-50 border-primary-200 text-primary-800;
   }
 
   /* Loading Spinner */
@@ -286,7 +314,7 @@ body {
   }
 
   .pagination-btn-active {
-    @apply bg-blue-600 text-white border-blue-600 hover:bg-blue-700;
+    @apply bg-primary-600 text-white border-primary-600 hover:bg-primary-700;
   }
 }
 
@@ -397,12 +425,12 @@ body {
   }
 
   .hover-glow {
-    @apply transition-shadow duration-300 hover:shadow-lg hover:shadow-blue-500/50;
+    @apply transition-shadow duration-300 hover:shadow-lg hover:shadow-primary-500/50;
   }
 
   /* Gradient Text */
   .text-gradient {
-    @apply bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-primary-600 to-accent-600 bg-clip-text text-transparent;
   }
 
   .text-gradient-green {
@@ -434,6 +462,6 @@ body {
 
   /* Focus Visible */
   .focus-ring {
-    @apply focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
+    @apply focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2;
   }
 }

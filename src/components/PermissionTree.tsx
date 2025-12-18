@@ -98,14 +98,14 @@ export function PermissionTree({ permissions, selectedIds, onChange, searchTerm 
             <div className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-100">
                 <div className="flex items-center gap-4">
                     <div className="text-sm font-semibold text-gray-700">
-                        <span className="text-2xl font-bold text-blue-600">{totalSelected}</span>
+                        <span className="text-2xl font-bold text-primary-600">{totalSelected}</span>
                         <span className="text-gray-500"> of {totalPermissions} selected</span>
                     </div>
                 </div>
                 <div className="flex gap-2">
                     <button
                         onClick={selectAll}
-                        className="px-4 py-2 text-sm bg-white border border-blue-300 text-blue-700 rounded-lg hover:bg-blue-50 transition-colors font-medium"
+                        className="px-4 py-2 text-sm bg-white border border-blue-300 text-primary-700 rounded-lg hover:bg-primary-50 transition-colors font-medium"
                     >
                         Select All
                     </button>
@@ -154,11 +154,11 @@ export function PermissionTree({ permissions, selectedIds, onChange, searchTerm 
                                             type="checkbox"
                                             checked={allSelected}
                                             onChange={() => { }}
-                                            className="w-5 h-5 rounded border-2 border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                                            className="w-5 h-5 rounded border-2 border-gray-300 text-primary-600 focus:ring-2 focus:ring-primary-500 cursor-pointer"
                                         />
                                         {someSelected && !allSelected && (
                                             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                                <div className="w-2.5 h-0.5 bg-blue-600 rounded"></div>
+                                                <div className="w-2.5 h-0.5 bg-primary-600 rounded"></div>
                                             </div>
                                         )}
                                     </div>
@@ -166,7 +166,7 @@ export function PermissionTree({ permissions, selectedIds, onChange, searchTerm 
                                     <div className="flex-1">
                                         <div className="flex items-center gap-2">
                                             <span className="font-semibold text-gray-900">{group}</span>
-                                            <span className={`text-sm ${allSelected ? 'text-green-600 font-semibold' : someSelected ? 'text-blue-600 font-semibold' : 'text-gray-500'}`}>
+                                            <span className={`text-sm ${allSelected ? 'text-green-600 font-semibold' : someSelected ? 'text-primary-600 font-semibold' : 'text-gray-500'}`}>
                                                 ({selectedInGroup}/{groupIds.length})
                                             </span>
                                         </div>
@@ -181,16 +181,16 @@ export function PermissionTree({ permissions, selectedIds, onChange, searchTerm 
                                         <div
                                             key={perm.id}
                                             onClick={() => togglePermission(perm.id)}
-                                            className="flex items-start gap-3 p-3 rounded-lg hover:bg-blue-50 transition-colors cursor-pointer group"
+                                            className="flex items-start gap-3 p-3 rounded-lg hover:bg-primary-50 transition-colors cursor-pointer group"
                                         >
                                             <input
                                                 type="checkbox"
                                                 checked={selectedIds.includes(perm.id)}
                                                 onChange={() => { }}
-                                                className="mt-0.5 w-4 h-4 rounded border-2 border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                                                className="mt-0.5 w-4 h-4 rounded border-2 border-gray-300 text-primary-600 focus:ring-2 focus:ring-primary-500 cursor-pointer"
                                             />
                                             <div className="flex-1 min-w-0">
-                                                <div className="font-medium text-gray-900 group-hover:text-blue-700">
+                                                <div className="font-medium text-gray-900 group-hover:text-primary-700">
                                                     {perm.name}
                                                 </div>
                                                 <div className="text-sm text-gray-600 mt-0.5">

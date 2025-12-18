@@ -28,7 +28,7 @@ export function RoleCard({
         <div
             className={`
                 card-gradient relative hover-lift transition-all duration-200
-                ${isSelected ? 'ring-2 ring-blue-500 ring-offset-2' : ''}
+                ${isSelected ? 'ring-2 ring-primary-500 ring-offset-2' : ''}
             `}
         >
             {/* Selection Checkbox */}
@@ -37,7 +37,7 @@ export function RoleCard({
                     type="checkbox"
                     checked={isSelected}
                     onChange={() => onSelect(role.id)}
-                    className="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                    className="w-5 h-5 rounded border-gray-300 text-primary-600 focus:ring-primary-500 cursor-pointer"
                     disabled={role.isSystem}
                 />
             </div>
@@ -83,7 +83,7 @@ export function RoleCard({
             <div className="flex gap-2 pt-4 border-t border-gray-200">
                 <button
                     onClick={onAssignPermissions}
-                    className="flex-1 px-4 py-2 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors font-medium text-sm"
+                    className="flex-1 px-4 py-2 bg-primary-50 text-primary-700 rounded-lg hover:bg-primary-100 transition-colors font-medium text-sm"
                 >
                     Permissions
                 </button>

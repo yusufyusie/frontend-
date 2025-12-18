@@ -76,7 +76,7 @@ export function CreateRoleModal({
                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                         placeholder="Describe the purpose of this role..."
                         rows={3}
-                        className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 outline-none"
+                        className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-primary-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 outline-none"
                         disabled={submitting}
                     />
                     {errors.description && (

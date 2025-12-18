@@ -51,7 +51,7 @@ function Toast({ toast, onClose }: { toast: Toast; onClose: () => void }) {
         success: 'bg-green-50 border-green-500 text-green-900',
         error: 'bg-red-50 border-red-500 text-red-900',
         warning: 'bg-yellow-50 border-yellow-500 text-yellow-900',
-        info: 'bg-blue-50 border-blue-500 text-blue-900'
+        info: 'bg-primary-50 border-primary-500 text-blue-900'
     };
 
     const icons = {
@@ -71,7 +71,7 @@ function Toast({ toast, onClose }: { toast: Toast; onClose: () => void }) {
             </svg>
         ),
         info: (
-            <svg className="w-5 h-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-5 h-5 text-primary-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
         )

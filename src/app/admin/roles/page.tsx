@@ -128,7 +128,7 @@ export default function AdminRolesPage() {
                 onBulkAssignPermissions={() => {
                     // For bulk assign, we would need a different modal
                     // For now, just show a toast
-                    console.log('Bulk assign permissions to', selection.selectedIds);
+                    // Bulk permissions assignment not yet implemented
                 }}
             />
 

@@ -28,7 +28,7 @@ export function RolesFilterBar({
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         placeholder="Search roles by name or description..."
-                        className="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none"
+                        className="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-300 focus:border-primary-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none"
                     />
                 </div>
 
@@ -36,7 +36,7 @@ export function RolesFilterBar({
                 <select
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value as RoleSortOption)}
-                    className="px-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none"
+                    className="px-4 py-3 rounded-lg border border-gray-300 focus:border-primary-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none"
                 >
                     <option value="name">Sort by Name</option>
                     <option value="users">Sort by Users</option>

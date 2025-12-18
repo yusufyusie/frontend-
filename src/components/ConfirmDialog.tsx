@@ -26,7 +26,7 @@ export function ConfirmDialog({
     const typeStyles = {
         danger: 'bg-red-600 hover:bg-red-700',
         warning: 'bg-yellow-600 hover:bg-yellow-700',
-        info: 'bg-blue-600 hover:bg-blue-700'
+        info: 'bg-teal-600 hover:bg-teal-700'
     };
 
     return (

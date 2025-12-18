@@ -24,7 +24,7 @@ export function PermissionBulkActions({
             <div className="flex items-center justify-between p-4">
                 <div className="flex items-center gap-4">
                     <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center font-semibold text-sm">
+                        <div className="w-8 h-8 rounded-full bg-primary-500 text-white flex items-center justify-center font-semibold text-sm">
                             {selectedCount}
                         </div>
                         <span className="font-medium text-gray-900">
@@ -35,7 +35,7 @@ export function PermissionBulkActions({
                     {selectedCount < totalCount && (
                         <button
                             onClick={onSelectAll}
-                            className="text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors"
+                            className="text-sm text-primary-600 hover:text-primary-700 font-medium transition-colors"
                         >
                             Select all {totalCount}
                         </button>

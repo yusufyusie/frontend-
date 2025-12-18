@@ -47,8 +47,13 @@ export default function LoginPage() {
     return (
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-500 to-primary-700">
             <div className="bg-white p-8 rounded-lg shadow-2xl w-full max-w-md">
-                <h1 className="text-3xl font-bold text-center mb-2">Access Control</h1>
-                <p className="text-center text-gray-600 mb-6">Sign in to your account</p>
+                <div className="mb-8 text-center">
+                    <div className="w-16 h-16 bg-gradient-to-br from-secondary-500 to-primary-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                        <span className="text-white font-bold text-2xl">ET</span>
+                    </div>
+                    <h1 className="text-3xl font-bold">Ethiopian IT Park</h1>
+                    <p className="text-gray-600 mt-1">Accesscontrol System</p>
+                </div>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     {error && (
@@ -96,19 +101,19 @@ export default function LoginPage() {
                     </button>
                 </form>
 
-                <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                    <p className="font-semibold mb-2 text-blue-900">✅ Test Credentials:</p>
+                <div className="mt-6 p-4 bg-primary-50 rounded-lg border border-primary-200">
+                    <p className="font-semibold mb-2 text-primary-900">✅ Test Credentials:</p>
                     <ul className="space-y-1.5 text-sm">
                         <li className="flex items-center gap-2">
-                            <span className="text-blue-600">👑</span>
+                            <span className="text-primary-600">👑</span>
                             <span className="text-gray-700">
-                                <strong>Admin:</strong> admin@example.com / <code className="bg-blue-100 px-1.5 py-0.5 rounded text-blue-800">Admin@123</code>
+                                <strong>Admin:</strong> admin@example.com / <code className="bg-primary-100 px-1.5 py-0.5 rounded text-primary-800">Admin@123</code>
                             </span>
                         </li>
                         <li className="flex items-center gap-2">
-                            <span className="text-blue-600">👔</span>
+                            <span className="text-primary-600">👔</span>
                             <span className="text-gray-700">
-                                <strong>Manager:</strong> manager@example.com / <code className="bg-blue-100 px-1.5 py-0.5 rounded text-blue-800">Manager@123</code>
+                                <strong>Manager:</strong> manager@example.com / <code className="bg-primary-100 px-1.5 py-0.5 rounded text-primary-800">Manager@123</code>
                             </span>
                         </li>
                     </ul>

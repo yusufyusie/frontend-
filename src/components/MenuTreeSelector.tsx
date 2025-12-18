@@ -206,10 +206,10 @@ export function MenuTreeSelector({ menus, selectedIds, onChange, readonly = fals
                         onClick={() => toggleMenu(item)}
                         disabled={readonly}
                         className={`w-5 h-5 border-2 rounded flex items-center justify-center transition-all flex-shrink-0 ${checkboxState === 'checked'
-                            ? 'bg-blue-600 border-blue-600'
+                            ? 'bg-primary-600 border-primary-600'
                             : checkboxState === 'indeterminate'
-                                ? 'bg-blue-600 border-blue-600'
-                                : 'border-gray-300 hover:border-blue-500'
+                                ? 'bg-primary-600 border-primary-600'
+                                : 'border-gray-300 hover:border-primary-500'
                             } ${readonly ? 'opacity-60 cursor-not-allowed' : ''}`}
                         type="button"
                     >
@@ -265,14 +265,14 @@ export function MenuTreeSelector({ menus, selectedIds, onChange, readonly = fals
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         placeholder="Search menus..."
-                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm"
                     />
                 </div>
                 {!readonly && (
                     <div className="flex gap-2">
                         <button
                             onClick={selectAll}
-                            className="px-3 py-2 text-sm text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                            className="px-3 py-2 text-sm text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
                             type="button"
                         >
                             Select All

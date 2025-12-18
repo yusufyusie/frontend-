@@ -23,7 +23,7 @@ export function AssignmentFooter({ hasChanges, onReset, onPreview, submitting }:
             <button
                 type="button"
                 onClick={onPreview}
-                className="px-6 py-2.5 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-lg font-medium transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-6 py-2.5 bg-gradient-to-r from-secondary-600 to-accent-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-lg font-medium transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={submitting}
             >
                 <div className="flex items-center gap-2">

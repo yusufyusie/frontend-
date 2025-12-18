@@ -56,9 +56,9 @@ export default function AdminDashboard() {
             title: 'Total Users',
             value: stats.totalUsers,
             icon: '👥',
-            color: 'from-blue-500 to-cyan-500',
-            bgColor: 'bg-blue-50',
-            textColor: 'text-blue-600',
+            color: 'from-primary-500 to-primary-700',
+            bgColor: 'bg-primary-50',
+            textColor: 'text-primary-600',
             link: '/admin/users'
         },
         {
@@ -74,7 +74,7 @@ export default function AdminDashboard() {
             title: 'Roles',
             value: stats.totalRoles,
             icon: '🎭',
-            color: 'from-purple-500 to-pink-500',
+            color: 'from-secondary-500 to-accent-500',
             bgColor: 'bg-purple-50',
             textColor: 'text-purple-600',
             link: '/admin/roles'
@@ -96,14 +96,14 @@ export default function AdminDashboard() {
             description: 'Create a new user account',
             icon: '👤➕',
             link: '/admin/users',
-            color: 'from-blue-500 to-cyan-500'
+            color: 'from-primary-500 to-primary-700'
         },
         {
             title: 'Manage Roles',
             description: 'Configure roles and permissions',
             icon: '🎭',
             link: '/admin/roles',
-            color: 'from-purple-500 to-pink-500'
+            color: 'from-secondary-500 to-accent-500'
         },
         {
             title: 'View Permissions',
@@ -128,7 +128,7 @@ export default function AdminDashboard() {
                         </p>
                     </div>
                     <div className="hidden md:block">
-                        <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-5xl">
+                        <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-white text-5xl shadow-lg">
                             {user?.username?.substring(0, 2).toUpperCase()}
                         </div>
                     </div>
@@ -144,7 +144,7 @@ export default function AdminDashboard() {
                                 <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center text-3xl shadow-lg group-hover:scale-110 transition-transform`}>
                                     {stat.icon}
                                 </div>
-                                <svg className="w-6 h-6 text-gray-400 group-hover:text-blue-600 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg className="w-6 h-6 text-gray-400 group-hover:text-primary-600 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                                 </svg>
                             </div>
@@ -165,7 +165,7 @@ export default function AdminDashboard() {
                                 <div className={`w-16 h-16 rounded-xl bg-gradient-to-br ${action.color} flex items-center justify-center text-4xl mb-4 group-hover:scale-110 transition-transform shadow-lg`}>
                                     {action.icon}
                                 </div>
-                                <h3 className="text-xl font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
+                                <h3 className="text-xl font-semibold text-gray-900 mb-2 group-hover:text-primary-600 transition-colors">
                                     {action.title}
                                 </h3>
                                 <p className="text-gray-600">{action.description}</p>
@@ -210,13 +210,13 @@ export default function AdminDashboard() {
                         Your Access
                     </h3>
                     <div className="space-y-3">
-                        <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
-                            <div className="text-sm text-blue-700 mb-1">Username</div>
-                            <div className="font-semibold text-blue-900">{user?.username}</div>
+                        <div className="p-3 bg-primary-50 rounded-lg border border-primary-200">
+                            <div className="text-sm text-primary-700 mb-1">Username</div>
+                            <div className="font-semibold text-primary-900">{user?.username}</div>
                         </div>
-                        <div className="p-3 bg-purple-50 rounded-lg border border-purple-200">
-                            <div className="text-sm text-purple-700 mb-1">Email</div>
-                            <div className="font-semibold text-purple-900">{user?.email}</div>
+                        <div className="p-3 bg-secondary-50 rounded-lg border border-secondary-200">
+                            <div className="text-sm text-secondary-700 mb-1">Email</div>
+                            <div className="font-semibold text-secondary-900">{user?.email}</div>
                         </div>
                         <div className="p-3 bg-green-50 rounded-lg border border-green-200">
                             <div className="text-sm text-green-700 mb-1">Status</div>
@@ -227,22 +227,22 @@ export default function AdminDashboard() {
             </div>
 
             {/* Feature Highlights */}
-            <div className="card bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-200">
+            <div className="card bg-gradient-to-r from-primary-50 to-accent-50 border-2 border-primary-200">
                 <div className="flex items-start gap-4">
                     <div className="text-5xl">🎯</div>
                     <div>
                         <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                            Dynamic Access Control System
+                            Ethiopian IT Park - Access Control System
                         </h3>
                         <p className="text-gray-700 mb-4">
-                            This system provides enterprise-grade access control with dynamic RBAC, PBAC, and Claims-Based Authentication.
+                            Enterprise-grade access control with dynamic RBAC, PBAC, and Claims-Based Authentication.
                             All permissions and roles are fully configurable without code changes.
                         </p>
                         <div className="flex flex-wrap gap-2">
-                            <span className="badge bg-blue-100 text-blue-800 border border-blue-300">✅ Dynamic RBAC</span>
-                            <span className="badge bg-purple-100 text-purple-800 border border-purple-300">✅ Dynamic PBAC</span>
+                            <span className="badge bg-primary-100 text-primary-800 border border-primary-300">✅ Dynamic RBAC</span>
+                            <span className="badge bg-secondary-100 text-secondary-800 border border-secondary-300">✅ Dynamic PBAC</span>
                             <span className="badge bg-green-100 text-green-800 border border-green-300">✅ Claims-Based</span>
-                            <span className="badge bg-orange-100 text-orange-800 border border-orange-300">✅ ASP.NET Zero UX</span>
+                            <span className="badge bg-accent-100 text-accent-800 border border-accent-300">✅ Professional UX</span>
                         </div>
                     </div>
                 </div>

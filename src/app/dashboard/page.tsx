@@ -56,7 +56,7 @@ export default function DashboardPage() {
                 </div>
             </div>
 
-            <div className="card bg-blue-50 border-2 border-blue-200">
+            <div className="card bg-primary-50 border-2 border-blue-200">
                 <h3 className="text-xl font-semibold mb-2">🎉 Welcome to Access Control System!</h3>
                 <p className="text-gray-700">
                     This system demonstrates fully dynamic RBAC + PBAC + Claims-based access control.

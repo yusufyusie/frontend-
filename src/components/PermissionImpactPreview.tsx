@@ -155,12 +155,12 @@ export function PermissionImpactPreview({
                         </p>
                     </div>
 
-                    <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                    <div className="p-4 bg-primary-50 rounded-lg border border-blue-200">
                         <div className="flex items-center gap-2 mb-1">
-                            <Icons.Check className="w-4 h-4 text-blue-600" />
+                            <Icons.Check className="w-4 h-4 text-primary-600" />
                             <span className="text-sm font-medium text-gray-700">Unchanged</span>
                         </div>
-                        <p className="text-2xl font-bold text-blue-600">{changes.unchanged}</p>
+                        <p className="text-2xl font-bold text-primary-600">{changes.unchanged}</p>
                     </div>
                 </div>
 
@@ -221,7 +221,7 @@ export function PermissionImpactPreview({
                         disabled={changes.totalChanges === 0}
                         className={`px-6 py-2 rounded-lg text-white font-medium transition-colors ${changes.totalChanges === 0
                                 ? 'bg-gray-400 cursor-not-allowed'
-                                : 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700'
+                                : 'bg-gradient-to-r from-secondary-600 to-accent-600 hover:from-purple-700 hover:to-pink-700'
                             }`}
                     >
                         <div className="flex items-center gap-2">

@@ -75,7 +75,7 @@ export default function AuditLogsPage() {
             header: 'User',
             render: (log: AuditLog) => (
                 <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-semibold text-sm">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-secondary-500 to-accent-500 flex items-center justify-center text-white font-semibold text-sm">
                         {log.user ? log.user.username[0].toUpperCase() : '?'}
                     </div>
                     <div>
@@ -95,7 +95,7 @@ export default function AuditLogsPage() {
             sortable: true,
             render: (log: AuditLog) => (
                 <div className="flex items-center gap-2">
-                    <Icons.Activity className="w-4 h-4 text-blue-500" />
+                    <Icons.Activity className="w-4 h-4 text-teal-500" />
                     <span className="text-sm font-medium text-gray-900">{log.action}</span>
                 </div>
             ),
@@ -107,7 +107,7 @@ export default function AuditLogsPage() {
                 <div className="flex items-center gap-1.5">
                     <Icons.Package className="w-3.5 h-3.5 text-gray-400" />
                     {log.resource ? (
-                        <span className="px-2.5 py-1 text-xs rounded-md bg-gradient-to-r from-blue-50 to-cyan-50 text-blue-700 font-semibold border border-blue-200">
+                        <span className="px-2.5 py-1 text-xs rounded-md bg-gradient-to-r from-blue-50 to-cyan-50 text-teal-700 font-semibold border border-teal-200">
                             {log.resource}
                         </span>
                     ) : (
@@ -183,7 +183,7 @@ export default function AuditLogsPage() {
                         <div className="card relative overflow-hidden">
                             <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-500/10 to-transparent rounded-full -mr-16 -mt-16" />
                             <div className="relative flex items-center gap-3">
-                                <div className="p-3 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl shadow-lg">
+                                <div className="p-3 bg-gradient-to-br from-secondary-500 to-accent-500 rounded-xl shadow-lg">
                                     <Icons.Activity className="w-6 h-6 text-white" />
                                 </div>
                                 <div>
@@ -219,7 +219,7 @@ export default function AuditLogsPage() {
                         <div className="card relative overflow-hidden">
                             <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-500/10 to-transparent rounded-full -mr-16 -mt-16" />
                             <div className="relative flex items-center gap-3">
-                                <div className="p-3 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl shadow-lg">
+                                <div className="p-3 bg-gradient-to-br from-teal-600 to-mint-500 rounded-xl shadow-lg">
                                     <Icons.Users className="w-6 h-6 text-white" />
                                 </div>
                                 <div>

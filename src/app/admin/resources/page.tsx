@@ -116,7 +116,7 @@ export default function ResourcesPage() {
             header: 'Icon',
             sortable: false,
             render: (resource) => (
-                <div className="flex items-center justify-center p-2 bg-gradient-to-br from-blue-500 to-purple-500 rounded-lg text-white">
+                <div className="flex items-center justify-center p-2 bg-gradient-to-br from-teal-600 to-mint-500 rounded-lg text-white">
                     {resource.iconName ? getIconComponent(resource.iconName) : <Icons.Package className="w-5 h-5" />}
                 </div>
             ),
@@ -150,7 +150,7 @@ export default function ResourcesPage() {
                     {(resource.actions || []).map((action, index) => (
                         <span
                             key={index}
-                            className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs"
+                            className="px-2 py-1 bg-teal-100 text-teal-700 rounded text-xs"
                         >
                             {action}
                         </span>
@@ -179,7 +179,7 @@ export default function ResourcesPage() {
                 <div className="flex gap-2">
                     <button
                         onClick={() => editModal.open(resource)}
-                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                        className="p-2 text-teal-600 hover:bg-teal-50 rounded-lg transition-colors"
                         title="Edit"
                     >
                         <Icons.Edit2 className="w-4 h-4" />
@@ -225,7 +225,7 @@ export default function ResourcesPage() {
                         </p>
                         <button
                             onClick={selection.deselectAll}
-                            className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                            className="text-sm text-teal-600 hover:text-teal-700 font-medium"
                         >
                             Deselect All
                         </button>

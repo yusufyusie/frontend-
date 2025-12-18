@@ -114,7 +114,7 @@ export function AuditLogDetailsDrawer({ log, isOpen, onClose }: AuditLogDetailsD
 
                                 <div className="p-4 bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl border border-purple-200">
                                     <div className="flex items-center gap-3 mb-3">
-                                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center text-white font-bold text-lg">
+                                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-secondary-600 to-accent-600 flex items-center justify-center text-white font-bold text-lg">
                                             {log.user.firstName?.[0]}{log.user.lastName?.[0]}
                                         </div>
                                         <div>

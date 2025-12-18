@@ -170,14 +170,14 @@ export function PermissionMatrix({
                                         toggleGroupPermissions(group);
                                     }}
                                     className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${checkState === 'all'
-                                        ? 'bg-blue-600 border-blue-600'
+                                        ? 'bg-primary-600 border-primary-600'
                                         : checkState === 'some'
                                             ? 'bg-blue-200 border-blue-400'
                                             : 'border-gray-300 hover:border-blue-400'
                                         } ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'}`}
                                 >
                                     {checkState === 'all' && <Check className="w-4 h-4 text-white" />}
-                                    {checkState === 'some' && <Minus className="w-4 h-4 text-blue-700" />}
+                                    {checkState === 'some' && <Minus className="w-4 h-4 text-primary-700" />}
                                 </div>
 
                                 {/* Group Name */}
@@ -205,7 +205,7 @@ export function PermissionMatrix({
                                                 {/* Permission Checkbox */}
                                                 <div
                                                     className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-all ${isSelected
-                                                        ? 'bg-blue-600 border-blue-600'
+                                                        ? 'bg-primary-600 border-primary-600'
                                                         : 'border-gray-300 hover:border-blue-400'
                                                         }`}
                                                 >
@@ -232,7 +232,7 @@ export function PermissionMatrix({
             {/* Footer with count */}
             <div className="bg-gray-50 px-4 py-3 border-t border-gray-200">
                 <p className="text-sm text-gray-600">
-                    <span className="font-semibold text-blue-600">{selectedPermissions.length}</span> of{' '}
+                    <span className="font-semibold text-primary-600">{selectedPermissions.length}</span> of{' '}
                     <span className="font-semibold">{permissions.length}</span> permissions selected
                 </p>
             </div>

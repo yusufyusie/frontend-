@@ -101,14 +101,14 @@ export function Sidebar({ isOpen = true, isCollapsed = false, onClose }: Sidebar
                 key={item.id}
                 href={item.path || '#'}
                 className={`flex items-center justify-center p-3 rounded-lg transition-all group relative ${isActive
-                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg'
+                    ? 'bg-gradient-to-r from-primary-500 to-accent-500 text-white shadow-lg'
                     : 'text-gray-300 hover:bg-gray-800/50 hover:text-white'
                     }`}
                 title={item.name}
             >
                 {getIcon(item.icon)}
                 {item.badge && (
-                    <span className="absolute top-1 right-1 w-2 h-2 bg-blue-500 rounded-full"></span>
+                    <span className="absolute top-1 right-1 w-2 h-2 bg-primary-500 rounded-full"></span>
                 )}
             </Link>
         );
@@ -132,7 +132,7 @@ export function Sidebar({ isOpen = true, isCollapsed = false, onClose }: Sidebar
                         <div className="flex-shrink-0 text-gray-500">{getIcon(item.icon)}</div>
                         <span className="flex-1 font-medium text-left text-xs uppercase tracking-wider">{item.name}</span>
                         {item.badge && (
-                            <span className={`px-2 py-0.5 text-xs rounded flex-shrink-0 ${item.badgeColor === 'blue' ? 'bg-blue-500/20 text-blue-400' :
+                            <span className={`px-2 py-0.5 text-xs rounded flex-shrink-0 ${item.badgeColor === 'blue' ? 'bg-primary-500/20 text-blue-400' :
                                 item.badgeColor === 'green' ? 'bg-green-500/20 text-green-400' :
                                     item.badgeColor === 'red' ? 'bg-red-500/20 text-red-400' :
                                         'bg-gray-500/20 text-gray-400'
@@ -162,7 +162,7 @@ export function Sidebar({ isOpen = true, isCollapsed = false, onClose }: Sidebar
                     target={item.isExternal ? '_blank' : undefined}
                     rel={item.isExternal ? 'noopener noreferrer' : undefined}
                     className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group ${isActive
-                        ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-500/30'
+                        ? 'bg-gradient-to-r from-primary-500 to-accent-500 text-white shadow-lg shadow-primary-500/30'
                         : hasActivePath
                             ? 'bg-gray-800/50 text-white'
                             : 'text-gray-300 hover:bg-gray-800/50 hover:text-white'
@@ -173,7 +173,7 @@ export function Sidebar({ isOpen = true, isCollapsed = false, onClose }: Sidebar
                     {item.badge && (
                         <span className={`px-2 py-0.5 text-xs rounded flex-shrink-0 ${isActive
                             ? 'bg-white/20 text-white'
-                            : item.badgeColor === 'blue' ? 'bg-blue-500/20 text-blue-400' :
+                            : item.badgeColor === 'blue' ? 'bg-primary-500/20 text-blue-400' :
                                 item.badgeColor === 'green' ? 'bg-green-500/20 text-green-400' :
                                     item.badgeColor === 'red' ? 'bg-red-500/20 text-red-400' :
                                         'bg-gray-500/20 text-gray-400'
@@ -195,13 +195,13 @@ export function Sidebar({ isOpen = true, isCollapsed = false, onClose }: Sidebar
             )}
 
             {/* Sidebar */}
-            <aside className={`fixed left-0 top-16 bottom-0 bg-gradient-to-b from-gray-900 via-gray-900 to-gray-950 text-white shadow-2xl border-r border-gray-800 z-40 transition-all duration-300 ${isCollapsed ? 'w-20' : 'w-72'
+            <aside className={`fixed left-0 top-16 bottom-0 bg-gradient-to-b from-secondary-900 via-secondary-800 to-gray-950 text-white shadow-2xl border-r border-primary-900 z-40 transition-all duration-300 ${isCollapsed ? 'w-20' : 'w-72'
                 } ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
 
                 <nav className="h-full p-4 overflow-y-auto custom-scrollbar pb-20">
                     {loading ? (
                         <div className="flex items-center justify-center py-8">
-                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"></div>
                         </div>
                     ) : error ? (
                         <div className="flex flex-col items-center justify-center py-8 px-4">
@@ -209,7 +209,7 @@ export function Sidebar({ isOpen = true, isCollapsed = false, onClose }: Sidebar
                             <p className="text-sm text-red-400 text-center mb-4">{error}</p>
                             <button
                                 onClick={loadMenus}
-                                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                                className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors text-sm"
                             >
                                 <Icons.RefreshCw className="w-4 h-4 inline mr-2" />
                                 Retry
@@ -232,10 +232,10 @@ export function Sidebar({ isOpen = true, isCollapsed = false, onClose }: Sidebar
 
                 {/* Footer */}
                 {!isCollapsed && (
-                    <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-800 bg-gray-900/50 backdrop-blur-sm">
+                    <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-primary-900 bg-secondary-900/50 backdrop-blur-sm">
                         <div className="text-xs text-gray-400 text-center">
-                            <div className="font-semibold">Access Control v1.0</div>
-                            <div>Dynamic RBAC</div>
+                            <div className="font-semibold text-accent-400">Ethiopian IT Park</div>
+                            <div>Access Control v1.0</div>
                         </div>
                     </div>
                 )}
