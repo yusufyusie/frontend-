@@ -3,13 +3,29 @@ const nextConfig = {
     reactStrictMode: true,
     swcMinify: true, // Use SWC for faster minification
     compress: true, // Enable gzip compression
+    poweredByHeader: false, // Remove X-Powered-By header for security
+
+    // Compiler optimizations for better performance
+    compiler: {
+        removeConsole: process.env.NODE_ENV === 'production' ? {
+            exclude: ['error', 'warn'],
+        } : false,
+    },
+
+    // Experimental features for performance
+    experimental: {
+        optimizeCss: true, // Enable CSS optimization
+        optimizePackageImports: ['lucide-react', '@mantine/core'], // Tree-shake icon libraries
+    },
 
     // Image optimization
     images: {
         formats: ['image/avif', 'image/webp'],
         deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
         imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
-        minimumCacheTTL: 60,
+        minimumCacheTTL: 31536000, // Cache images for 1 year
+        dangerouslyAllowSVG: true,
+        contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
     },
 
     // Security headers
@@ -49,7 +65,11 @@ const nextConfig = {
                     {
                         key: 'Content-Security-Policy',
                         value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' http://localhost:3000/api; frame-ancestors 'self';"
-                    }
+                    },
+                    {
+                        key: 'Cache-Control',
+                        value: 'public, max-age=31536000, immutable',
+                    },
                 ],
             },
         ];
@@ -62,17 +82,28 @@ const nextConfig = {
             config.optimization = {
                 ...config.optimization,
                 minimize: true,
+                usedExports: true, // Tree shaking
+                sideEffects: false, // Enable aggressive tree shaking
                 splitChunks: {
                     chunks: 'all',
+                    maxInitialRequests: 25,
+                    minSize: 20000,
                     cacheGroups: {
                         default: false,
                         vendors: false,
+                        // Framework chunk (React, Next.js)
+                        framework: {
+                            name: 'framework',
+                            test: /[\\/]node_modules[\\/](react|react-dom|scheduler|next)[\\/]/,
+                            priority: 40,
+                            enforce: true,
+                        },
                         // Vendor chunk
                         vendor: {
                             name: 'vendor',
                             chunks: 'all',
-                            test: /node_modules/,
-                            priority: 20
+                            test: /[\\/]node_modules[\\/]/,
+                            priority: 20,
                         },
                         // Common chunk
                         common: {
@@ -81,18 +112,26 @@ const nextConfig = {
                             chunks: 'all',
                             priority: 10,
                             reuseExistingChunk: true,
-                            enforce: true
-                        }
-                    }
-                }
+                            enforce: true,
+                        },
+                        // Styles chunk
+                        styles: {
+                            name: 'styles',
+                            test: /\.(css|scss|sass)$/,
+                            chunks: 'all',
+                            enforce: true,
+                        },
+                    },
+                },
             };
         }
+
         return config;
     },
 
     // Environment variables available to the browser
     env: {
-        API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/api',
+        API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api',
     },
 };
 
