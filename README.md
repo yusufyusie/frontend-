@@ -47,7 +47,7 @@ A modern Next.js frontend application for managing users, roles, permissions, an
 ## Prerequisites
 
 - Node.js (v18 or higher)
-- Backend API running on `http://localhost:3000`
+- Backend API running on `http://localhost:3000/api`
 
 ## Installation
 
@@ -63,7 +63,7 @@ cp .env.example .env.local
 
 Update `.env.local` with your configuration:
 ```env
-NEXT_PUBLIC_API_URL=http://localhost:3000
+NEXT_PUBLIC_API_URL=http://localhost:3000/api
 ```
 
 ## Running the Application
