@@ -105,18 +105,17 @@ function Toast({ toast, onClose, index }: { toast: Toast; onClose: () => void; i
     return (
         <div
             className={`
-                ${variant.bg} 
-                border-l-4 
-                rounded-lg 
-                shadow-xl 
-                backdrop-blur-sm 
+                ${variant.bg}
+                border-l-4
+                rounded-lg
+                shadow-xl
+                backdrop-blur-sm
                 overflow-hidden
                 animate-slide-in-right
                 hover:shadow-2xl
                 transition-shadow
                 duration-300
             `}
-            style={{ animationDelay: `${delay}ms` }}
             role="alert"
             aria-live="polite"
         >
@@ -145,7 +144,6 @@ function Toast({ toast, onClose, index }: { toast: Toast; onClose: () => void; i
             <div className="h-1 bg-gray-200/50">
                 <div
                     className={`h-full ${variant.progress} transition-all duration-100 ease-linear`}
-                    style={{ width: `${progress}%` }}
                     role="progressbar"
                     aria-valuenow={progress}
                     aria-valuemin={0}

@@ -112,17 +112,17 @@ export function RoleMenuAssignment({ roleId, roleName }: RoleMenuAssignmentProps
 
             {/* Error Message */}
             {error && (
-                <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-lg">
-                    <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
-                    <p className="text-sm text-red-700">{error}</p>
+                <div className="flex items-center gap-3 p-4 bg-error-50 border border-error-200 rounded-lg">
+                    <AlertCircle className="w-5 h-5 text-error-600 flex-shrink-0" />
+                    <p className="text-sm text-error-700">{error}</p>
                 </div>
             )}
 
             {/* Success Message */}
             {success && (
-                <div className="flex items-center gap-3 p-4 bg-green-50 border border-green-200 rounded-lg">
-                    <Check className="w-5 h-5 text-green-600 flex-shrink-0" />
-                    <p className="text-sm text-green-700">Menus assigned successfully!</p>
+                <div className="flex items-center gap-3 p-4 bg-success-50 border border-success-200 rounded-lg">
+                    <Check className="w-5 h-5 text-success-600 flex-shrink-0" />
+                    <p className="text-sm text-success-700">Menus assigned successfully!</p>
                 </div>
             )}
 

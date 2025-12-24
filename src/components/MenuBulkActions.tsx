@@ -25,7 +25,7 @@ export function MenuBulkActions({
             <div className="flex items-center justify-between p-4">
                 <div className="flex items-center gap-4">
                     <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-secondary-500 to-accent-500 text-white flex items-center justify-center font-semibold text-sm">
+                        <div className="w-8 h-8 rounded-full bg-secondary text-white flex items-center justify-center font-semibold text-sm">
                             {selectedCount}
                         </div>
                         <span className="font-medium text-gray-900">
@@ -36,7 +36,7 @@ export function MenuBulkActions({
                     {selectedCount < totalCount && (
                         <button
                             onClick={onSelectAll}
-                            className="text-sm text-purple-600 hover:text-purple-700 font-medium transition-colors"
+                            className="text-sm text-secondary-600 hover:text-secondary-700 font-medium transition-colors"
                         >
                             Select all {totalCount}
                         </button>
@@ -60,7 +60,7 @@ export function MenuBulkActions({
                     </button>
                     <button
                         onClick={onBulkDelete}
-                        className="btn bg-red-600 hover:bg-red-700 text-white flex items-center gap-2"
+                        className="btn bg-error-600 hover:bg-error-700 text-white flex items-center gap-2"
                     >
                         <Icons.Trash2 className="w-4 h-4" />
                         Delete Selected

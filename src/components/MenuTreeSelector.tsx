@@ -178,15 +178,17 @@ export function MenuTreeSelector({ menus, selectedIds, onChange, readonly = fals
         return (
             <div key={item.id}>
                 <div
-                    className={`flex items-center gap-2 py-2 px-3 hover:bg-gray-50 rounded-lg transition-colors ${readonly ? 'cursor-default' : 'cursor-pointer'
+                    className={`flex items-center gap-2 py-2 px-3 pl-6 hover:bg-gray-50 rounded-lg transition-colors ${readonly ? 'cursor-default' : 'cursor-pointer'
                         }`}
-                    style={{ paddingLeft: `${depth * 1.5 + 0.75}rem` }}
                 >
                     {/* Expand/Collapse Icon */}
                     <div className="w-5 h-5 flex items-center justify-center flex-shrink-0">
                         {hasChildren ? (
                             <button
-                                onClick={() => toggleExpand(item.id)}
+                                onClick={(e) => {
+                                    e.stopPropagation(); // Prevent row click from triggering
+                                    toggleExpand(item.id);
+                                }}
                                 className="text-gray-500 hover:text-gray-700 transition-colors"
                                 type="button"
                             >
@@ -245,12 +247,14 @@ export function MenuTreeSelector({ menus, selectedIds, onChange, readonly = fals
                 </div>
 
                 {/* Children */}
-                {hasChildren && isExpanded && (
-                    <div className="border-l-2 border-gray-200 ml-4">
-                        {item.children!.map(child => renderTreeNode(child, depth + 1))}
-                    </div>
-                )}
-            </div>
+                {
+                    hasChildren && isExpanded && (
+                        <div className="border-l-2 border-gray-200 ml-4">
+                            {item.children!.map(child => renderTreeNode(child, depth + 1))}
+                        </div>
+                    )
+                }
+            </div >
         );
     };
 

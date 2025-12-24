@@ -1,6 +1,5 @@
 import React from 'react';
 import { Permission } from '@/services/permissions.service';
-import { getGradientStyle } from '@/utils/color-generator';
 
 interface PermissionCardProps {
     permission: Permission;
@@ -28,7 +27,7 @@ export function PermissionCard({
                 hover:shadow-lg hover:-translate-y-0.5
                 ${isSelected
                     ? 'border-primary-500 bg-primary-50 shadow-md'
-                    : 'border-gray-200 bg-white hover:border-blue-200'
+                    : 'border-gray-200 bg-white hover:border-primary-200'
                 }
             `}
         >
@@ -45,8 +44,7 @@ export function PermissionCard({
             {/* Group Badge */}
             <div className="flex justify-between items-start mb-3 ml-8">
                 <div
-                    className="px-3 py-1 rounded-full text-xs font-semibold text-white shadow-sm"
-                    style={getGradientStyle(permission.groupName)}
+                    className="px-3 py-1 rounded-full text-xs font-semibold text-white shadow-sm bg-primary"
                 >
                     {permission.groupName}
                 </div>
@@ -64,19 +62,19 @@ export function PermissionCard({
                     </button>
                     <button
                         onClick={onViewDetails}
-                        className="p-1.5 hover:bg-purple-50 rounded-lg transition-colors group"
+                        className="p-1.5 hover:bg-secondary-50 rounded-lg transition-colors group"
                         title="View Details"
                     >
-                        <svg className="w-4 h-4 text-gray-500 group-hover:text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg className="w-4 h-4 text-gray-500 group-hover:text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </button>
                     <button
                         onClick={onDelete}
-                        className="p-1.5 hover:bg-red-50 rounded-lg transition-colors group"
+                        className="p-1.5 hover:bg-error-50 rounded-lg transition-colors group"
                         title="Delete"
                     >
-                        <svg className="w-4 h-4 text-gray-500 group-hover:text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg className="w-4 h-4 text-gray-500 group-hover:text-error-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                         </svg>
                     </button>

@@ -12,7 +12,6 @@ import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { toast } from '@/components/Toast';
 import { PermissionGate } from '@/components/PermissionGate';
-import { getGradientStyle } from '@/utils/color-generator';
 import * as Icons from 'lucide-react';
 
 export default function MenuManagementPage() {
@@ -166,10 +165,7 @@ export default function MenuManagementPage() {
                 const Icon = menu.icon ? (Icons as any)[menu.icon] : null;
                 return (
                     <div className="flex items-center gap-3">
-                        <div
-                            className="p-2 rounded-lg shadow-sm"
-                            style={getGradientStyle(menu.name)}
-                        >
+                        <div className="p-2 bg-primary rounded-lg shadow-sm">
                             {Icon ? (
                                 <Icon className="w-4 h-4 text-white" />
                             ) : (
@@ -188,17 +184,11 @@ export default function MenuManagementPage() {
             key: 'level',
             header: 'Level',
             sortable: true,
-            render: (menu: MenuItem) => {
-                const levelStyle = getGradientStyle(`Level-${menu.level}`);
-                return (
-                    <div
-                        className="inline-flex px-3 py-1 rounded-full font-medium text-sm shadow-sm"
-                        style={levelStyle}
-                    >
-                        <span className="text-white">L{menu.level}</span>
-                    </div>
-                );
-            },
+            render: (menu: MenuItem) => (
+                <div className="inline-flex px-3 py-1 rounded-full bg-primary font-medium text-sm shadow-sm">
+                    <span className="text-white">L{menu.level}</span>
+                </div>
+            ),
         },
         {
             key: 'parent',
@@ -341,9 +331,8 @@ export default function MenuManagementPage() {
             {stats && (
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div className="card relative overflow-hidden">
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-500/10 to-transparent rounded-full -mr-16 -mt-16" />
                         <div className="relative flex items-center gap-3">
-                            <div className="p-3 bg-gradient-to-br from-secondary-500 to-accent-500 rounded-xl shadow-lg">
+                            <div className="p-3 bg-secondary rounded-xl shadow-lg">
                                 <Icons.Menu className="w-6 h-6 text-white" />
                             </div>
                             <div>
@@ -354,9 +343,8 @@ export default function MenuManagementPage() {
                     </div>
 
                     <div className="card relative overflow-hidden">
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-green-500/10 to-transparent rounded-full -mr-16 -mt-16" />
                         <div className="relative flex items-center gap-3">
-                            <div className="p-3 bg-gradient-to-br from-green-500 to-teal-500 rounded-xl shadow-lg">
+                            <div className="p-3 bg-success rounded-xl shadow-lg">
                                 <Icons.Check className="w-6 h-6 text-white" />
                             </div>
                             <div>
@@ -367,9 +355,8 @@ export default function MenuManagementPage() {
                     </div>
 
                     <div className="card relative overflow-hidden">
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-500/10 to-transparent rounded-full -mr-16 -mt-16" />
                         <div className="relative flex items-center gap-3">
-                            <div className="p-3 bg-gradient-to-br from-teal-600 to-mint-500 rounded-xl shadow-lg">
+                            <div className="p-3 bg-primary rounded-xl shadow-lg">
                                 <Icons.Layers className="w-6 h-6 text-white" />
                             </div>
                             <div>
@@ -380,9 +367,8 @@ export default function MenuManagementPage() {
                     </div>
 
                     <div className="card relative overflow-hidden">
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-orange-500/10 to-transparent rounded-full -mr-16 -mt-16" />
                         <div className="relative flex items-center gap-3">
-                            <div className="p-3 bg-gradient-to-br from-orange-500 to-red-500 rounded-xl shadow-lg">
+                            <div className="p-3 bg-accent-700 rounded-xl shadow-lg">
                                 <Icons.Target className="w-6 h-6 text-white" />
                             </div>
                             <div>

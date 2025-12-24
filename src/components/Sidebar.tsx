@@ -116,15 +116,15 @@ export function Sidebar({ isOpen = true, isCollapsed = false, onClose }: Sidebar
                     <Link
                         href={item.path || '#'}
                         className={`flex items-center justify-center p-3.5 rounded-xl transition-all duration-300 group relative overflow-hidden ${isActiveItem
-                            ? 'bg-gradient-to-br from-secondary to-secondary-700 text-white shadow-xl shadow-secondary/40 scale-105 ring-2 ring-accent/50'
-                            : 'text-white bg-primary-600/30 hover:bg-gradient-to-br hover:from-accent/30 hover:to-accent/40 hover:text-white hover:scale-110 hover:shadow-xl hover:shadow-accent/20 hover:ring-2 hover:ring-accent/30'
+                            ? 'bg-secondary text-white shadow-xl shadow-secondary/40 scale-105 ring-2 ring-accent/50'
+                            : 'text-white bg-primary-600/30 hover:bg-accent/40 hover:text-white hover:scale-110 hover:shadow-xl hover:shadow-accent/20 hover:ring-2 hover:ring-accent/30'
                             }`}
                         title={item.name}
                         aria-label={item.name}
                         aria-current={isActiveItem ? 'page' : undefined}
                     >
-                        {/* Animated background glow */}
-                        <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" aria-hidden="true" />
+                        {/* Active indicator glow */}
+                        <span className="absolute inset-0 bg-transparent" aria-hidden="true" />
 
                         {Icon ? (
                             <Icon className="w-6 h-6 relative z-10 transition-all duration-300 group-hover:rotate-12 group-hover:scale-110" aria-hidden="true" />
@@ -149,7 +149,7 @@ export function Sidebar({ isOpen = true, isCollapsed = false, onClose }: Sidebar
                     </Link>
 
                     {/* Enhanced Tooltip with animation */}
-                    <div className="absolute left-full ml-4 top-1/2 -translate-y-1/2 px-4 py-2.5 bg-gradient-to-r from-secondary to-secondary-700 text-white text-sm font-medium rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible group-hover:ml-3 transition-all duration-300 whitespace-nowrap z-50 pointer-events-none backdrop-blur-sm border border-accent/20">
+                    <div className="absolute left-full ml-4 top-1/2 -translate-y-1/2 px-4 py-2.5 bg-secondary text-white text-sm font-medium rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible group-hover:ml-3 transition-all duration-300 whitespace-nowrap z-50 pointer-events-none backdrop-blur-sm border border-accent/20">
                         <span className="relative z-10">{item.name}</span>
                         {/* Tooltip arrow */}
                         <div className="absolute right-full top-1/2 -translate-y-1/2 border-[6px] border-transparent border-r-secondary" aria-hidden="true" />

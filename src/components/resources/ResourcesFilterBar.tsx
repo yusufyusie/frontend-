@@ -28,7 +28,7 @@ export function ResourcesFilterBar({
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         placeholder="Search resources..."
-                        className="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-300 focus:border-primary-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none"
+                        className="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all outline-none"
                     />
                 </div>
 
@@ -36,7 +36,7 @@ export function ResourcesFilterBar({
                 <select
                     value={filterCategory}
                     onChange={(e) => setFilterCategory(e.target.value)}
-                    className="px-4 py-3 rounded-lg border border-gray-300 focus:border-primary-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none"
+                    className="px-4 py-3 rounded-lg border border-gray-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all outline-none"
                 >
                     <option value="">All Categories</option>
                     {uniqueCategories.map(category => (

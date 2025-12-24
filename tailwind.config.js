@@ -92,10 +92,11 @@ module.exports = {
             },
 
             fontFamily: {
-                sans: ['Roboto', 'Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
-                brand: ['Roboto', 'system-ui'],
-                amharic: ['Ethiopic Sadiss', 'Noto Sans Ethiopic', 'system-ui'],
-                mono: ['Menlo', 'Monaco', 'Courier New', 'monospace'],
+                // Ethiopian IT Park Brand Fonts ONLY
+                primary: ['OOOK', 'system-ui', 'sans-serif'],                    // Primary brand typeface
+                sans: ['Roboto', 'system-ui', 'sans-serif'],                     // Secondary typeface
+                amharic: ['Ethiopic Sadiss', 'Noto Sans Ethiopic', 'system-ui'], // Amharic typeface
+                mono: ['Roboto', 'Menlo', 'monospace'],                          // Monospace using Roboto
             },
 
             fontSize: {

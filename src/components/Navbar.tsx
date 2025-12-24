@@ -67,7 +67,7 @@ export function Navbar({ onToggleSidebar }: NavbarProps) {
                         aria-label="Notifications"
                     >
                         <Bell className="w-5 h-5 text-gray-600" />
-                        <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                        <span className="absolute top-1 right-1 w-2 h-2 bg-error-500 rounded-full"></span>
                     </button>
 
                     {/* Settings */}
@@ -127,10 +127,10 @@ export function Navbar({ onToggleSidebar }: NavbarProps) {
                                     <hr className="my-2" />
                                     <button
                                         onClick={handleLogout}
-                                        className="flex items-center gap-3 px-4 py-2 hover:bg-red-50 transition-colors w-full text-left"
+                                        className="flex items-center gap-3 px-4 py-2 hover:bg-error-50 transition-colors w-full text-left"
                                     >
-                                        <LogOut className="w-5 h-5 text-red-600" />
-                                        <span className="text-sm text-red-600 font-medium">Logout</span>
+                                        <LogOut className="w-5 h-5 text-error-600" />
+                                        <span className="text-sm text-error-600 font-medium">Logout</span>
                                     </button>
                                 </div>
                             </>

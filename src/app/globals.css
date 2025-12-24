@@ -1,5 +1,6 @@
-/* Ethiopian IT Park Brand Fonts */
+/* Ethiopian IT Park Brand Fonts - STRICTLY ENFORCED */
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700;900&display=swap');
+/* Note: OOOK font should be added via font files if not available on Google Fonts */
 
 @tailwind base;
 @tailwind components;
@@ -49,12 +50,13 @@
   --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
+/* Ethiopian IT Park Brand Typography */
 * {
-  font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: 'OOOK', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
 body {
-  @apply bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen text-gray-900;
+  @apply bg-gray-50 min-h-screen text-gray-900;
 }
 
 /* Accessibility: Screen Reader Only */
@@ -130,17 +132,17 @@ body {
 
   /* Primary Button - Teal */
   .btn-primary {
-    @apply bg-primary text-white hover:bg-primary-700 focus:ring-primary shadow-md hover:shadow-lg;
+    @apply bg-gradient-to-r from-primary to-primary-600 text-white hover:from-primary-600 hover:to-primary-700 focus:ring-primary shadow-md hover:shadow-lg;
   }
 
   /* Secondary Button - Navy */
   .btn-secondary {
-    @apply bg-secondary text-white hover:bg-secondary-700 focus:ring-secondary shadow-md hover:shadow-lg;
+    @apply bg-gradient-to-r from-secondary to-secondary-600 text-white hover:from-secondary-600 hover:to-secondary-700 focus:ring-secondary shadow-md hover:shadow-lg;
   }
 
   /* Accent Button - Mint */
   .btn-accent {
-    @apply bg-accent text-white hover:bg-accent-700 focus:ring-accent shadow-md hover:shadow-lg;
+    @apply bg-gradient-to-r from-accent to-accent-600 text-white hover:from-accent-600 hover:to-accent-700 focus:ring-accent shadow-md hover:shadow-lg;
   }
 
   /* Outline Primary Button */
@@ -150,15 +152,15 @@ body {
 
   /* Semantic Buttons - WCAG AA Compliant */
   .btn-danger {
-    @apply bg-error text-white hover:bg-error-600 focus:ring-error;
+    @apply bg-gradient-to-r from-error to-error-600 text-white hover:from-error-600 hover:to-error-700 focus:ring-error shadow-md hover:shadow-lg;
   }
 
   .btn-success {
-    @apply bg-success text-white hover:bg-success-600 focus:ring-success;
+    @apply bg-gradient-to-r from-success to-success-600 text-white hover:from-success-600 hover:to-success-700 focus:ring-success shadow-md hover:shadow-lg;
   }
 
   .btn-warning {
-    @apply bg-warning text-white hover:bg-warning-600 focus:ring-warning;
+    @apply bg-gradient-to-r from-warning to-warning-600 text-white hover:from-warning-600 hover:to-warning-700 focus:ring-warning shadow-md hover:shadow-lg;
   }
 
   .btn-info {
@@ -546,23 +548,22 @@ body {
 }
 
 .scrollbar-custom::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #6EC9C4 0%, #0C7C92 100%);
+  background: #6EC9C4;
+  /* Solid Mint - Brand Color */
   border-radius: 100px;
   border: 2px solid rgba(12, 124, 146, 0.1);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 4px rgba(110, 201, 196, 0.15);
 }
 
 .scrollbar-custom::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #0C7C92 0%, #16284F 100%);
+  background: #0C7C92;
+  /* Solid Teal - Brand Color */
   border-color: rgba(110, 201, 196, 0.4);
-  box-shadow: 0 0 12px rgba(110, 201, 196, 0.5), 0 4px 8px rgba(110, 201, 196, 0.3);
-  transform: scaleY(1.05);
 }
 
 .scrollbar-custom::-webkit-scrollbar-thumb:active {
   background: #16284F;
-  box-shadow: 0 0 8px rgba(110, 201, 196, 0.6);
+  /* Solid Navy - Brand Color */
 }
 
 /* Thin scrollbar for collapsed mode */
@@ -577,13 +578,13 @@ body {
 
 .scrollbar-thin::-webkit-scrollbar-thumb {
   background: rgba(110, 201, 196, 0.6);
+  /* Mint with opacity */
   border: none;
-  box-shadow: 0 2px 4px rgba(110, 201, 196, 0.2);
 }
 
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
   background: #6EC9C4;
-  box-shadow: 0 0 8px rgba(110, 201, 196, 0.5);
+  /* Solid Mint - Brand Color */
 }
 
 /* Premium Animations */

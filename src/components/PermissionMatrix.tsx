@@ -112,7 +112,7 @@ export function PermissionMatrix({
     return (
         <div className="border border-gray-200 rounded-xl overflow-hidden bg-white">
             {/* Header with Select All/Deselect All */}
-            <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-4 border-b border-gray-200">
+            <div className="bg-gray-50 p-4 border-b border-gray-200">
                 <div className="flex items-center justify-between">
                     <h3 className="text-lg font-semibold text-gray-900">Permissions</h3>
                     <div className="flex gap-2">
@@ -172,8 +172,8 @@ export function PermissionMatrix({
                                     className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${checkState === 'all'
                                         ? 'bg-primary-600 border-primary-600'
                                         : checkState === 'some'
-                                            ? 'bg-blue-200 border-blue-400'
-                                            : 'border-gray-300 hover:border-blue-400'
+                                            ? 'bg-primary-200 border-primary-400'
+                                            : 'border-gray-300 hover:border-primary-400'
                                         } ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'}`}
                                 >
                                     {checkState === 'all' && <Check className="w-4 h-4 text-white" />}
@@ -206,7 +206,7 @@ export function PermissionMatrix({
                                                 <div
                                                     className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-all ${isSelected
                                                         ? 'bg-primary-600 border-primary-600'
-                                                        : 'border-gray-300 hover:border-blue-400'
+                                                        : 'border-gray-300 hover:border-primary-400'
                                                         }`}
                                                 >
                                                     {isSelected && <Check className="w-3 h-3 text-white" />}

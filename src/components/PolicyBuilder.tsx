@@ -105,8 +105,8 @@ export function PolicyBuilder({ value, onChange, level = 0 }: PolicyBuilderProps
     };
 
     const indentClass = level === 0 ? '' : 'ml-8';
-    const borderColor = level % 2 === 0 ? 'border-blue-200' : 'border-purple-200';
-    const bgColor = level % 2 === 0 ? 'bg-primary-50/30' : 'bg-purple-50/30';
+    const borderColor = level % 2 === 0 ? 'border-primary-200' : 'border-secondary-200';
+    const bgColor = level % 2 === 0 ? 'bg-primary-50/30' : 'bg-secondary-50/30';
 
     return (
         <div className={`${indentClass} space-y-4`}>
@@ -121,7 +121,7 @@ export function PolicyBuilder({ value, onChange, level = 0 }: PolicyBuilderProps
                                 onClick={() => updateOperator(op)}
                                 className={`px-4 py-2 rounded-lg font-semibold transition-all ${value.operator === op
                                         ? 'bg-primary-600 text-white shadow-md'
-                                        : 'bg-white border-2 border-gray-200 text-gray-700 hover:border-blue-300'
+                                        : 'bg-white border-2 border-gray-200 text-gray-700 hover:border-primary-300'
                                     }`}
                             >
                                 {op}
@@ -203,7 +203,7 @@ export function PolicyBuilder({ value, onChange, level = 0 }: PolicyBuilderProps
                             <div key={index} className="relative">
                                 <button
                                     onClick={() => removeNestedRule(index)}
-                                    className="absolute -top-2 -right-2 z-10 bg-red-600 text-white rounded-full p-1.5 hover:bg-red-700 shadow-lg transition-all hover:scale-110"
+                                    className="absolute -top-2 -right-2 z-10 bg-error-600 text-white rounded-full p-1.5 hover:bg-error-700 shadow-lg transition-all hover:scale-110"
                                     title="Remove nested rule"
                                 >
                                     <X className="w-4 h-4" />

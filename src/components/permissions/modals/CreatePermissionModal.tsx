@@ -89,18 +89,18 @@ export function CreatePermissionModal({
 
                 <div className="mb-4">
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Description <span className="text-red-500">*</span>
+                        Description <span className="text-error-500">*</span>
                     </label>
                     <textarea
                         value={formData.description}
                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                         placeholder="Describe what this permission allows..."
                         rows={3}
-                        className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-primary-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 outline-none"
+                        className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all duration-200 outline-none"
                         disabled={submitting}
                     />
                     {errors.description && (
-                        <p className="mt-1 text-sm text-red-600">{errors.description}</p>
+                        <p className="mt-1 text-sm text-error-600">{errors.description}</p>
                     )}
                 </div>
 

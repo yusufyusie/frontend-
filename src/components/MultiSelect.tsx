@@ -51,7 +51,7 @@ export function MultiSelect({ label, options, selectedIds, onChange, placeholder
                             {option.name}
                             <button
                                 onClick={() => toggleOption(option.id)}
-                                className="hover:bg-blue-200 rounded-full p-0.5 transition-colors"
+                                className="hover:bg-primary-200 rounded-full p-0.5 transition-colors"
                             >
                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -70,7 +70,7 @@ export function MultiSelect({ label, options, selectedIds, onChange, placeholder
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     onFocus={() => setIsOpen(true)}
-                    className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-primary-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 outline-none"
+                    className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all duration-200 outline-none"
                 />
 
                 {isOpen && (

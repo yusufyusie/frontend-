@@ -1,6 +1,5 @@
 import React from 'react';
 import { MenuItem } from '@/services/menu.service';
-import { getGradientStyle } from '@/utils/color-generator';
 import * as Icons from 'lucide-react';
 
 interface MenuCardProps {
@@ -22,8 +21,6 @@ export function MenuCard({
     const childrenCount = menu._count?.children || 0;
 
     // Generate dynamic color for level badge
-    const levelStyle = getGradientStyle(`Level-${menu.level}`);
-
     return (
         <div
             className={`
@@ -37,16 +34,13 @@ export function MenuCard({
                     type="checkbox"
                     checked={isSelected}
                     onChange={() => onSelect(menu.id)}
-                    className="w-5 h-5 rounded border-gray-300 text-purple-600 focus:ring-purple-500 cursor-pointer"
+                    className="w-5 h-5 rounded border-gray-300 text-secondary-600 focus:ring-secondary-500 cursor-pointer"
                 />
             </div>
 
             {/* Icon with Dynamic Color */}
             <div className="flex items-start justify-between mb-3">
-                <div
-                    className="p-3 rounded-xl shadow-md"
-                    style={levelStyle}
-                >
+                <div className="p-3 bg-primary rounded-xl shadow-md">
                     {Icon ? (
                         <Icon className="w-6 h-6 text-white" />
                     ) : (
@@ -55,10 +49,10 @@ export function MenuCard({
                 </div>
                 {menu.badge && (
                     <span className={`px-2 py-1 text-xs font-medium rounded-full ${menu.badgeColor === 'blue' ? 'bg-primary-100 text-primary-800' :
-                            menu.badgeColor === 'green' ? 'bg-green-100 text-green-800' :
-                                menu.badgeColor === 'red' ? 'bg-red-100 text-red-800' :
-                                    menu.badgeColor === 'yellow' ? 'bg-yellow-100 text-yellow-800' :
-                                        'bg-gray-100 text-gray-800'
+                        menu.badgeColor === 'green' ? 'bg-success-100 text-success-800' :
+                            menu.badgeColor === 'red' ? 'bg-error-100 text-error-800' :
+                                menu.badgeColor === 'yellow' ? 'bg-yellow-100 text-yellow-800' :
+                                    'bg-gray-100 text-gray-800'
                         }`}>
                         {menu.badge}
                     </span>
@@ -85,10 +79,7 @@ export function MenuCard({
 
             {/* Stats */}
             <div className="flex items-center gap-4 mb-4 text-sm">
-                <div
-                    className="px-3 py-1 rounded-full font-medium shadow-sm"
-                    style={levelStyle}
-                >
+                <div className="px-3 py-1 bg-primary rounded-full font-medium shadow-sm">
                     <span className="text-white">Level {menu.level}</span>
                 </div>
                 {menu.parent && (
@@ -108,8 +99,8 @@ export function MenuCard({
             {/* Status */}
             <div className="mb-4">
                 <span className={`px-3 py-1 text-xs rounded-full font-medium ${menu.isActive
-                        ? 'bg-green-100 text-green-700'
-                        : 'bg-gray-100 text-gray-700'
+                    ? 'bg-success-100 text-success-700'
+                    : 'bg-gray-100 text-gray-700'
                     }`}>
                     {menu.isActive ? 'Active' : 'Inactive'}
                 </span>
@@ -126,7 +117,7 @@ export function MenuCard({
                 </button>
                 <button
                     onClick={onDelete}
-                    className="flex-1 px-4 py-2 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-colors font-medium text-sm flex items-center justify-center gap-2"
+                    className="flex-1 px-4 py-2 bg-error-50 text-error-700 rounded-lg hover:bg-error-100 transition-colors font-medium text-sm flex items-center justify-center gap-2"
                 >
                     <Icons.Trash2 className="w-4 h-4" />
                     Delete

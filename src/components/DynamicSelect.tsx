@@ -119,7 +119,7 @@ export function DynamicSelect({
                     : isOpen
                         ? 'border-primary-500 ring-2 ring-blue-200'
                         : error
-                            ? 'border-red-500'
+                            ? 'border-error-500'
                             : 'border-gray-300 hover:border-gray-400'
                     }`}
             >
@@ -128,13 +128,13 @@ export function DynamicSelect({
                         selectedOptions.map(option => (
                             <span
                                 key={option.value}
-                                className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-primary-100 text-primary-800 text-sm rounded-md border border-blue-200"
+                                className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-primary-100 text-primary-800 text-sm rounded-md border border-primary-200"
                             >
                                 <span className="font-medium">{option.label}</span>
                                 {!disabled && (
                                     <button
                                         onClick={(e) => handleRemoveOption(option.value, e)}
-                                        className="hover:bg-blue-200 rounded-full p-0.5 transition-colors"
+                                        className="hover:bg-primary-200 rounded-full p-0.5 transition-colors"
                                     >
                                         <X className="w-3 h-3" />
                                     </button>
@@ -149,7 +149,7 @@ export function DynamicSelect({
             </div>
 
             {error && (
-                <p className="mt-1.5 text-sm text-red-600">{error}</p>
+                <p className="mt-1.5 text-sm text-error-600">{error}</p>
             )}
 
             {/* Dropdown */}
@@ -177,7 +177,7 @@ export function DynamicSelect({
                         <div className="flex gap-2 p-3 border-b border-gray-200 bg-gray-50">
                             <button
                                 onClick={handleSelectAll}
-                                className="flex-1 px-3 py-1.5 text-xs font-medium text-primary-700 bg-primary-50 hover:bg-primary-100 rounded border border-blue-200 transition-colors"
+                                className="flex-1 px-3 py-1.5 text-xs font-medium text-primary-700 bg-primary-50 hover:bg-primary-100 rounded border border-primary-200 transition-colors"
                             >
                                 Select All
                             </button>
@@ -209,7 +209,7 @@ export function DynamicSelect({
                                             className={`w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors ${option.disabled
                                                 ? 'opacity-50 cursor-not-allowed'
                                                 : isSelected
-                                                    ? 'bg-primary-50 text-blue-900'
+                                                    ? 'bg-primary-50 text-primary-900'
                                                     : 'hover:bg-gray-50'
                                                 }`}
                                         >
@@ -220,7 +220,7 @@ export function DynamicSelect({
                                                 {isSelected && <Check className="w-3 h-3 text-white" />}
                                             </div>
                                             <div className="flex-1 min-w-0">
-                                                <p className={`text-sm font-medium ${isSelected ? 'text-blue-900' : 'text-gray-900'}`}>
+                                                <p className={`text-sm font-medium ${isSelected ? 'text-primary-900' : 'text-gray-900'}`}>
                                                     {option.label}
                                                 </p>
                                                 {option.description && (

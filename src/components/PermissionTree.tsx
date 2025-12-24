@@ -95,7 +95,7 @@ export function PermissionTree({ permissions, selectedIds, onChange, searchTerm 
     return (
         <div className="space-y-4">
             {/* Header with actions */}
-            <div className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-100">
+            <div className="flex items-center justify-between p-4 bg-primary-50 rounded-lg border border-primary-100">
                 <div className="flex items-center gap-4">
                     <div className="text-sm font-semibold text-gray-700">
                         <span className="text-2xl font-bold text-primary-600">{totalSelected}</span>
@@ -105,7 +105,7 @@ export function PermissionTree({ permissions, selectedIds, onChange, searchTerm 
                 <div className="flex gap-2">
                     <button
                         onClick={selectAll}
-                        className="px-4 py-2 text-sm bg-white border border-blue-300 text-primary-700 rounded-lg hover:bg-primary-50 transition-colors font-medium"
+                        className="px-4 py-2 text-sm bg-white border border-primary-300 text-primary-700 rounded-lg hover:bg-primary-50 transition-colors font-medium"
                     >
                         Select All
                     </button>
@@ -166,7 +166,7 @@ export function PermissionTree({ permissions, selectedIds, onChange, searchTerm 
                                     <div className="flex-1">
                                         <div className="flex items-center gap-2">
                                             <span className="font-semibold text-gray-900">{group}</span>
-                                            <span className={`text-sm ${allSelected ? 'text-green-600 font-semibold' : someSelected ? 'text-primary-600 font-semibold' : 'text-gray-500'}`}>
+                                            <span className={`text-sm ${allSelected ? 'text-success-600 font-semibold' : someSelected ? 'text-primary-600 font-semibold' : 'text-gray-500'}`}>
                                                 ({selectedInGroup}/{groupIds.length})
                                             </span>
                                         </div>
@@ -198,7 +198,7 @@ export function PermissionTree({ permissions, selectedIds, onChange, searchTerm 
                                                 </div>
                                             </div>
                                             {selectedIds.includes(perm.id) && (
-                                                <svg className="w-5 h-5 text-green-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <svg className="w-5 h-5 text-success-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                                 </svg>
                                             )}

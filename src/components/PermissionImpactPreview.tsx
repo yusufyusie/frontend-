@@ -65,8 +65,8 @@ export function PermissionImpactPreview({
     const renderPermissionGroup = (grouped: Map<string, Permission[]>, type: 'added' | 'removed') => {
         if (grouped.size === 0) return null;
 
-        const bgColor = type === 'added' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200';
-        const iconColor = type === 'added' ? 'text-green-600' : 'text-red-600';
+        const bgColor = type === 'added' ? 'bg-success-50 border-success-200' : 'bg-error-50 border-error-200';
+        const iconColor = type === 'added' ? 'text-success-600' : 'text-error-600';
         const icon = type === 'added' ? <Icons.PlusCircle className="w-5 h-5" /> : <Icons.MinusCircle className="w-5 h-5" />;
 
         return (
@@ -101,15 +101,15 @@ export function PermissionImpactPreview({
         >
             <div className="space-y-6">
                 {/* Impact Level Indicator */}
-                <div className={`p-4 rounded-lg border-2 ${impact.color === 'green' ? 'bg-green-50 border-green-300' :
+                <div className={`p-4 rounded-lg border-2 ${impact.color === 'green' ? 'bg-success-50 border-success-300' :
                         impact.color === 'yellow' ? 'bg-yellow-50 border-yellow-300' :
-                            impact.color === 'red' ? 'bg-red-50 border-red-300' :
+                            impact.color === 'red' ? 'bg-error-50 border-error-300' :
                                 'bg-gray-50 border-gray-300'
                     }`}>
                     <div className="flex items-center gap-3">
-                        <div className={`p-2 rounded-full ${impact.color === 'green' ? 'bg-green-600' :
+                        <div className={`p-2 rounded-full ${impact.color === 'green' ? 'bg-success-600' :
                                 impact.color === 'yellow' ? 'bg-yellow-600' :
-                                    impact.color === 'red' ? 'bg-red-600' :
+                                    impact.color === 'red' ? 'bg-error-600' :
                                         'bg-gray-600'
                             }`}>
                             {impact.color === 'red' ? (
@@ -119,9 +119,9 @@ export function PermissionImpactPreview({
                             )}
                         </div>
                         <div>
-                            <h4 className={`font-semibold ${impact.color === 'green' ? 'text-green-900' :
+                            <h4 className={`font-semibold ${impact.color === 'green' ? 'text-success-900' :
                                     impact.color === 'yellow' ? 'text-yellow-900' :
-                                        impact.color === 'red' ? 'text-red-900' :
+                                        impact.color === 'red' ? 'text-error-900' :
                                             'text-gray-900'
                                 }`}>
                                 {impact.message}
@@ -135,27 +135,27 @@ export function PermissionImpactPreview({
 
                 {/* Changes Summary */}
                 <div className="grid grid-cols-3 gap-4">
-                    <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+                    <div className="p-4 bg-success-50 rounded-lg border border-success-200">
                         <div className="flex items-center gap-2 mb-1">
-                            <Icons.PlusCircle className="w-4 h-4 text-green-600" />
+                            <Icons.PlusCircle className="w-4 h-4 text-success-600" />
                             <span className="text-sm font-medium text-gray-700">Adding</span>
                         </div>
-                        <p className="text-2xl font-bold text-green-600">
+                        <p className="text-2xl font-bold text-success-600">
                             {Array.from(changes.added.values()).reduce((sum, perms) => sum + perms.length, 0)}
                         </p>
                     </div>
 
-                    <div className="p-4 bg-red-50 rounded-lg border border-red-200">
+                    <div className="p-4 bg-error-50 rounded-lg border border-error-200">
                         <div className="flex items-center gap-2 mb-1">
-                            <Icons.MinusCircle className="w-4 h-4 text-red-600" />
+                            <Icons.MinusCircle className="w-4 h-4 text-error-600" />
                             <span className="text-sm font-medium text-gray-700">Removing</span>
                         </div>
-                        <p className="text-2xl font-bold text-red-600">
+                        <p className="text-2xl font-bold text-error-600">
                             {Array.from(changes.removed.values()).reduce((sum, perms) => sum + perms.length, 0)}
                         </p>
                     </div>
 
-                    <div className="p-4 bg-primary-50 rounded-lg border border-blue-200">
+                    <div className="p-4 bg-primary-50 rounded-lg border border-primary-200">
                         <div className="flex items-center gap-2 mb-1">
                             <Icons.Check className="w-4 h-4 text-primary-600" />
                             <span className="text-sm font-medium text-gray-700">Unchanged</span>
@@ -170,7 +170,7 @@ export function PermissionImpactPreview({
                     {changes.added.size > 0 && (
                         <div>
                             <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                                <Icons.PlusCircle className="w-5 h-5 text-green-600" />
+                                <Icons.PlusCircle className="w-5 h-5 text-success-600" />
                                 New Permissions
                             </h4>
                             {renderPermissionGroup(changes.added, 'added')}
@@ -181,7 +181,7 @@ export function PermissionImpactPreview({
                     {changes.removed.size > 0 && (
                         <div>
                             <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                                <Icons.MinusCircle className="w-5 h-5 text-red-600" />
+                                <Icons.MinusCircle className="w-5 h-5 text-error-600" />
                                 Removed Permissions
                             </h4>
                             {renderPermissionGroup(changes.removed, 'removed')}
@@ -199,9 +199,9 @@ export function PermissionImpactPreview({
 
                 {/* Warning for significant changes */}
                 {impact.color === 'red' && (
-                    <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-lg">
-                        <Icons.AlertTriangle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-                        <div className="text-sm text-red-900">
+                    <div className="flex items-start gap-2 p-3 bg-error-50 border border-error-200 rounded-lg">
+                        <Icons.AlertTriangle className="w-5 h-5 text-error-600 flex-shrink-0 mt-0.5" />
+                        <div className="text-sm text-error-900">
                             <strong>Warning:</strong> This is a significant change affecting {affectedUsersCount} users.
                             Please review the changes carefully before confirming.
                         </div>
@@ -221,7 +221,7 @@ export function PermissionImpactPreview({
                         disabled={changes.totalChanges === 0}
                         className={`px-6 py-2 rounded-lg text-white font-medium transition-colors ${changes.totalChanges === 0
                                 ? 'bg-gray-400 cursor-not-allowed'
-                                : 'bg-gradient-to-r from-secondary-600 to-accent-600 hover:from-purple-700 hover:to-pink-700'
+                                : 'bg-secondary hover:bg-secondary-700'
                             }`}
                     >
                         <div className="flex items-center gap-2">

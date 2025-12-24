@@ -33,9 +33,9 @@ export function PermissionDetailsDrawer({ permission, isOpen, onClose, roles = [
             >
                 <div className="h-full flex flex-col">
                     {/* Header */}
-                    <div className="flex items-center justify-between p-6 border-b bg-gradient-to-r from-purple-50 to-pink-50">
+                    <div className="flex items-center justify-between p-6 border-b bg-secondary to-pink-50">
                         <div className="flex items-center gap-3">
-                            <div className="p-2 bg-gradient-to-br from-secondary-600 to-accent-600 rounded-lg">
+                            <div className="p-2 bg-secondary rounded-lg">
                                 <Icons.Shield className="w-6 h-6 text-white" />
                             </div>
                             <div>
@@ -56,7 +56,7 @@ export function PermissionDetailsDrawer({ permission, isOpen, onClose, roles = [
                         {/* Basic Information */}
                         <div className="space-y-4">
                             <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                                <Icons.Info className="w-5 h-5 text-purple-600" />
+                                <Icons.Info className="w-5 h-5 text-secondary-600" />
                                 Basic Information
                             </h3>
 
@@ -81,12 +81,12 @@ export function PermissionDetailsDrawer({ permission, isOpen, onClose, roles = [
                         {/* Usage Statistics */}
                         <div className="space-y-4">
                             <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                                <Icons.BarChart className="w-5 h-5 text-purple-600" />
+                                <Icons.BarChart className="w-5 h-5 text-secondary-600" />
                                 Usage Statistics
                             </h3>
 
                             <div className="grid grid-cols-2 gap-4">
-                                <div className="p-4 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl border border-blue-200">
+                                <div className="p-4 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl border border-primary-200">
                                     <div className="flex items-center gap-2 mb-2">
                                         <Icons.Users className="w-5 h-5 text-primary-600" />
                                         <span className="text-sm font-medium text-gray-700">Roles Using</span>
@@ -94,12 +94,12 @@ export function PermissionDetailsDrawer({ permission, isOpen, onClose, roles = [
                                     <p className="text-3xl font-bold text-primary-600">{usageCount}</p>
                                 </div>
 
-                                <div className="p-4 bg-gradient-to-br from-green-50 to-teal-50 rounded-xl border border-green-200">
+                                <div className="p-4 bg-gradient-to-br from-green-50 to-teal-50 rounded-xl border border-success-200">
                                     <div className="flex items-center gap-2 mb-2">
-                                        <Icons.TrendingUp className="w-5 h-5 text-green-600" />
+                                        <Icons.TrendingUp className="w-5 h-5 text-success-600" />
                                         <span className="text-sm font-medium text-gray-700">Status</span>
                                     </div>
-                                    <p className="text-lg font-semibold text-green-600">
+                                    <p className="text-lg font-semibold text-success-600">
                                         {usageCount > 0 ? 'Active' : 'Unused'}
                                     </p>
                                 </div>
@@ -119,7 +119,7 @@ export function PermissionDetailsDrawer({ permission, isOpen, onClose, roles = [
                         {roles.length > 0 && (
                             <div className="space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                                    <Icons.Shield className="w-5 h-5 text-purple-600" />
+                                    <Icons.Shield className="w-5 h-5 text-secondary-600" />
                                     Assigned to Roles ({roles.length})
                                 </h3>
 
@@ -127,9 +127,9 @@ export function PermissionDetailsDrawer({ permission, isOpen, onClose, roles = [
                                     {roles.map((role) => (
                                         <div
                                             key={role.id}
-                                            className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200 hover:border-purple-300 transition-colors"
+                                            className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200 hover:border-secondary-300 transition-colors"
                                         >
-                                            <div className="p-2 bg-gradient-to-br from-secondary-500 to-accent-500 rounded-lg">
+                                            <div className="p-2 bg-secondary rounded-lg">
                                                 <Icons.Users className="w-4 h-4 text-white" />
                                             </div>
                                             <div>
@@ -145,7 +145,7 @@ export function PermissionDetailsDrawer({ permission, isOpen, onClose, roles = [
                         {/* Permission Breakdown */}
                         <div className="space-y-4">
                             <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                                <Icons.Code className="w-5 h-5 text-purple-600" />
+                                <Icons.Code className="w-5 h-5 text-secondary-600" />
                                 Technical Details
                             </h3>
 
@@ -153,11 +153,11 @@ export function PermissionDetailsDrawer({ permission, isOpen, onClose, roles = [
                                 <div className="space-y-2 font-mono text-sm">
                                     <div className="flex">
                                         <span className="text-gray-400 w-24">ID:</span>
-                                        <span className="text-green-400">{permission.id}</span>
+                                        <span className="text-success-400">{permission.id}</span>
                                     </div>
                                     <div className="flex">
                                         <span className="text-gray-400 w-24">Name:</span>
-                                        <span className="text-blue-400">"{permission.name}"</span>
+                                        <span className="text-primary-400">"{permission.name}"</span>
                                     </div>
                                     <div className="flex">
                                         <span className="text-gray-400 w-24">Group:</span>
@@ -166,7 +166,7 @@ export function PermissionDetailsDrawer({ permission, isOpen, onClose, roles = [
                                     {permission._count && (
                                         <div className="flex">
                                             <span className="text-gray-400 w-24">Usage:</span>
-                                            <span className="text-purple-400">{permission._count.rolePermissions} roles</span>
+                                            <span className="text-secondary-400">{permission._count.rolePermissions} roles</span>
                                         </div>
                                     )}
                                 </div>
@@ -207,7 +207,7 @@ function InfoItem({
     return (
         <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
             <div className="flex items-start gap-2">
-                <div className="text-purple-600 mt-0.5">{icon}</div>
+                <div className="text-secondary-600 mt-0.5">{icon}</div>
                 <div className="flex-1">
                     <span className="text-sm font-medium text-gray-700 block mb-1">{label}</span>
                     <p className={`text-gray-900 ${multiline ? 'text-sm' : ''}`}>

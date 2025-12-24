@@ -175,11 +175,11 @@ export function ResourceActionMatrix({ permissions, selectedPermissions, onChang
 
     const getActionColor = (action: string) => {
         const colorMap: { [key: string]: string } = {
-            'Create': 'text-green-600',
+            'Create': 'text-success-600',
             'View': 'text-primary-600',
             'Edit': 'text-yellow-600',
-            'Delete': 'text-red-600',
-            'Export': 'text-purple-600',
+            'Delete': 'text-error-600',
+            'Export': 'text-secondary-600',
         };
         return colorMap[action] || 'text-gray-600';
     };
@@ -189,7 +189,7 @@ export function ResourceActionMatrix({ permissions, selectedPermissions, onChang
             {/* Column Headers */}
             <div className="overflow-x-auto">
                 <div className="min-w-[800px]">
-                    <div className="grid gap-2 mb-2" style={{ gridTemplateColumns: `200px repeat(${allActions.length}, 100px)` }}>
+                    <div className="grid gap-2 mb-2">
                         <div className="font-semibold text-gray-700 px-4 py-2">Resource</div>
                         {allActions.map(action => (
                             <button
@@ -215,7 +215,7 @@ export function ResourceActionMatrix({ permissions, selectedPermissions, onChang
                                 {/* Category Header */}
                                 <button
                                     onClick={() => toggleCategory(category)}
-                                    className="w-full flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg mb-2 hover:from-gray-100 hover:to-gray-200 transition-colors"
+                                    className="w-full flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-lg mb-2 hover:bg-gray-100 transition-colors"
                                 >
                                     {isExpanded ? (
                                         <Icons.ChevronDown className="w-4 h-4 text-gray-600" />
@@ -239,7 +239,6 @@ export function ResourceActionMatrix({ permissions, selectedPermissions, onChang
                                                 <div
                                                     key={resource.resource}
                                                     className="grid gap-2 items-center group hover:bg-gray-50 rounded-lg transition-colors"
-                                                    style={{ gridTemplateColumns: `200px repeat(${allActions.length}, 100px)` }}
                                                 >
                                                     {/* Resource Name */}
                                                     <button
@@ -255,9 +254,9 @@ export function ResourceActionMatrix({ permissions, selectedPermissions, onChang
                                                                 }
                                                             }}
                                                             onChange={() => { }}
-                                                            className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                                                            className="rounded border-gray-300 text-secondary-600 focus:ring-secondary-500"
                                                         />
-                                                        <div className="p-2 bg-gradient-to-br from-secondary-500 to-accent-500 rounded-lg">
+                                                        <div className="p-2 bg-secondary rounded-lg">
                                                             <IconComponent className="w-4 h-4 text-white" />
                                                         </div>
                                                         <span className="font-medium text-gray-900">{resource.resource}</span>
@@ -276,7 +275,7 @@ export function ResourceActionMatrix({ permissions, selectedPermissions, onChang
                                                                             type="checkbox"
                                                                             checked={isChecked}
                                                                             onChange={() => togglePermission(permission)}
-                                                                            className="w-5 h-5 rounded border-gray-300 text-purple-600 focus:ring-purple-500 cursor-pointer transition-transform group-hover/checkbox:scale-110"
+                                                                            className="w-5 h-5 rounded border-gray-300 text-secondary-600 focus:ring-secondary-500 cursor-pointer transition-transform group-hover/checkbox:scale-110"
                                                                             title={permission.displayName}
                                                                         />
                                                                     </label>
@@ -301,7 +300,7 @@ export function ResourceActionMatrix({ permissions, selectedPermissions, onChang
             <div className="flex items-center gap-4 px-4 py-3 bg-gray-50 rounded-lg text-sm">
                 <span className="font-medium text-gray-700">Legend:</span>
                 <div className="flex items-center gap-2">
-                    <Icons.PlusCircle className="w-4 h-4 text-green-600" />
+                    <Icons.PlusCircle className="w-4 h-4 text-success-600" />
                     <span className="text-gray-600">Create</span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -313,11 +312,11 @@ export function ResourceActionMatrix({ permissions, selectedPermissions, onChang
                     <span className="text-gray-600">Edit</span>
                 </div>
                 <div className="flex items-center gap-2">
-                    <Icons.Trash2 className="w-4 h-4 text-red-600" />
+                    <Icons.Trash2 className="w-4 h-4 text-error-600" />
                     <span className="text-gray-600">Delete</span>
                 </div>
                 <div className="flex items-center gap-2">
-                    <Icons.Download className="w-4 h-4 text-purple-600" />
+                    <Icons.Download className="w-4 h-4 text-secondary-600" />
                     <span className="text-gray-600">Export</span>
                 </div>
             </div>

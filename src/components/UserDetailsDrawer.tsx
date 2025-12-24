@@ -114,7 +114,7 @@ export function UserDetailsDrawer({ userId, isOpen, onClose, onUpdate }: UserDet
                 ) : user ? (
                     <div className="flex flex-col h-full">
                         {/* Header */}
-                        <div className="bg-gradient-to-r from-primary-500 to-accent-500 p-6">
+                        <div className="bg-primary p-6">
                             <div className="flex items-start justify-between mb-4">
                                 <h2 className="text-2xl font-bold text-white">User Details</h2>
                                 <button
@@ -134,8 +134,8 @@ export function UserDetailsDrawer({ userId, isOpen, onClose, onUpdate }: UserDet
                                 </div>
                                 <div className="text-white">
                                     <h3 className="text-2xl font-bold">{user.username}</h3>
-                                    <p className="text-blue-100">{user.email}</p>
-                                    <span className={`inline-block mt-1 px-3 py-1 rounded-full text-xs font-semibold ${user.isActive ? 'bg-green-500' : 'bg-red-500'
+                                    <p className="text-primary-100">{user.email}</p>
+                                    <span className={`inline-block mt-1 px-3 py-1 rounded-full text-xs font-semibold ${user.isActive ? 'bg-success-500' : 'bg-error-500'
                                         }`}>
                                         {user.isActive ? 'ACTIVE' : 'INACTIVE'}
                                     </span>
@@ -190,7 +190,7 @@ export function UserDetailsDrawer({ userId, isOpen, onClose, onUpdate }: UserDet
                                                 </button>
                                                 <button
                                                     onClick={handleSaveEdit}
-                                                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm"
+                                                    className="px-4 py-2 bg-success-600 text-white rounded-lg hover:bg-success-700 transition-colors text-sm"
                                                 >
                                                     Save
                                                 </button>
@@ -234,19 +234,19 @@ export function UserDetailsDrawer({ userId, isOpen, onClose, onUpdate }: UserDet
                                         <>
                                             {/* Stats Cards */}
                                             <div className="grid grid-cols-3 gap-4">
-                                                <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg border border-blue-200">
-                                                    <div className="text-2xl font-bold text-blue-900">{user.roles?.length || 0}</div>
+                                                <div className="p-4 bg-primary-50 rounded-lg border border-primary-200">
+                                                    <div className="text-2xl font-bold text-primary-900">{user.roles?.length || 0}</div>
                                                     <div className="text-sm text-primary-700">Roles</div>
                                                 </div>
-                                                <div className="p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-lg border border-green-200">
-                                                    <div className="text-2xl font-bold text-green-900">
+                                                <div className="p-4 bg-success-50 rounded-lg border border-success-200">
+                                                    <div className="text-2xl font-bold text-success-900">
                                                         {user.roles?.reduce((acc, role) => acc + (role.permissions?.length || 0), 0) || 0}
                                                     </div>
-                                                    <div className="text-sm text-green-700">Permissions</div>
+                                                    <div className="text-sm text-success-700">Permissions</div>
                                                 </div>
-                                                <div className="p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg border border-purple-200">
-                                                    <div className="text-2xl font-bold text-purple-900">{user.claims?.length || 0}</div>
-                                                    <div className="text-sm text-purple-700">Claims</div>
+                                                <div className="p-4 bg-secondary rounded-lg border border-secondary-200">
+                                                    <div className="text-2xl font-bold text-secondary-900">{user.claims?.length || 0}</div>
+                                                    <div className="text-sm text-secondary-700">Claims</div>
                                                 </div>
                                             </div>
 
@@ -286,7 +286,7 @@ export function UserDetailsDrawer({ userId, isOpen, onClose, onUpdate }: UserDet
                                     <h3 className="text-lg font-semibold text-gray-900">Assigned Roles</h3>
                                     <div className="space-y-3">
                                         {user.roles?.map(role => (
-                                            <div key={role.id} className="p-4 bg-primary-50 rounded-lg border border-blue-200">
+                                            <div key={role.id} className="p-4 bg-primary-50 rounded-lg border border-primary-200">
                                                 <div className="flex items-start justify-between">
                                                     <div className="flex-1">
                                                         <div className="font-semibold text-gray-900">{role.name}</div>
@@ -295,7 +295,7 @@ export function UserDetailsDrawer({ userId, isOpen, onClose, onUpdate }: UserDet
                                                         )}
                                                         {role.permissions && role.permissions.length > 0 && (
                                                             <div className="mt-2 flex items-center gap-2">
-                                                                <svg className="w-4 h-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <svg className="w-4 h-4 text-success-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                                 </svg>
                                                                 <span className="text-xs text-gray-600">
@@ -306,7 +306,7 @@ export function UserDetailsDrawer({ userId, isOpen, onClose, onUpdate }: UserDet
                                                     </div>
                                                     <button
                                                         onClick={() => handleRemoveRole(role.id)}
-                                                        className="px-3 py-1 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors text-sm flex-shrink-0"
+                                                        className="px-3 py-1 bg-error-100 text-error-700 rounded-lg hover:bg-error-200 transition-colors text-sm flex-shrink-0"
                                                     >
                                                         Remove
                                                     </button>
@@ -327,7 +327,7 @@ export function UserDetailsDrawer({ userId, isOpen, onClose, onUpdate }: UserDet
                                                     <button
                                                         key={role.id}
                                                         onClick={() => handleAddRole(role.id)}
-                                                        className="w-full text-left p-3 bg-gray-50 rounded-lg hover:bg-primary-50 hover:border-blue-300 border border-gray-200 transition-colors"
+                                                        className="w-full text-left p-3 bg-gray-50 rounded-lg hover:bg-primary-50 hover:border-primary-300 border border-gray-200 transition-colors"
                                                     >
                                                         <div className="font-medium text-gray-900">{role.name}</div>
                                                         <div className="text-sm text-gray-600">{role.description}</div>
@@ -362,8 +362,8 @@ export function UserDetailsDrawer({ userId, isOpen, onClose, onUpdate }: UserDet
                                                         </div>
                                                         <div className="space-y-2">
                                                             {role.permissions.map(perm => (
-                                                                <div key={perm.id} className="flex items-start gap-3 p-3 bg-green-50 rounded-lg border border-green-200">
-                                                                    <svg className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <div key={perm.id} className="flex items-start gap-3 p-3 bg-success-50 rounded-lg border border-success-200">
+                                                                    <svg className="w-5 h-5 text-success-600 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                                                     </svg>
                                                                     <div className="flex-1 min-w-0">
@@ -403,10 +403,10 @@ export function UserDetailsDrawer({ userId, isOpen, onClose, onUpdate }: UserDet
                                     <div className="space-y-2">
                                         {user.claims && user.claims.length > 0 ? (
                                             user.claims.map(claim => (
-                                                <div key={claim.id} className="flex items-center justify-between p-4 bg-purple-50 rounded-lg border border-purple-200 hover:border-purple-300 transition-colors">
+                                                <div key={claim.id} className="flex items-center justify-between p-4 bg-secondary-50 rounded-lg border border-secondary-200 hover:border-secondary-300 transition-colors">
                                                     <div className="flex-1">
                                                         <div className="flex items-center gap-2 mb-1">
-                                                            <svg className="w-4 h-4 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <svg className="w-4 h-4 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                                                             </svg>
                                                             <span className="font-medium text-gray-900">{claim.claimType}</span>
@@ -424,7 +424,7 @@ export function UserDetailsDrawer({ userId, isOpen, onClose, onUpdate }: UserDet
                                                                 toast.error('Failed to remove claim');
                                                             }
                                                         }}
-                                                        className="px-3 py-1 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors text-sm flex-shrink-0"
+                                                        className="px-3 py-1 bg-error-100 text-error-700 rounded-lg hover:bg-error-200 transition-colors text-sm flex-shrink-0"
                                                     >
                                                         Remove
                                                     </button>
@@ -445,7 +445,7 @@ export function UserDetailsDrawer({ userId, isOpen, onClose, onUpdate }: UserDet
                                                     type="text"
                                                     id="claim-type"
                                                     placeholder="e.g., Department"
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none text-sm"
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-secondary-500 focus:border-secondary-500 outline-none text-sm"
                                                 />
                                             </div>
                                             <div>
@@ -454,7 +454,7 @@ export function UserDetailsDrawer({ userId, isOpen, onClose, onUpdate }: UserDet
                                                     type="text"
                                                     id="claim-value"
                                                     placeholder="e.g., Engineering"
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none text-sm"
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-secondary-500 focus:border-secondary-500 outline-none text-sm"
                                                 />
                                             </div>
                                         </div>
@@ -481,7 +481,7 @@ export function UserDetailsDrawer({ userId, isOpen, onClose, onUpdate }: UserDet
                                                     toast.error('Failed to add claim');
                                                 }
                                             }}
-                                            className="mt-3 w-full px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
+                                            className="mt-3 w-full px-4 py-2 bg-secondary-600 text-white rounded-lg hover:bg-secondary-700 transition-colors text-sm font-medium"
                                         >
                                             Add Claim
                                         </button>

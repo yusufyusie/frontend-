@@ -16,9 +16,9 @@ export function AuditLogDetailsDrawer({ log, isOpen, onClose }: AuditLogDetailsD
 
     const getResultColor = (result?: string) => {
         switch (result?.toUpperCase()) {
-            case 'SUCCESS': return 'text-green-600 bg-green-50 border-green-200';
-            case 'DENIED': return 'text-red-600 bg-red-50 border-red-200';
-            case 'ERROR': return 'text-orange-600 bg-orange-50 border-orange-200';
+            case 'SUCCESS': return 'text-success-600 bg-success-50 border-success-200';
+            case 'DENIED': return 'text-error-600 bg-error-50 border-error-200';
+            case 'ERROR': return 'text-accent-600 bg-accent-50 border-accent-200';
             default: return 'text-gray-600 bg-gray-50 border-gray-200';
         }
     };
@@ -52,9 +52,9 @@ export function AuditLogDetailsDrawer({ log, isOpen, onClose }: AuditLogDetailsD
             >
                 <div className="h-full flex flex-col">
                     {/* Header */}
-                    <div className="flex items-center justify-between p-6 border-b bg-gradient-to-r from-purple-50 to-pink-50">
+                    <div className="flex items-center justify-between p-6 border-b bg-secondary to-pink-50">
                         <div className="flex items-center gap-3">
-                            <div className="p-2 bg-purple-600 rounded-lg">
+                            <div className="p-2 bg-secondary-600 rounded-lg">
                                 {getActionIcon(log.action)}
                             </div>
                             <div>
@@ -85,7 +85,7 @@ export function AuditLogDetailsDrawer({ log, isOpen, onClose }: AuditLogDetailsD
                         {/* Event Information */}
                         <div className="space-y-4">
                             <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                                <Icons.Info className="w-5 h-5 text-purple-600" />
+                                <Icons.Info className="w-5 h-5 text-secondary-600" />
                                 Event Information
                             </h3>
 
@@ -108,13 +108,13 @@ export function AuditLogDetailsDrawer({ log, isOpen, onClose }: AuditLogDetailsD
                         {log.user && (
                             <div className="space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                                    <Icons.User className="w-5 h-5 text-purple-600" />
+                                    <Icons.User className="w-5 h-5 text-secondary-600" />
                                     User Information
                                 </h3>
 
-                                <div className="p-4 bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl border border-purple-200">
+                                <div className="p-4 bg-secondary rounded-xl border border-secondary-200">
                                     <div className="flex items-center gap-3 mb-3">
-                                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-secondary-600 to-accent-600 flex items-center justify-center text-white font-bold text-lg">
+                                        <div className="w-12 h-12 rounded-full bg-secondary flex items-center justify-center text-white font-bold text-lg">
                                             {log.user.firstName?.[0]}{log.user.lastName?.[0]}
                                         </div>
                                         <div>
@@ -141,7 +141,7 @@ export function AuditLogDetailsDrawer({ log, isOpen, onClose }: AuditLogDetailsD
                         {/* Technical Details */}
                         <div className="space-y-4">
                             <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                                <Icons.Server className="w-5 h-5 text-purple-600" />
+                                <Icons.Server className="w-5 h-5 text-secondary-600" />
                                 Technical Details
                             </h3>
 
@@ -169,12 +169,12 @@ export function AuditLogDetailsDrawer({ log, isOpen, onClose }: AuditLogDetailsD
                         {log.details && Object.keys(log.details).length > 0 && (
                             <div className="space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                                    <Icons.FileText className="w-5 h-5 text-purple-600" />
+                                    <Icons.FileText className="w-5 h-5 text-secondary-600" />
                                     Additional Details
                                 </h3>
 
                                 <div className="bg-gray-900 rounded-lg p-4 overflow-x-auto">
-                                    <pre className="text-sm text-green-400 font-mono">
+                                    <pre className="text-sm text-success-400 font-mono">
                                         {JSON.stringify(log.details, null, 2)}
                                     </pre>
                                 </div>
@@ -185,11 +185,11 @@ export function AuditLogDetailsDrawer({ log, isOpen, onClose }: AuditLogDetailsD
                         {log.reason && (
                             <div className="space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                                    <Icons.AlertTriangle className="w-5 h-5 text-orange-600" />
+                                    <Icons.AlertTriangle className="w-5 h-5 text-accent-600" />
                                     Failure Reason
                                 </h3>
 
-                                <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg">
+                                <div className="p-4 bg-accent-50 border border-accent-200 rounded-lg">
                                     <p className="text-gray-900">{log.reason}</p>
                                 </div>
                             </div>
@@ -241,7 +241,7 @@ function InfoItem({
             <div className="flex items-start justify-between gap-2">
                 <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                        <div className="text-purple-600">{icon}</div>
+                        <div className="text-secondary-600">{icon}</div>
                         <span className="text-sm font-medium text-gray-700">{label}</span>
                     </div>
                     <p className={`text-gray-900 ${multiline ? 'text-xs break-all' : ''}`}>
@@ -255,7 +255,7 @@ function InfoItem({
                         title="Copy to clipboard"
                     >
                         {copied ? (
-                            <Icons.Check className="w-4 h-4 text-green-600" />
+                            <Icons.Check className="w-4 h-4 text-success-600" />
                         ) : (
                             <Icons.Copy className="w-4 h-4 text-gray-600" />
                         )}
