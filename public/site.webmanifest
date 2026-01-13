@@ -1,7 +1,7 @@
 {
-    "name": "Access Control System - Ethiopian IT Park",
-    "short_name": "Access Control",
-    "description": "Dynamic RBAC + PBAC + Claims Access Control System",
+    "name": "Tenant Management System - Ethiopian IT Park",
+    "short_name": "TMS",
+    "description": "Comprehensive Tenant & Property Management System",
     "start_url": "/",
     "display": "standalone",
     "background_color": "#ffffff",

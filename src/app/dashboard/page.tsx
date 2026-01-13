@@ -57,9 +57,9 @@ export default function DashboardPage() {
             </div>
 
             <div className="card bg-primary-50 border-2 border-blue-200">
-                <h3 className="text-xl font-semibold mb-2">🎉 Welcome to Access Control System!</h3>
+                <h3 className="text-xl font-semibold mb-2">🎉 Welcome to Tenant Management System!</h3>
                 <p className="text-gray-700">
-                    This system demonstrates fully dynamic RBAC + PBAC + Claims-based access control.
+                    This system provides comprehensive tenant management with secure role-based access control.
                 </p>
                 <ul className="mt-4 space-y-2 text-gray-700">
                     <li>✅ Permissions are loaded from the database</li>

@@ -1,5 +1,5 @@
 {
-    "name": "access-control-frontend",
+    "name": "tms-frontend",
     "version": "1.0.0",
     "private": true,
     "scripts": {

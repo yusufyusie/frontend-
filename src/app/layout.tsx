@@ -19,11 +19,11 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
     title: {
-        default: 'Access Control System - Ethiopian IT Park',
-        template: '%s | Access Control System',
+        default: 'Tenant Management System - Ethiopian IT Park',
+        template: '%s | TMS',
     },
-    description: 'Dynamic Role-Based Access Control (RBAC) with Policy-Based Access Control (PBAC) and Claims-based authentication. Secure, scalable, and enterprise-ready access management system.',
-    keywords: ['access control', 'RBAC', 'PBAC', 'authentication', 'authorization', 'security', 'Ethiopian IT Park'],
+    description: 'Comprehensive Tenant Management System for Ethiopian IT Park. Manage tenants, leases, billing, and property administration with advanced RBAC and secure authentication.',
+    keywords: ['tenant management', 'property management', 'lease management', 'billing', 'RBAC', 'Ethiopian IT Park', 'TMS'],
     authors: [{ name: 'Ethiopian IT Park' }],
     creator: 'Ethiopian IT Park',
     publisher: 'Ethiopian IT Park',
@@ -34,10 +34,10 @@ export const metadata: Metadata = {
     },
     metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3001'),
     openGraph: {
-        title: 'Access Control System - Ethiopian IT Park',
-        description: 'Dynamic RBAC + PBAC + Claims Access Control',
+        title: 'Tenant Management System - Ethiopian IT Park',
+        description: 'Comprehensive Tenant Management for Ethiopian IT Park',
         url: '/',
-        siteName: 'Access Control System',
+        siteName: 'Tenant Management System',
         locale: 'en_US',
         type: 'website',
     },
@@ -80,10 +80,10 @@ export default function RootLayout({
                         __html: JSON.stringify({
                             '@context': 'https://schema.org',
                             '@type': 'WebApplication',
-                            name: 'Access Control System',
-                            description: 'Dynamic RBAC + PBAC + Claims Access Control',
+                            name: 'Tenant Management System',
+                            description: 'Comprehensive Tenant Management for Ethiopian IT Park',
                             url: process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3001',
-                            applicationCategory: 'SecurityApplication',
+                            applicationCategory: 'BusinessApplication',
                             operatingSystem: 'Web',
                         }),
                     }}

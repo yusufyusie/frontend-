@@ -124,7 +124,7 @@ export default function AdminDashboard() {
                             Welcome back, {user?.username}! 👋
                         </h1>
                         <p className="text-gray-600 text-lg">
-                            Here's what's happening with your access control system today.
+                            Here's what's happening with your tenant management system today.
                         </p>
                     </div>
                     <div className="hidden md:block">
@@ -189,8 +189,8 @@ export default function AdminDashboard() {
                             <span className="font-semibold text-gray-900">1.0.0</span>
                         </div>
                         <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                            <span className="text-gray-700">Access Control Type</span>
-                            <span className="font-semibold text-gray-900">Dynamic RBAC & PBAC</span>
+                            <span className="text-gray-700">Management Type</span>
+                            <span className="font-semibold text-gray-900">Tenant & Property</span>
                         </div>
                         <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
                             <span className="text-gray-700">Claims-Based Auth</span>
@@ -232,11 +232,11 @@ export default function AdminDashboard() {
                     <div className="text-5xl">🎯</div>
                     <div>
                         <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                            Ethiopian IT Park - Access Control System
+                            Ethiopian IT Park - Tenant Management System
                         </h3>
                         <p className="text-gray-700 mb-4">
-                            Enterprise-grade access control with dynamic RBAC, PBAC, and Claims-Based Authentication.
-                            All permissions and roles are fully configurable without code changes.
+                            Comprehensive tenant management with advanced RBAC, billing, and property administration.
+                            All features are fully configurable without code changes.
                         </p>
                         <div className="flex flex-wrap gap-2">
                             <span className="badge bg-primary-100 text-primary-800 border border-primary-300">✅ Dynamic RBAC</span>

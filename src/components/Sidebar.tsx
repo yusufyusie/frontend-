@@ -28,7 +28,7 @@ export function Sidebar({ isOpen = true, isCollapsed = false, onClose }: Sidebar
 
         // Listen for menu assignment changes
         const handleMenuUpdate = () => {
-            console.log('[Sidebar] Menu assignment changed, refreshing...');
+
             loadMenus();
         };
 
@@ -44,17 +44,17 @@ export function Sidebar({ isOpen = true, isCollapsed = false, onClose }: Sidebar
             setLoading(true);
             setError(null);
 
-            console.log('[Sidebar] Fetching menus from API...');
+
             const menus = await menuService.getUserMenu();
-            console.log('[Sidebar] Received menus:', menus);
+
 
             if (menus && menus.length > 0) {
                 setMenuItems(menus);
                 const parentIds = menus.filter(m => m.children && m.children.length > 0).map(m => m.id);
                 setExpandedMenus(new Set(parentIds));
-                console.log('[Sidebar] Menus loaded successfully, expanded:', parentIds);
+
             } else {
-                console.log('[Sidebar] No menus returned from API');
+
                 setMenuItems([]);
             }
         } catch (err: any) {
@@ -298,7 +298,7 @@ export function Sidebar({ isOpen = true, isCollapsed = false, onClose }: Sidebar
                     <div className="absolute bottom-0 left-0 right-0 px-4 py-3 border-t border-primary-700 bg-primary-700/50 backdrop-blur-sm">
                         <div className="text-center">
                             <div className="text-xs font-semibold text-accent mb-0.5">Ethiopian IT Park</div>
-                            <div className="text-[10px] text-white/40">Access Control v1.0</div>
+                            <div className="text-[10px] text-white/40">TMS v1.0</div>
                         </div>
                     </div>
                 )}

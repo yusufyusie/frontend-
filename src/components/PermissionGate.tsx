@@ -19,10 +19,10 @@ export function PermissionGate({
 
     // Debug logging
     if (permission) {
-        console.log(`🚪 PermissionGate: "${permission}" =>`, hasPermission ? '✅ GRANTED' : '❌ DENIED');
+
     }
     if (role) {
-        console.log(`🚪 RoleGate: "${role}" =>`, hasRole ? '✅ GRANTED' : '❌ DENIED');
+
     }
 
     if (permission && !hasPermission) {

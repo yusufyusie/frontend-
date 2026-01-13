@@ -2,6 +2,7 @@
 
 import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { authService } from '@/services/auth.service';
 
 export default function LoginPage() {
@@ -45,17 +46,21 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-500 to-primary-700" role="main">
-            <div className="bg-white p-8 rounded-lg shadow-2xl w-full max-w-md">
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-500 to-primary-700" role="main" suppressHydrationWarning>
+            <div className="bg-white p-8 rounded-lg shadow-2xl w-full max-w-md" suppressHydrationWarning>
                 <div className="mb-8 text-center">
-                    <div
-                        className="w-16 h-16 bg-gradient-to-br from-secondary-500 to-primary-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg"
-                        aria-hidden="true"
-                    >
-                        <span className="text-white font-bold text-2xl">ET</span>
+                    <div className="flex items-center justify-center mb-4">
+                        <Image
+                            src="/ethiopian-it-park-logo.png"
+                            alt="Ethiopian IT Park Logo"
+                            width={160}
+                            height={64}
+                            className="h-16 w-auto"
+                            priority
+                        />
                     </div>
                     <h1 className="text-3xl font-bold text-gray-900">Ethiopian IT Park</h1>
-                    <p className="text-gray-600 mt-1">Access Control System</p>
+                    <p className="text-gray-600 mt-1">Tenant Management System</p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-4" aria-label="Login form" noValidate>

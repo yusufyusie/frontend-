@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { useAccessStore } from '@/store/access.store';
 import { authService } from '@/services/auth.service';
 import { Menu, Bell, Search, Settings, LogOut, User, ChevronDown } from 'lucide-react';
@@ -21,7 +22,7 @@ export function Navbar({ onToggleSidebar }: NavbarProps) {
     };
 
     return (
-        <header className="fixed top-0 left-0 right-0 h-16 bg-white border-b border-gray-200 z-50 shadow-sm">
+        <header className="fixed top-0 left-0 right-0 h-16 bg-white border-b border-gray-200 z-50 shadow-sm" suppressHydrationWarning>
             <div className="flex items-center justify-between h-full px-4">
                 {/* Left: Menu Toggle + Logo */}
                 <div className="flex items-center gap-4">
@@ -35,14 +36,19 @@ export function Navbar({ onToggleSidebar }: NavbarProps) {
                     </button>
 
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center shadow-md">
-                            <span className="text-white font-bold text-lg">ET</span>
-                        </div>
+                        <Image
+                            src="/ethiopian-it-park-logo.png"
+                            alt="Ethiopian IT Park Logo"
+                            width={120}
+                            height={40}
+                            className="h-10 w-auto"
+                            priority
+                        />
                         <div className="hidden md:block">
                             <h1 className="text-xl font-bold text-secondary">
                                 Ethiopian IT Park
                             </h1>
-                            <p className="text-xs text-gray-500">Access Control System</p>
+                            <p className="text-xs text-gray-500">Tenant Management System</p>
                         </div>
                     </div>
                 </div>

@@ -2,7 +2,7 @@
  * Centralized Theme Configuration
  * 
  * This file contains all branding, colors, typography, and design tokens
- * for the Ethiopian IT Park Access Control System.
+ * for the Ethiopian IT Park Tenant Management System.
  * 
  * Features:
  * - WCAG AA compliant color contrast ratios
@@ -15,8 +15,8 @@ export const theme = {
     // Brand Identity
     brand: {
         name: 'Ethiopian IT Park',
-        shortName: 'ET',
-        tagline: 'Access Control System',
+        shortName: 'TMS',
+        tagline: 'Tenant Management System',
     },
 
     // Color Palette - Ethiopian IT Park Brand Colors
