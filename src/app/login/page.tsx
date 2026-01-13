@@ -1,16 +1,21 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
+import { useState, useEffect, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { authService } from '@/services/auth.service';
 
 export default function LoginPage() {
     const router = useRouter();
+    const [mounted, setMounted] = useState(false);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
@@ -45,9 +50,19 @@ export default function LoginPage() {
         }
     };
 
+    if (!mounted) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-500 to-primary-700">
+                <div className="bg-white p-8 rounded-lg shadow-2xl w-full max-w-md text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
+                </div>
+            </div>
+        );
+    }
+
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-500 to-primary-700" role="main" suppressHydrationWarning>
-            <div className="bg-white p-8 rounded-lg shadow-2xl w-full max-w-md" suppressHydrationWarning>
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-500 to-primary-700" role="main">
+            <div className="bg-white p-8 rounded-lg shadow-2xl w-full max-w-md">
                 <div className="mb-8 text-center">
                     <div className="flex items-center justify-center mb-4">
                         <Image
@@ -59,8 +74,7 @@ export default function LoginPage() {
                             priority
                         />
                     </div>
-                    <h1 className="text-3xl font-bold text-gray-900">Ethiopian IT Park</h1>
-                    <p className="text-gray-600 mt-1">Tenant Management System</p>
+                    <h1 className="text-3xl font-bold text-gray-900">Tenant Management System</h1>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-4" aria-label="Login form" noValidate>

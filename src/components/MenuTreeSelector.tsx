@@ -176,30 +176,39 @@ export function MenuTreeSelector({ menus, selectedIds, onChange, readonly = fals
         const checkboxState = getCheckboxState(item);
 
         return (
-            <div key={item.id}>
+            <div key={item.id} className="relative">
                 <div
-                    className={`flex items-center gap-2 py-2 px-3 pl-6 hover:bg-gray-50 rounded-lg transition-colors ${readonly ? 'cursor-default' : 'cursor-pointer'
-                        }`}
+                    className={`flex items-center gap-3 py-2.5 px-3 rounded-lg transition-all duration-200 group relative
+                        ${readonly ? 'cursor-default' : 'cursor-pointer hover:bg-gray-50/80 hover:shadow-sm'}
+                        ${depth === 0 ? 'bg-white mb-1' : ''}
+                    `}
+                    style={{ paddingLeft: `${depth > 0 ? depth * 24 + 12 : 12}px` }}
                 >
-                    {/* Expand/Collapse Icon */}
-                    <div className="w-5 h-5 flex items-center justify-center flex-shrink-0">
+                    {/* Vertical Guide Line */}
+                    {depth > 0 && (
+                        <div
+                            className="absolute left-0 top-0 bottom-0 border-l border-gray-100"
+                            style={{ left: `${(depth * 24) - 8}px` }}
+                        />
+                    )}
+
+                    {/* Expand/Collapse Button */}
+                    <div className="w-5 h-5 flex items-center justify-center flex-shrink-0 relative z-10">
                         {hasChildren ? (
                             <button
                                 onClick={(e) => {
-                                    e.stopPropagation(); // Prevent row click from triggering
+                                    e.stopPropagation();
                                     toggleExpand(item.id);
                                 }}
-                                className="text-gray-500 hover:text-gray-700 transition-colors"
+                                className={`text-gray-400 hover:text-primary-600 transition-colors p-0.5 rounded-md hover:bg-primary-50
+                                    ${isExpanded ? 'transform rotate-90 text-primary-500' : ''}
+                                `}
                                 type="button"
                             >
-                                {isExpanded ? (
-                                    <ChevronDown className="w-4 h-4" />
-                                ) : (
-                                    <ChevronRight className="w-4 h-4" />
-                                )}
+                                <ChevronRight className="w-4 h-4 transition-transform" />
                             </button>
                         ) : (
-                            <div className="w-4 h-4" />
+                            <div className="w-1 h-1 rounded-full bg-gray-200" />
                         )}
                     </div>
 
@@ -207,53 +216,58 @@ export function MenuTreeSelector({ menus, selectedIds, onChange, readonly = fals
                     <button
                         onClick={() => toggleMenu(item)}
                         disabled={readonly}
-                        className={`w-5 h-5 border-2 rounded flex items-center justify-center transition-all flex-shrink-0 ${checkboxState === 'checked'
-                            ? 'bg-primary-600 border-primary-600'
-                            : checkboxState === 'indeterminate'
-                                ? 'bg-primary-600 border-primary-600'
-                                : 'border-gray-300 hover:border-primary-500'
+                        className={`w-5 h-5 rounded-md flex items-center justify-center transition-all duration-200 flex-shrink-0 relative z-10 shadow-sm
+                            ${checkboxState === 'checked'
+                                ? 'bg-primary-600 border-primary-600 text-white shadow-primary/20'
+                                : checkboxState === 'indeterminate'
+                                    ? 'bg-primary-600 border-primary-600 text-white'
+                                    : 'border-2 border-gray-300 hover:border-primary-500 bg-white'
                             } ${readonly ? 'opacity-60 cursor-not-allowed' : ''}`}
                         type="button"
                     >
                         {checkboxState === 'checked' && (
-                            <Check className="w-3 h-3 text-white" strokeWidth={3} />
+                            <Check className="w-3.5 h-3.5" strokeWidth={3} />
                         )}
                         {checkboxState === 'indeterminate' && (
-                            <Minus className="w-3 h-3 text-white" strokeWidth={3} />
+                            <Minus className="w-3.5 h-3.5" strokeWidth={3} />
                         )}
                     </button>
 
-                    {/* Icon */}
-                    {item.icon && (
-                        <div className="text-gray-600 flex-shrink-0">
-                            {getIcon(item.icon)}
+                    {/* Content */}
+                    <div className="flex-1 flex items-center gap-3 min-w-0">
+                        {item.icon && (
+                            <div className={`p-1.5 rounded-md flex-shrink-0 ${depth === 0 ? 'bg-primary-50 text-primary-600' : 'bg-gray-50 text-gray-500'}`}>
+                                {getIcon(item.icon)}
+                            </div>
+                        )}
+                        <div className="flex flex-col min-w-0">
+                            <span className={`text-sm font-medium truncate ${depth === 0 ? 'text-gray-900' : 'text-gray-700'}`}>
+                                {item.name}
+                            </span>
+                            {item.path && (
+                                <span className="text-[10px] text-gray-400 font-mono truncate hidden group-hover:block transition-all">
+                                    {item.path}
+                                </span>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Level Badge - Only show for deeper levels or specific cases */}
+                    {depth > 0 && (
+                        <div className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <span className="px-1.5 py-0.5 bg-gray-100 text-gray-500 text-[10px] font-bold rounded uppercase tracking-wider">
+                                L{item.level}
+                            </span>
                         </div>
                     )}
-
-                    {/* Name */}
-                    <div className="flex-1 flex items-center gap-2">
-                        <span className="text-sm font-medium text-gray-900">{item.name}</span>
-                        {item.path && (
-                            <span className="text-xs text-gray-500">({item.path})</span>
-                        )}
-                    </div>
-
-                    {/* Level Badge */}
-                    <div className="flex-shrink-0">
-                        <span className="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded">
-                            L{item.level}
-                        </span>
-                    </div>
                 </div>
 
                 {/* Children */}
-                {
-                    hasChildren && isExpanded && (
-                        <div className="border-l-2 border-gray-200 ml-4">
-                            {item.children!.map(child => renderTreeNode(child, depth + 1))}
-                        </div>
-                    )
-                }
+                {hasChildren && isExpanded && (
+                    <div className="relative">
+                        {item.children!.map(child => renderTreeNode(child, depth + 1))}
+                    </div>
+                )}
             </div >
         );
     };

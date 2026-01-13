@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useAccessStore } from '@/store/access.store';
@@ -15,6 +15,11 @@ export function Navbar({ onToggleSidebar }: NavbarProps) {
     const router = useRouter();
     const { user } = useAccessStore();
     const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     const handleLogout = () => {
         authService.logout();
@@ -22,7 +27,7 @@ export function Navbar({ onToggleSidebar }: NavbarProps) {
     };
 
     return (
-        <header className="fixed top-0 left-0 right-0 h-16 bg-white border-b border-gray-200 z-50 shadow-sm" suppressHydrationWarning>
+        <header className="fixed top-0 left-0 right-0 h-16 bg-white border-b border-gray-200 z-50 shadow-sm">
             <div className="flex items-center justify-between h-full px-4">
                 {/* Left: Menu Toggle + Logo */}
                 <div className="flex items-center gap-4">
@@ -46,9 +51,8 @@ export function Navbar({ onToggleSidebar }: NavbarProps) {
                         />
                         <div className="hidden md:block">
                             <h1 className="text-xl font-bold text-secondary">
-                                Ethiopian IT Park
+                                Tenant Management System
                             </h1>
-                            <p className="text-xs text-gray-500">Tenant Management System</p>
                         </div>
                     </div>
                 </div>
@@ -84,64 +88,66 @@ export function Navbar({ onToggleSidebar }: NavbarProps) {
                         <Settings className="w-5 h-5 text-gray-600" />
                     </button>
 
-                    {/* User Menu */}
-                    <div className="relative">
-                        <button
-                            onClick={() => setProfileMenuOpen(!profileMenuOpen)}
-                            className="flex items-center gap-3 p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                        >
-                            <div className="text-right hidden sm:block">
-                                <div className="text-sm font-semibold text-gray-900">
-                                    {user?.username || 'User'}
-                                </div>
-                                <div className="text-xs text-gray-500">{user?.email}</div>
-                            </div>
-                            <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-semibold shadow-md">
-                                {user?.username?.substring(0, 2).toUpperCase() || 'U'}
-                            </div>
-                            <ChevronDown className="w-4 h-4 text-gray-600 hidden sm:block" />
-                        </button>
-
-                        {/* Dropdown Menu */}
-                        {profileMenuOpen && (
-                            <>
-                                <div
-                                    className="fixed inset-0 z-40"
-                                    onClick={() => setProfileMenuOpen(false)}
-                                />
-                                <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
-                                    <div className="px-4 py-3 border-b border-gray-100">
-                                        <div className="text-sm font-semibold text-gray-900">
-                                            {user?.username}
-                                        </div>
-                                        <div className="text-xs text-gray-500">{user?.email}</div>
+                    {/* User Menu - Only render when mounted to avoid hydration mismatch */}
+                    {mounted && (
+                        <div className="relative">
+                            <button
+                                onClick={() => setProfileMenuOpen(!profileMenuOpen)}
+                                className="flex items-center gap-3 p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                            >
+                                <div className="text-right hidden sm:block">
+                                    <div className="text-sm font-semibold text-gray-900">
+                                        {user?.username || 'User'}
                                     </div>
-                                    <button
-                                        onClick={() => router.push('/profile')}
-                                        className="flex items-center gap-3 px-4 py-2 hover:bg-gray-50 transition-colors w-full text-left"
-                                    >
-                                        <User className="w-5 h-5 text-gray-600" />
-                                        <span className="text-sm text-gray-700">My Profile</span>
-                                    </button>
-                                    <button
-                                        onClick={() => router.push('/settings')}
-                                        className="flex items-center gap-3 px-4 py-2 hover:bg-gray-50 transition-colors w-full text-left"
-                                    >
-                                        <Settings className="w-5 h-5 text-gray-600" />
-                                        <span className="text-sm text-gray-700">Settings</span>
-                                    </button>
-                                    <hr className="my-2" />
-                                    <button
-                                        onClick={handleLogout}
-                                        className="flex items-center gap-3 px-4 py-2 hover:bg-error-50 transition-colors w-full text-left"
-                                    >
-                                        <LogOut className="w-5 h-5 text-error-600" />
-                                        <span className="text-sm text-error-600 font-medium">Logout</span>
-                                    </button>
+                                    <div className="text-xs text-gray-500">{user?.email}</div>
                                 </div>
-                            </>
-                        )}
-                    </div>
+                                <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-semibold shadow-md">
+                                    {user?.username?.substring(0, 2).toUpperCase() || 'U'}
+                                </div>
+                                <ChevronDown className="w-4 h-4 text-gray-600 hidden sm:block" />
+                            </button>
+
+                            {/* Dropdown Menu */}
+                            {profileMenuOpen && (
+                                <>
+                                    <div
+                                        className="fixed inset-0 z-40"
+                                        onClick={() => setProfileMenuOpen(false)}
+                                    />
+                                    <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                                        <div className="px-4 py-3 border-b border-gray-100">
+                                            <div className="text-sm font-semibold text-gray-900">
+                                                {user?.username}
+                                            </div>
+                                            <div className="text-xs text-gray-500">{user?.email}</div>
+                                        </div>
+                                        <button
+                                            onClick={() => router.push('/profile')}
+                                            className="flex items-center gap-3 px-4 py-2 hover:bg-gray-50 transition-colors w-full text-left"
+                                        >
+                                            <User className="w-5 h-5 text-gray-600" />
+                                            <span className="text-sm text-gray-700">My Profile</span>
+                                        </button>
+                                        <button
+                                            onClick={() => router.push('/settings')}
+                                            className="flex items-center gap-3 px-4 py-2 hover:bg-gray-50 transition-colors w-full text-left"
+                                        >
+                                            <Settings className="w-5 h-5 text-gray-600" />
+                                            <span className="text-sm text-gray-700">Settings</span>
+                                        </button>
+                                        <hr className="my-2" />
+                                        <button
+                                            onClick={handleLogout}
+                                            className="flex items-center gap-3 px-4 py-2 hover:bg-error-50 transition-colors w-full text-left"
+                                        >
+                                            <LogOut className="w-5 h-5 text-error-600" />
+                                            <span className="text-sm text-error-600 font-medium">Logout</span>
+                                        </button>
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                    )}
                 </div>
             </div>
         </header>

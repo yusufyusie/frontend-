@@ -38,6 +38,7 @@ export function AssignPermissionsModal({
   permissions,
 }: AssignPermissionsModalProps) {
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [initialSelectedIds, setInitialSelectedIds] = useState<number[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [templates, setTemplates] = useState<PermissionTemplate[]>([]);
   const [loading, setLoading] = useState(false);
@@ -63,6 +64,14 @@ export function AssignPermissionsModal({
       permissions: perms,
     }));
   }, [permissions]);
+
+  // Check if dirty
+  const isDirty = useMemo(() => {
+    if (selectedIds.length !== initialSelectedIds.length) return true;
+    const sortedSelected = [...selectedIds].sort((a, b) => a - b);
+    const sortedInitial = [...initialSelectedIds].sort((a, b) => a - b);
+    return sortedSelected.some((id, index) => id !== sortedInitial[index]);
+  }, [selectedIds, initialSelectedIds]);
 
   // Filter permissions by search
   const filteredGroups = useMemo(() => {
@@ -139,6 +148,7 @@ export function AssignPermissionsModal({
           const currentIds =
             roleWithPermissions.permissions?.map((p) => p.id) || [];
           setSelectedIds(currentIds);
+          setInitialSelectedIds(currentIds);
         } catch (error) {
           toast.error("Failed to load current permissions");
         }
@@ -212,21 +222,19 @@ export function AssignPermissionsModal({
         <div className="flex border-b border-gray-200">
           <button
             onClick={() => setActiveTab("templates")}
-            className={`px-4 py-2 text-sm font-medium border-b-2 ${
-              activeTab === "templates"
-                ? "border-primary text-primary"
-                : "border-transparent text-gray-500 hover:text-gray-700"
-            }`}
+            className={`px-4 py-2 text-sm font-medium border-b-2 ${activeTab === "templates"
+              ? "border-primary text-primary"
+              : "border-transparent text-gray-500 hover:text-gray-700"
+              }`}
           >
             Templates
           </button>
           <button
             onClick={() => setActiveTab("custom")}
-            className={`px-4 py-2 text-sm font-medium border-b-2 ${
-              activeTab === "custom"
-                ? "border-primary text-primary"
-                : "border-transparent text-gray-500 hover:text-gray-700"
-            }`}
+            className={`px-4 py-2 text-sm font-medium border-b-2 ${activeTab === "custom"
+              ? "border-primary text-primary"
+              : "border-transparent text-gray-500 hover:text-gray-700"
+              }`}
           >
             Custom Selection
           </button>
@@ -324,9 +332,8 @@ export function AssignPermissionsModal({
                         selected
                       </span>
                       <ChevronDownIcon
-                        className={`w-5 h-5 text-gray-400 transition-transform ${
-                          expandedGroups.has(group.name) ? "rotate-180" : ""
-                        }`}
+                        className={`w-5 h-5 text-gray-400 transition-transform ${expandedGroups.has(group.name) ? "rotate-180" : ""
+                          }`}
                       />
                     </div>
                   </div>
@@ -379,24 +386,33 @@ export function AssignPermissionsModal({
         )}
       </div>
 
-      {/* Actions */}
-      <div className="flex justify-end space-x-3 border-t border-gray-200 p-4 bg-gray-50 rounded-b-lg">
-        <Button onClick={onClose} variant="outline">
-          Cancel
-        </Button>
-        <Button
-          onClick={handleAssign}
-          disabled={selectedIds.length === 0 || loading}
-          className="bg-primary hover:bg-primary/90 text-white"
-        >
-          {loading ? (
-            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-          ) : (
-            <CheckIcon className="w-4 h-4 mr-2" />
-          )}
-          Assign Permissions
-        </Button>
-      </div>
+      {/* Actions - Only show if dirty */}
+      {
+        isDirty && (
+          <div className="flex justify-between items-center border-t border-gray-200 p-4 bg-gray-50/50 rounded-b-lg animate-slide-up-fade">
+            <span className="text-sm text-gray-500 italic">
+              You have unsaved changes
+            </span>
+            <div className="flex space-x-3">
+              <Button onClick={onClose} variant="ghost" className="hover:bg-gray-200">
+                Discard
+              </Button>
+              <Button
+                onClick={handleAssign}
+                disabled={loading}
+                className="bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20 transition-all hover:scale-105"
+              >
+                {loading ? (
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                ) : (
+                  <CheckIcon className="w-4 h-4 mr-2" />
+                )}
+                Save Changes
+              </Button>
+            </div>
+          </div>
+        )
+      }
     </Modal>
   );
 }

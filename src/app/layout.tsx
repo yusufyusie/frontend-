@@ -19,7 +19,7 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
     title: {
-        default: 'Tenant Management System - Ethiopian IT Park',
+        default: 'Tenant Management System',
         template: '%s | TMS',
     },
     description: 'Comprehensive Tenant Management System for Ethiopian IT Park. Manage tenants, leases, billing, and property administration with advanced RBAC and secure authentication.',
@@ -34,7 +34,7 @@ export const metadata: Metadata = {
     },
     metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3001'),
     openGraph: {
-        title: 'Tenant Management System - Ethiopian IT Park',
+        title: 'Tenant Management System',
         description: 'Comprehensive Tenant Management for Ethiopian IT Park',
         url: '/',
         siteName: 'Tenant Management System',

@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     reactStrictMode: true,
-    swcMinify: true, // Use SWC for faster minification
+    // swcMinify is now default in Next.js 16 (removed deprecated option)
     compress: true, // Enable gzip compression
     poweredByHeader: false, // Remove X-Powered-By header for security
 
@@ -11,6 +11,9 @@ const nextConfig = {
             exclude: ['error', 'warn'],
         } : false,
     },
+
+    // Turbopack configuration (empty to silence warnings - webpack config still works)
+    turbopack: {},
 
     // Experimental features for performance
     experimental: {

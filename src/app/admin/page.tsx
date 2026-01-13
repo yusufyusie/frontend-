@@ -232,7 +232,7 @@ export default function AdminDashboard() {
                     <div className="text-5xl">🎯</div>
                     <div>
                         <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                            Ethiopian IT Park - Tenant Management System
+                            Tenant Management System
                         </h3>
                         <p className="text-gray-700 mb-4">
                             Comprehensive tenant management with advanced RBAC, billing, and property administration.
