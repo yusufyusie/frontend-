@@ -1,10 +1,14 @@
 'use client';
 
+import { Save, X } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Modal } from '@/components/Modal';
 import { FormInput } from '@/components/FormInput';
 import type { Role, CreateRoleData } from '@/services/roles.service';
 
+/**
+ * Props for the EditRoleModal component
+ */
 interface EditRoleModalProps {
     isOpen: boolean;
     onClose: () => void;
@@ -12,6 +16,10 @@ interface EditRoleModalProps {
     role: Role | null;
 }
 
+/**
+ * Administrative interface for modifying existing security roles
+ * Allows reconfiguration of role identifiers and business metadata
+ */
 export function EditRoleModal({
     isOpen,
     onClose,
@@ -24,7 +32,7 @@ export function EditRoleModal({
     });
     const [submitting, setSubmitting] = useState(false);
 
-    // Update form data when role changes
+    // Synchronize local state with selected descriptor
     useEffect(() => {
         if (role) {
             setFormData({
@@ -34,6 +42,9 @@ export function EditRoleModal({
         }
     }, [role]);
 
+    /**
+     * Persist modifications to the registry
+     */
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!role) return;
@@ -43,7 +54,7 @@ export function EditRoleModal({
             await onUpdate(role.id, formData);
             onClose();
         } catch (error) {
-            // Error is already handled in the hook
+            // Error states managed via centralized notification layer
         } finally {
             setSubmitting(false);
         }
@@ -52,44 +63,61 @@ export function EditRoleModal({
     if (!role) return null;
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title="Edit Role">
-            <form onSubmit={handleSubmit}>
+        <Modal
+            isOpen={isOpen}
+            onClose={onClose}
+            title="Modify Security Role"
+            description={`Updating Descriptor ID: ${role.id}`}
+        >
+            <form onSubmit={handleSubmit} className="space-y-6">
                 <FormInput
-                    label="Role Name"
+                    label="Role Identifier"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     required
                     disabled={submitting}
                 />
 
-                <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Description
+                <div className="space-y-1.5">
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest text-primary">
+                        Business Purpose Descriptor
                     </label>
                     <textarea
                         value={formData.description}
                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                        placeholder="Detail the scope and responsibilities of this descriptor..."
                         rows={3}
-                        className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all duration-200 outline-none"
+                        className="w-full px-4 py-3 rounded-xl border-2 border-gray-100 focus:border-primary/20 focus:ring-4 focus:ring-primary/5 transition-all outline-none text-sm text-gray-700 bg-gray-50/30"
                         disabled={submitting}
                     />
                 </div>
 
-                <div className="flex gap-3 justify-end mt-6">
+                <div className="flex gap-3 justify-end pt-4 border-t border-gray-50">
                     <button
                         type="button"
                         onClick={onClose}
-                        className="btn btn-secondary"
+                        className="btn btn-secondary flex items-center gap-2"
                         disabled={submitting}
                     >
-                        Cancel
+                        <X className="w-4 h-4" />
+                        <span>Cancel</span>
                     </button>
                     <button
                         type="submit"
-                        className="btn btn-primary"
+                        className="btn btn-primary flex items-center gap-2"
                         disabled={submitting}
                     >
-                        {submitting ? 'Saving...' : 'Save Changes'}
+                        {submitting ? (
+                            <>
+                                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                <span>Saving...</span>
+                            </>
+                        ) : (
+                            <>
+                                <Save className="w-4 h-4" />
+                                <span>Save Changes</span>
+                            </>
+                        )}
                     </button>
                 </div>
             </form>

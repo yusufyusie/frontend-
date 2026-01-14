@@ -1,7 +1,11 @@
 'use client';
 
+import { Search, Filter, SortAsc } from 'lucide-react';
 import type { SortOption } from '@/hooks/permissions/usePermissionFilters';
 
+/**
+ * Props for the PermissionsFilterBar component
+ */
 interface PermissionsFilterBarProps {
     searchTerm: string;
     setSearchTerm: (value: string) => void;
@@ -12,6 +16,10 @@ interface PermissionsFilterBarProps {
     uniqueGroups: string[];
 }
 
+/**
+ * Filtering and sorting interface for permissions
+ * Allows granular searching across name, group, and business description
+ */
 export function PermissionsFilterBar({
     searchTerm,
     setSearchTerm,
@@ -22,44 +30,46 @@ export function PermissionsFilterBar({
     uniqueGroups,
 }: PermissionsFilterBarProps) {
     return (
-        <div className="card">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {/* Search */}
-                <div className="relative col-span-2">
-                    <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                    <input
-                        type="text"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        placeholder="Search permissions by name, description, or group..."
-                        className="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all outline-none"
-                    />
-                </div>
+        <div className="card p-0 overflow-hidden shadow-sm flex flex-col lg:flex-row divide-y lg:divide-y-0 lg:divide-x divide-gray-100">
+            {/* Contextual Search Input */}
+            <div className="flex-1 relative group">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-primary transition-colors" />
+                <input
+                    type="text"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder="Search permissions by name, description, or asset group..."
+                    className="w-full pl-12 pr-4 py-4 border-none outline-none focus:ring-0 transition-all text-sm font-medium text-gray-700 bg-transparent"
+                />
+            </div>
 
-                {/* Group Filter */}
-                <div className="flex gap-2">
+            <div className="flex divide-x divide-gray-100 bg-gray-50/20">
+                {/* Taxonomy Filter */}
+                <div className="flex-1 lg:w-48 relative flex items-center px-4">
+                    <Filter className="w-4 h-4 text-gray-400 mr-2 shrink-0" />
                     <select
                         value={selectedGroup}
                         onChange={(e) => setSelectedGroup(e.target.value)}
-                        className="flex-1 px-4 py-3 rounded-lg border border-gray-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all outline-none"
+                        className="w-full py-4 bg-transparent border-none outline-none focus:ring-0 text-xs font-bold text-gray-500 uppercase tracking-widest cursor-pointer"
                     >
-                        <option value="all">All Groups</option>
+                        <option value="all">Every Group</option>
                         {uniqueGroups.map(group => (
                             <option key={group} value={group}>{group}</option>
                         ))}
                     </select>
+                </div>
 
-                    {/* Sort */}
+                {/* Ordering Selector */}
+                <div className="flex-1 lg:w-48 relative flex items-center px-4">
+                    <SortAsc className="w-4 h-4 text-gray-400 mr-2 shrink-0" />
                     <select
                         value={sortBy}
                         onChange={(e) => setSortBy(e.target.value as SortOption)}
-                        className="px-4 py-3 rounded-lg border border-gray-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all outline-none"
+                        className="w-full py-4 bg-transparent border-none outline-none focus:ring-0 text-xs font-bold text-gray-500 uppercase tracking-widest cursor-pointer"
                     >
-                        <option value="name">Sort by Name</option>
-                        <option value="usage">Sort by Usage</option>
-                        <option value="date">Sort by Date</option>
+                        <option value="name">Alphanumeric</option>
+                        <option value="usage">Impact (Usage)</option>
+                        <option value="date">Registry Date</option>
                     </select>
                 </div>
             </div>

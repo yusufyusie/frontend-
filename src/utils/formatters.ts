@@ -16,14 +16,6 @@ export function formatDate(date: string | Date, includeTime: boolean = false): s
 }
 
 /**
- * Format a date to time only
- */
-export function formatTime(date: string | Date): string {
-    const d = new Date(date);
-    return d.toLocaleTimeString();
-}
-
-/**
  * Format a date to relative time (e.g., "2 hours ago")
  */
 export function formatRelativeTime(date: string | Date): string {

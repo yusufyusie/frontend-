@@ -1,8 +1,12 @@
 'use client';
 
+import { ShieldAlert } from 'lucide-react';
 import type { Role } from '@/services/roles.service';
 import { RoleCard } from '@/components/RoleCard';
 
+/**
+ * Props for the RolesGrid component
+ */
 interface RolesGridProps {
     roles: Role[];
     selectedIds: Set<number>;
@@ -13,6 +17,10 @@ interface RolesGridProps {
     onAssignMenusClick: (role: Role) => void;
 }
 
+/**
+ * Responsive grid container for displaying role cards
+ * Manages empty states and passes user interactions to individual cards
+ */
 export function RolesGrid({
     roles,
     selectedIds,
@@ -24,17 +32,22 @@ export function RolesGrid({
 }: RolesGridProps) {
     if (roles.length === 0) {
         return (
-            <div className="col-span-full card text-center p-12">
-                <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-                <p className="text-gray-500 text-lg">No roles found matching your criteria</p>
+            <div className="col-span-full card border-dashed border-2 py-20 bg-gray-50/50 flex flex-col items-center justify-center text-center">
+                <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+                    <ShieldAlert className="w-8 h-8 text-gray-300" />
+                </div>
+                <div>
+                    <h3 className="text-lg font-bold text-gray-900">No Records Found</h3>
+                    <p className="text-sm text-gray-400 mt-1 max-w-xs mx-auto">
+                        Your current search filters didn't match any security roles in the directory.
+                    </p>
+                </div>
             </div>
         );
     }
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
             {roles.map((role) => (
                 <RoleCard
                     key={role.id}

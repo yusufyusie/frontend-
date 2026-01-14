@@ -1,77 +1,77 @@
 'use client';
 
+import { Shield, Users, Key, CheckCircle } from 'lucide-react';
 import type { RoleStats } from '@/services/roles.service';
 
+/**
+ * Props for the RolesStatsCards component
+ */
 interface RolesStatsCardsProps {
     stats: RoleStats | null;
     selectedCount: number;
 }
 
+/**
+ * Roles statistics visualization component
+ * Displays high-level metrics about roles, users, and permissions
+ */
 export function RolesStatsCards({ stats, selectedCount }: RolesStatsCardsProps) {
     if (!stats) return null;
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            {/* Total Roles */}
-            <div className="card relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32  rounded-full -mr-16 -mt-16" />
-                <div className="relative flex items-center gap-3">
-                    <div className="p-3 bg-secondary rounded-xl shadow-lg">
-                        <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                        </svg>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Total Roles Metric */}
+            <div className="card border-none bg-white p-6 shadow-sm hover:shadow-md transition-all group overflow-hidden relative">
+                <div className="absolute -right-4 -top-4 w-24 h-24 bg-primary/5 rounded-full group-hover:scale-150 transition-transform duration-500" />
+                <div className="relative flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
+                        <Shield className="w-6 h-6" />
                     </div>
                     <div>
-                        <p className="text-3xl font-bold text-gray-900">{stats.totalRoles}</p>
-                        <p className="text-sm text-gray-600">Total Roles</p>
+                        <div className="text-2xl font-bold text-gray-900 leading-tight">{stats.totalRoles}</div>
+                        <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">Total System Roles</div>
                     </div>
                 </div>
             </div>
 
-            {/* Total Users */}
-            <div className="card relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32  rounded-full -mr-16 -mt-16" />
-                <div className="relative flex items-center gap-3">
-                    <div className="p-3 bg-accent rounded-xl shadow-lg">
-                        <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                        </svg>
+            {/* Total Users Metric */}
+            <div className="card border-none bg-white p-6 shadow-sm hover:shadow-md transition-all group overflow-hidden relative">
+                <div className="absolute -right-4 -top-4 w-24 h-24 bg-accent/5 rounded-full group-hover:scale-150 transition-transform duration-500" />
+                <div className="relative flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-2xl bg-accent/10 flex items-center justify-center text-accent">
+                        <Users className="w-6 h-6" />
                     </div>
                     <div>
-                        <p className="text-3xl font-bold text-gray-900">{stats.totalUsers}</p>
-                        <p className="text-sm text-gray-600">Total Users</p>
+                        <div className="text-2xl font-bold text-gray-900 leading-tight">{stats.totalUsers}</div>
+                        <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">Assigned Users</div>
                     </div>
                 </div>
             </div>
 
-            {/* Average Permissions */}
-            <div className="card relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32  rounded-full -mr-16 -mt-16" />
-                <div className="relative flex items-center gap-3">
-                    <div className="p-3 bg-primary rounded-xl shadow-lg">
-                        <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                        </svg>
+            {/* Average Permissions Metric */}
+            <div className="card border-none bg-white p-6 shadow-sm hover:shadow-md transition-all group overflow-hidden relative">
+                <div className="absolute -right-4 -top-4 w-24 h-24 bg-secondary/5 rounded-full group-hover:scale-150 transition-transform duration-500" />
+                <div className="relative flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-2xl bg-secondary/10 flex items-center justify-center text-secondary">
+                        <Key className="w-6 h-6" />
                     </div>
                     <div>
-                        <p className="text-3xl font-bold text-gray-900">{stats.averagePermissions}</p>
-                        <p className="text-sm text-gray-600">Avg Permissions</p>
+                        <div className="text-2xl font-bold text-gray-900 leading-tight">{stats.averagePermissions}</div>
+                        <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">Avg Permissions</div>
                     </div>
                 </div>
             </div>
 
-            {/* Selected Items */}
-            <div className="card relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32  rounded-full -mr-16 -mt-16" />
-                <div className="relative flex items-center gap-3">
-                    <div className="p-3 bg-accent-700 rounded-xl shadow-lg">
-                        <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                        </svg>
+            {/* Selected Items Counter */}
+            <div className="card border-none bg-white p-6 shadow-sm hover:shadow-md transition-all group overflow-hidden relative">
+                <div className="absolute -right-4 -top-4 w-24 h-24 bg-teal-50 rounded-full group-hover:scale-150 transition-transform duration-500" />
+                <div className="relative flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-2xl bg-teal-50 flex items-center justify-center text-teal-600">
+                        <CheckCircle className="w-6 h-6" />
                     </div>
                     <div>
-                        <p className="text-3xl font-bold text-gray-900">{selectedCount}</p>
-                        <p className="text-sm text-gray-600">Selected Items</p>
+                        <div className="text-2xl font-bold text-gray-900 leading-tight">{selectedCount}</div>
+                        <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">Items Selected</div>
                     </div>
                 </div>
             </div>

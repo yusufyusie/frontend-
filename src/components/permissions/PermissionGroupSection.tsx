@@ -1,8 +1,12 @@
 'use client';
 
+import { Folder, ChevronDown } from 'lucide-react';
 import type { Permission } from '@/services/permissions.service';
 import { PermissionCard } from '@/components/PermissionCard';
 
+/**
+ * Props for the PermissionGroupSection component
+ */
 interface PermissionGroupSectionProps {
     groupName: string;
     permissions: Permission[];
@@ -15,6 +19,10 @@ interface PermissionGroupSectionProps {
     onViewDetailsClick: (permission: Permission) => void;
 }
 
+/**
+ * Categorized section of permissions sharing the same logical group
+ * Supports collapsible interface for managing large numbers of rules
+ */
 export function PermissionGroupSection({
     groupName,
     permissions,
@@ -27,39 +35,32 @@ export function PermissionGroupSection({
     onViewDetailsClick,
 }: PermissionGroupSectionProps) {
     return (
-        <div className="card overflow-hidden">
-            {/* Group Header */}
+        <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-md transition-all">
+            {/* Contextual Group Registry Header */}
             <button
                 onClick={() => onToggleExpand(groupName)}
-                className="w-full flex items-center justify-between p-5 hover:bg-gray-50 transition-colors"
+                className="w-full flex items-center justify-between p-6 hover:bg-gray-50/50 transition-colors group"
             >
-                <div className="flex items-center gap-4">
-                    <div
-                        className="p-3 rounded-xl shadow-md bg-primary"
-                    >
-                        <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-                        </svg>
+                <div className="flex items-center gap-5">
+                    <div className="w-12 h-12 rounded-2xl bg-secondary/10 flex items-center justify-center text-secondary group-hover:scale-110 transition-transform duration-300">
+                        <Folder className="w-6 h-6" />
                     </div>
                     <div className="text-left">
-                        <h2 className="text-2xl font-bold text-gray-900">{groupName}</h2>
-                        <p className="text-sm text-gray-600 mt-0.5">{permissions.length} permission{permissions.length !== 1 ? 's' : ''}</p>
+                        <h2 className="text-xl font-bold text-gray-900 tracking-tight">{groupName}</h2>
+                        <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">
+                            Registry: {permissions.length} Rule{permissions.length !== 1 ? 's' : ''}
+                        </div>
                     </div>
                 </div>
-                <svg
-                    className={`w-6 h-6 text-gray-400 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
+                <div className={`p-2 rounded-xl bg-gray-50 text-gray-400 group-hover:bg-gray-100 group-hover:text-gray-600 transition-all ${isExpanded ? 'rotate-180 bg-gray-100 text-gray-900' : ''}`}>
+                    <ChevronDown className="w-5 h-5 transition-transform duration-300" />
+                </div>
             </button>
 
-            {/* Permissions Grid */}
+            {/* Granular Permission Ledger */}
             {isExpanded && (
-                <div className="border-t border-gray-100 p-5 bg-gray-50/50">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="border-t border-gray-50 p-6 bg-gray-50/30">
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                         {permissions.map((perm) => (
                             <PermissionCard
                                 key={perm.id}

@@ -1,10 +1,14 @@
 'use client';
 
+import { Save, X } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Modal } from '@/components/Modal';
 import { FormInput } from '@/components/FormInput';
 import type { Permission, CreatePermissionData } from '@/services/permissions.service';
 
+/**
+ * Props for the EditPermissionModal component
+ */
 interface EditPermissionModalProps {
     isOpen: boolean;
     onClose: () => void;
@@ -13,6 +17,10 @@ interface EditPermissionModalProps {
     existingGroups: string[];
 }
 
+/**
+ * Administrative interface for modifying existing security rules
+ * Allows reconfiguration of system identifiers and business metadata
+ */
 export function EditPermissionModal({
     isOpen,
     onClose,
@@ -27,7 +35,7 @@ export function EditPermissionModal({
     });
     const [submitting, setSubmitting] = useState(false);
 
-    // Update form data when permission changes
+    // Synchronize local state with selected registry entry
     useEffect(() => {
         if (permission) {
             setFormData({
@@ -38,6 +46,9 @@ export function EditPermissionModal({
         }
     }, [permission]);
 
+    /**
+     * Persist modifications to the registry
+     */
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!permission) return;
@@ -47,7 +58,7 @@ export function EditPermissionModal({
             await onUpdate(permission.id, formData);
             onClose();
         } catch (error) {
-            // Error is already handled in the hook
+            // Error states managed via centralized notification layer
         } finally {
             setSubmitting(false);
         }
@@ -56,10 +67,15 @@ export function EditPermissionModal({
     if (!permission) return null;
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title="Edit Permission">
-            <form onSubmit={handleSubmit}>
+        <Modal
+            isOpen={isOpen}
+            onClose={onClose}
+            title="Modify Security Rule"
+            description={`Updating Registry ID: ${permission.id}`}
+        >
+            <form onSubmit={handleSubmit} className="space-y-5">
                 <FormInput
-                    label="Permission Name"
+                    label="System Identifier (Resource.Action)"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     required
@@ -67,7 +83,7 @@ export function EditPermissionModal({
                 />
 
                 <FormInput
-                    label="Group Name"
+                    label="Logical Asset Group"
                     value={formData.groupName}
                     onChange={(e) => setFormData({ ...formData, groupName: e.target.value })}
                     required
@@ -80,34 +96,46 @@ export function EditPermissionModal({
                     ))}
                 </datalist>
 
-                <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Description
+                <div className="space-y-1.5">
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest text-primary">
+                        Business Purpose
                     </label>
                     <textarea
                         value={formData.description}
                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                        placeholder="Detail the exact resource access and capabilities..."
                         rows={3}
-                        className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all duration-200 outline-none"
+                        className="w-full px-4 py-3 rounded-xl border-2 border-gray-100 focus:border-primary/20 focus:ring-4 focus:ring-primary/5 transition-all outline-none text-sm text-gray-700 bg-gray-50/30"
                         disabled={submitting}
                     />
                 </div>
 
-                <div className="flex gap-3 justify-end mt-6">
+                <div className="flex gap-3 justify-end pt-4 border-t border-gray-50">
                     <button
                         type="button"
                         onClick={onClose}
-                        className="btn btn-secondary"
+                        className="btn btn-secondary flex items-center gap-2"
                         disabled={submitting}
                     >
-                        Cancel
+                        <X className="w-4 h-4" />
+                        <span>Cancel</span>
                     </button>
                     <button
                         type="submit"
-                        className="btn btn-primary"
+                        className="btn btn-primary flex items-center gap-2"
                         disabled={submitting}
                     >
-                        {submitting ? 'Saving...' : 'Save Changes'}
+                        {submitting ? (
+                            <>
+                                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                <span>Saving...</span>
+                            </>
+                        ) : (
+                            <>
+                                <Save className="w-4 h-4" />
+                                <span>Save Changes</span>
+                            </>
+                        )}
                     </button>
                 </div>
             </form>

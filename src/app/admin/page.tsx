@@ -8,6 +8,8 @@ import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { useAccessStore } from '@/store/access.store';
 import Link from 'next/link';
 
+import { Users, UserCheck, Shield, Lock, ChevronRight, UserPlus, Info, Mail, Activity, Target } from 'lucide-react';
+
 export default function AdminDashboard() {
     const { user } = useAccessStore();
     const [stats, setStats] = useState({
@@ -22,6 +24,9 @@ export default function AdminDashboard() {
         fetchStats();
     }, []);
 
+    /**
+     * Fetch dashboard statistics from multiple services
+     */
     const fetchStats = async () => {
         try {
             const [users, roles, permissions] = await Promise.all([
@@ -55,37 +60,29 @@ export default function AdminDashboard() {
         {
             title: 'Total Users',
             value: stats.totalUsers,
-            icon: '👥',
-            color: 'from-primary-500 to-primary-700',
-            bgColor: 'bg-primary-50',
-            textColor: 'text-primary-600',
+            icon: Users,
+            color: 'bg-primary',
             link: '/admin/users'
         },
         {
             title: 'Active Users',
             value: stats.activeUsers,
-            icon: '✅',
-            color: 'from-green-500 to-teal-500',
-            bgColor: 'bg-green-50',
-            textColor: 'text-green-600',
+            icon: UserCheck,
+            color: 'bg-success',
             link: '/admin/users'
         },
         {
-            title: 'Roles',
+            title: 'System Roles',
             value: stats.totalRoles,
-            icon: '🎭',
-            color: 'from-secondary-500 to-accent-500',
-            bgColor: 'bg-purple-50',
-            textColor: 'text-purple-600',
+            icon: Shield,
+            color: 'bg-secondary',
             link: '/admin/roles'
         },
         {
             title: 'Permissions',
             value: stats.totalPermissions,
-            icon: '🔐',
-            color: 'from-orange-500 to-red-500',
-            bgColor: 'bg-orange-50',
-            textColor: 'text-orange-600',
+            icon: Lock,
+            color: 'bg-accent',
             link: '/admin/permissions'
         }
     ];
@@ -93,156 +90,181 @@ export default function AdminDashboard() {
     const quickActions = [
         {
             title: 'Add New User',
-            description: 'Create a new user account',
-            icon: '👤➕',
+            description: 'Register and configure fresh user accounts',
+            icon: UserPlus,
             link: '/admin/users',
-            color: 'from-primary-500 to-primary-700'
+            color: 'bg-primary'
         },
         {
             title: 'Manage Roles',
-            description: 'Configure roles and permissions',
-            icon: '🎭',
+            description: 'Configure hierarchical access controls',
+            icon: Shield,
             link: '/admin/roles',
-            color: 'from-secondary-500 to-accent-500'
+            color: 'bg-secondary'
         },
         {
-            title: 'View Permissions',
-            description: 'Browse all system permissions',
-            icon: '🔐',
-            link: '/admin/permissions',
-            color: 'from-green-500 to-teal-500'
+            title: 'System Audit',
+            description: 'Monitor all administrative activities',
+            icon: Activity,
+            link: '/admin/audit',
+            color: 'bg-success'
         }
     ];
 
     return (
-        <div className="space-y-6 animate-fade-in">
-            {/* Welcome Header */}
-            <div className="card-gradient p-6">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <h1 className="text-4xl font-bold text-primary mb-2">
-                            Welcome back, {user?.username}! 👋
+        <div className="space-y-8 animate-fade-in">
+            {/* Dashboard welcome section */}
+            <div className="card-gradient p-8 md:p-10">
+                <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div className="text-center md:text-left">
+                        <h1 className="text-3xl md:text-4xl font-bold text-primary mb-3">
+                            Welcome, {user?.username}
                         </h1>
-                        <p className="text-gray-600 text-lg">
-                            Here's what's happening with your tenant management system today.
+                        <p className="text-gray-600 text-base md:text-lg max-w-2xl">
+                            Overview of the Tenant Management System activities and configuration status.
                         </p>
                     </div>
-                    <div className="hidden md:block">
-                        <div className="w-24 h-24 rounded-full bg-[#0C7C92] flex items-center justify-center text-white text-5xl shadow-lg" aria-hidden="true">
-                            {user?.username?.substring(0, 2).toUpperCase()}
+                    <div className="flex-shrink-0">
+                        <div className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-primary flex items-center justify-center text-white text-3xl md:text-5xl font-bold shadow-xl border-4 border-white">
+                            {user?.username?.substring(0, 1).toUpperCase()}
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* Statistics Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {statCards.map((stat, index) => (
-                    <Link key={index} href={stat.link}>
-                        <div className="card hover-lift cursor-pointer group">
-                            <div className="flex items-center justify-between mb-4">
-                                <div className="w-14 h-14 rounded-xl bg-primary flex items-center justify-center text-3xl shadow-lg group-hover:scale-110 transition-transform" aria-hidden="true">
-                                    {stat.icon}
+            {/* Core statistics grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {statCards.map((stat, index) => {
+                    const Icon = stat.icon;
+                    return (
+                        <Link key={index} href={stat.link}>
+                            <div className="card hover-lift cursor-pointer group p-5">
+                                <div className="flex items-center justify-between mb-4">
+                                    <div className={`w-12 h-12 rounded-xl ${stat.color} flex items-center justify-center text-white shadow-md group-hover:scale-110 transition-transform`}>
+                                        <Icon className="w-6 h-6" />
+                                    </div>
+                                    <ChevronRight className="w-5 h-5 text-gray-300 group-hover:text-primary transition-colors" />
                                 </div>
-                                <svg className="w-6 h-6 text-gray-400 group-hover:text-primary-600 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                </svg>
-                            </div>
-                            <div className="text-sm text-gray-600 mb-1">{stat.title}</div>
-                            <div className="text-4xl font-bold text-gray-900">{stat.value}</div>
-                        </div>
-                    </Link>
-                ))}
-            </div>
-
-            {/* Quick Actions */}
-            <div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">Quick Actions</h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {quickActions.map((action, index) => (
-                        <Link key={index} href={action.link}>
-                            <div className="card hover-lift cursor-pointer group">
-                                <div className="w-16 h-16 rounded-xl bg-primary-dark flex items-center justify-center text-4xl mb-4 group-hover:scale-110 transition-transform shadow-lg" aria-hidden="true">
-                                    {action.icon}
-                                </div>
-                                <h3 className="text-xl font-semibold text-gray-900 mb-2 group-hover:text-primary-600 transition-colors">
-                                    {action.title}
-                                </h3>
-                                <p className="text-gray-600">{action.description}</p>
+                                <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">{stat.title}</div>
+                                <div className="text-3xl font-bold text-gray-900">{stat.value}</div>
                             </div>
                         </Link>
-                    ))}
-                </div>
+                    );
+                })}
             </div>
 
-            {/* Recent Activity / System Overview */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* System Information */}
+            {/* Administrative quick actions */}
+            <section>
+                <div className="flex items-center gap-3 mb-6">
+                    <div className="h-8 w-1 bg-primary rounded-full"></div>
+                    <h2 className="text-2xl font-bold text-gray-900">Quick Actions</h2>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {quickActions.map((action, index) => {
+                        const Icon = action.icon;
+                        return (
+                            <Link key={index} href={action.link}>
+                                <div className="card hover-lift cursor-pointer group h-full">
+                                    <div className={`w-14 h-14 rounded-2xl ${action.color} flex items-center justify-center text-white mb-5 group-hover:scale-110 transition-transform shadow-lg`}>
+                                        <Icon className="w-8 h-8" />
+                                    </div>
+                                    <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-primary transition-colors">
+                                        {action.title}
+                                    </h3>
+                                    <p className="text-gray-500 text-sm leading-relaxed">{action.description}</p>
+                                </div>
+                            </Link>
+                        );
+                    })}
+                </div>
+            </section>
+
+            {/* System details and access info */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* System technical status */}
                 <div className="card">
-                    <h3 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                        <span className="text-2xl">ℹ️</span>
+                    <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                        <Info className="w-5 h-5 text-primary" />
                         System Information
                     </h3>
-                    <div className="space-y-3">
-                        <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                            <span className="text-gray-700">Version</span>
-                            <span className="font-semibold text-gray-900">1.0.0</span>
+                    <div className="space-y-4">
+                        <div className="flex justify-between items-center p-4 bg-gray-50 rounded-xl border border-gray-100">
+                            <span className="text-sm font-medium text-gray-600 uppercase tracking-widest text-[10px]">Version</span>
+                            <span className="font-mono text-sm font-bold text-primary">v1.0.0</span>
                         </div>
-                        <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                            <span className="text-gray-700">Management Type</span>
-                            <span className="font-semibold text-gray-900">Tenant & Property</span>
+                        <div className="flex justify-between items-center p-4 bg-gray-50 rounded-xl border border-gray-100">
+                            <span className="text-sm font-medium text-gray-600 uppercase tracking-widest text-[10px]">Security Engine</span>
+                            <span className="badge badge-success badge-sm font-bold">Dynamic PBAC</span>
                         </div>
-                        <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                            <span className="text-gray-700">Claims-Based Auth</span>
-                            <span className="badge badge-success">Enabled</span>
+                        <div className="flex justify-between items-center p-4 bg-gray-50 rounded-xl border border-gray-100">
+                            <span className="text-sm font-medium text-gray-600 uppercase tracking-widest text-[10px]">Identity Provider</span>
+                            <span className="text-sm font-bold text-gray-900">Internal JWT</span>
                         </div>
-                        <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                            <span className="text-gray-700">Database</span>
-                            <span className="badge badge-success">Connected</span>
+                        <div className="flex justify-between items-center p-4 bg-gray-50 rounded-xl border border-gray-100">
+                            <span className="text-sm font-medium text-gray-600 uppercase tracking-widest text-[10px]">Database Status</span>
+                            <div className="flex items-center gap-2">
+                                <span className="h-2 w-2 rounded-full bg-success animate-pulse"></span>
+                                <span className="text-sm font-bold text-gray-900">Synchronized</span>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                {/* Your Access */}
+                {/* Current user session info */}
                 <div className="card">
-                    <h3 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                        <span className="text-2xl">🔑</span>
-                        Your Access
+                    <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                        <Shield className="w-5 h-5 text-primary" />
+                        Access Details
                     </h3>
-                    <div className="space-y-3">
-                        <div className="p-3 bg-primary-50 rounded-lg border border-primary-200">
-                            <div className="text-sm text-primary-700 mb-1">Username</div>
-                            <div className="font-semibold text-primary-900">{user?.username}</div>
+                    <div className="space-y-4">
+                        <div className="p-4 bg-primary/5 rounded-xl border border-primary/10">
+                            <div className="flex items-center gap-3 mb-1">
+                                <Users className="w-4 h-4 text-primary" />
+                                <span className="text-[10px] font-bold text-primary uppercase tracking-widest">Username</span>
+                            </div>
+                            <div className="font-bold text-gray-900">{user?.username}</div>
                         </div>
-                        <div className="p-3 bg-secondary-50 rounded-lg border border-secondary-200">
-                            <div className="text-sm text-secondary-700 mb-1">Email</div>
-                            <div className="font-semibold text-secondary-900">{user?.email}</div>
+                        <div className="p-4 bg-secondary/5 rounded-xl border border-secondary/10">
+                            <div className="flex items-center gap-3 mb-1">
+                                <Mail className="w-4 h-4 text-secondary" />
+                                <span className="text-[10px] font-bold text-secondary uppercase tracking-widest">Auth Email</span>
+                            </div>
+                            <div className="font-bold text-gray-900">{user?.email}</div>
                         </div>
-                        <div className="p-3 bg-green-50 rounded-lg border border-green-200">
-                            <div className="text-sm text-green-700 mb-1">Status</div>
-                            <span className="badge badge-success">Active</span>
+                        <div className="p-4 bg-success/5 rounded-xl border border-success/10">
+                            <div className="flex items-center gap-3 mb-1">
+                                <Target className="w-4 h-4 text-success" />
+                                <span className="text-[10px] font-bold text-success uppercase tracking-widest">Account Status</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <span className="badge badge-success font-bold uppercase tracking-tighter">Verified Session</span>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* Feature Highlights */}
-            <div className="card bg-primary-50 border-2 border-primary">
-                <div className="flex items-start gap-4">
-                    <div className="text-5xl">🎯</div>
-                    <div>
-                        <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                            Tenant Management System
+            {/* Feature spotlight */}
+            <div className="card bg-primary text-white border-0 shadow-2xl relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl"></div>
+                <div className="flex flex-col md:flex-row items-center gap-8 relative z-10">
+                    <div className="w-20 h-20 md:w-24 md:h-24 bg-white/20 rounded-3xl backdrop-blur-md flex items-center justify-center flex-shrink-0">
+                        <Target className="w-10 h-10 md:w-12 md:h-12 text-white" />
+                    </div>
+                    <div className="text-center md:text-left">
+                        <h3 className="text-2xl md:text-3xl font-bold mb-3">
+                            Next-Generation Access Management
                         </h3>
-                        <p className="text-gray-700 mb-4">
-                            Comprehensive tenant management with advanced RBAC, billing, and property administration.
-                            All features are fully configurable without code changes.
+                        <p className="text-white/80 mb-6 text-sm md:text-base leading-relaxed max-w-2xl">
+                            Our system utilizes fully dynamic, automated RBAC and PBAC controls.
+                            Configure entire organizational structures and security constraints in real-time.
                         </p>
-                        <div className="flex flex-wrap gap-2">
-                            <span className="badge bg-primary-100 text-primary-800 border border-primary-300">✅ Dynamic RBAC</span>
-                            <span className="badge bg-secondary-100 text-secondary-800 border border-secondary-300">✅ Dynamic PBAC</span>
-                            <span className="badge bg-green-100 text-green-800 border border-green-300">✅ Claims-Based</span>
-                            <span className="badge bg-accent-100 text-accent-800 border border-accent-300">✅ Professional UX</span>
+                        <div className="flex flex-wrap justify-center md:justify-start gap-2">
+                            {['Zero-Trust Ready', 'claims-based', 'Auto-Discovery', 'Enterprise Audit'].map(feature => (
+                                <span key={feature} className="px-3 py-1 bg-white/20 rounded-full text-[10px] font-bold uppercase tracking-wider backdrop-blur-sm border border-white/10">
+                                    {feature}
+                                </span>
+                            ))}
                         </div>
                     </div>
                 </div>

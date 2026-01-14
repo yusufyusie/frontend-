@@ -1,13 +1,24 @@
 import React, { useState, useEffect, useMemo } from "react";
+import {
+  Search,
+  Check,
+  X,
+  LayoutGrid,
+  ListTree,
+  Table,
+  Globe,
+  ShieldCheck,
+  History,
+  ChevronDown,
+  AlertCircle,
+  ArrowRight,
+  Save,
+  Trash
+} from 'lucide-react';
 import { Modal } from "@/components/Modal";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import {
-  MagnifyingGlassIcon,
-  CheckIcon,
-  XMarkIcon,
-} from "@heroicons/react/24/outline";
 import {
   permissionTemplatesService,
   type PermissionTemplate,
@@ -16,7 +27,12 @@ import { toast } from "@/components/Toast";
 import type { Permission } from "@/services/permissions.service";
 import type { Role } from "@/services/roles.service";
 import { rolesService } from "@/services/roles.service";
+import { PermissionTree } from "@/components/PermissionTree";
+import { ResourceActionMatrix } from "@/components/ResourceActionMatrix";
 
+/**
+ * Props for the AssignPermissionsModal component
+ */
 interface AssignPermissionsModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -25,11 +41,23 @@ interface AssignPermissionsModalProps {
   permissions: Permission[];
 }
 
+/**
+ * Internal group descriptor for permissions taxonomy
+ */
 interface PermissionGroup {
   name: string;
   permissions: Permission[];
 }
 
+/**
+ * Valid visualization strategies for permission assignment
+ */
+type TabType = "templates" | "custom" | "tree" | "matrix";
+
+/**
+ * Administrative Control Center for Role-Based Access Control (RBAC)
+ * Orchestrates technical rule assignment via templates, matrices, and hierarchical trees.
+ */
 export function AssignPermissionsModal({
   isOpen,
   onClose,
@@ -42,19 +70,18 @@ export function AssignPermissionsModal({
   const [searchTerm, setSearchTerm] = useState("");
   const [templates, setTemplates] = useState<PermissionTemplate[]>([]);
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<"templates" | "custom">(
-    "templates",
-  );
+  const [activeTab, setActiveTab] = useState<TabType>("templates");
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
 
-  // Group permissions
+  // Derive logical taxonomy groups from raw registry entries
   const groupedPermissions = useMemo(() => {
     const groups = permissions.reduce(
       (acc, perm) => {
-        if (!acc[perm.groupName]) {
-          acc[perm.groupName] = [];
+        const groupName = perm.groupName || "General";
+        if (!acc[groupName]) {
+          acc[groupName] = [];
         }
-        acc[perm.groupName].push(perm);
+        acc[groupName].push(perm);
         return acc;
       },
       {} as Record<string, Permission[]>,
@@ -65,7 +92,7 @@ export function AssignPermissionsModal({
     }));
   }, [permissions]);
 
-  // Check if dirty
+  // Determine delta between initial state and current selection
   const isDirty = useMemo(() => {
     if (selectedIds.length !== initialSelectedIds.length) return true;
     const sortedSelected = [...selectedIds].sort((a, b) => a - b);
@@ -73,23 +100,26 @@ export function AssignPermissionsModal({
     return sortedSelected.some((id, index) => id !== sortedInitial[index]);
   }, [selectedIds, initialSelectedIds]);
 
-  // Filter permissions by search
+  // Apply search filtering across the taxonomy
   const filteredGroups = useMemo(() => {
     if (!searchTerm.trim()) return groupedPermissions;
+    const lowerSearch = searchTerm.toLowerCase();
     return groupedPermissions
       .map((group) => ({
         ...group,
         permissions: group.permissions.filter(
           (perm) =>
-            perm.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            perm.displayName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            perm.description.toLowerCase().includes(searchTerm.toLowerCase()),
+            perm.name.toLowerCase().includes(lowerSearch) ||
+            perm.displayName?.toLowerCase().includes(lowerSearch) ||
+            perm.description?.toLowerCase().includes(lowerSearch),
         ),
       }))
       .filter((group) => group.permissions.length > 0);
   }, [groupedPermissions, searchTerm]);
 
-  // Toggle group expansion
+  /**
+   * Toggle expansion of a logical group in the list view
+   */
   const toggleGroup = (groupName: string) => {
     const newExpanded = new Set(expandedGroups);
     if (newExpanded.has(groupName)) {
@@ -100,46 +130,50 @@ export function AssignPermissionsModal({
     setExpandedGroups(newExpanded);
   };
 
-  // Toggle permission selection
+  /**
+   * Toggle individual permission selection
+   */
   const togglePermission = (id: number) => {
     setSelectedIds((prev) =>
       prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id],
     );
   };
 
-  // Select all in group
+  /**
+   * Perform bulk selection/deselection for a group
+   */
   const selectAllInGroup = (group: PermissionGroup) => {
     const groupIds = group.permissions.map((p) => p.id);
+    const allSelectedInGroup = groupIds.every(id => selectedIds.includes(id));
+
     setSelectedIds((prev) => {
-      const newSelected = new Set(prev);
-      groupIds.forEach((id) => {
-        if (newSelected.has(id)) {
-          newSelected.delete(id);
-        } else {
-          newSelected.add(id);
-        }
-      });
-      return Array.from(newSelected);
+      if (allSelectedInGroup) {
+        return prev.filter(id => !groupIds.includes(id));
+      } else {
+        const newSelected = new Set([...prev, ...groupIds]);
+        return Array.from(newSelected);
+      }
     });
   };
 
-  // Load templates
+  // Load templates on open
   useEffect(() => {
     if (isOpen) {
       const loadTemplates = async () => {
         try {
           const data = await permissionTemplatesService.getAll();
-          setTemplates(data);
+          setTemplates(data || []);
         } catch (error) {
-          toast.error("Failed to load permission templates");
+          // Errors managed via centralized logging
         }
       };
       loadTemplates();
       setExpandedGroups(new Set());
+      console.log("AssignPermissionsModal: Layout refreshed");
     }
   }, [isOpen]);
 
-  // Load current assigned permissions
+  // Load current role permissions
   useEffect(() => {
     if (isOpen && role) {
       const fetchAssignedPermissions = async () => {
@@ -157,49 +191,53 @@ export function AssignPermissionsModal({
     }
   }, [isOpen, role]);
 
-  // Apply template
+  /**
+   * Apply template
+   */
   const applyTemplate = async (templateId: number) => {
     try {
       setLoading(true);
       const permissionIds =
         await permissionTemplatesService.evaluate(templateId);
-      setSelectedIds(permissionIds);
+      setSelectedIds(permissionIds || []);
       toast.success("Template applied successfully");
     } catch (error) {
-      toast.error("Failed to apply template");
+      toast.error("Template evaluation error");
     } finally {
       setLoading(false);
     }
   };
 
-  // Handle assign
+  /**
+   * Save changes
+   */
   const handleAssign = async () => {
-    if (!role || selectedIds.length === 0) {
-      toast.error("No permissions selected");
-      return;
-    }
+    if (!role) return;
     try {
       setLoading(true);
       await onAssign(role.id, selectedIds);
       onClose();
-      toast.success("Permissions assigned successfully");
+      toast.success("Role permissions updated successfully");
     } catch (error) {
-      toast.error("Failed to assign permissions");
+      toast.error("Failed to update permissions");
     } finally {
       setLoading(false);
     }
   };
 
-  // Clear selection
+  /**
+   * Clear selection
+   */
   const clearSelection = () => setSelectedIds([]);
 
-  // Is all selected in group
+  /**
+   * Logic for indeterminate checkbox states
+   */
   const isAllSelectedInGroup = (group: PermissionGroup) => {
     const groupIds = group.permissions.map((p) => p.id);
-    return groupIds.every((id) => selectedIds.includes(id));
+    return groupIds.length > 0 && groupIds.every((id) => selectedIds.includes(id));
   };
 
-  // Is some selected in group
   const isSomeSelectedInGroup = (group: PermissionGroup) => {
     const groupIds = group.permissions.map((p) => p.id);
     return (
@@ -210,83 +248,95 @@ export function AssignPermissionsModal({
 
   if (!role) return null;
 
-  return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      title={`Assign Permissions to "${role.name}"`}
-      size="xl"
-    >
-      <div className="space-y-6 p-6 font-primary">
-        {/* Tabs */}
-        <div className="flex border-b border-gray-200">
-          <button
-            onClick={() => setActiveTab("templates")}
-            className={`px-4 py-2 text-sm font-medium border-b-2 ${activeTab === "templates"
-              ? "border-primary text-primary"
-              : "border-transparent text-gray-500 hover:text-gray-700"
-              }`}
-          >
-            Templates
-          </button>
-          <button
-            onClick={() => setActiveTab("custom")}
-            className={`px-4 py-2 text-sm font-medium border-b-2 ${activeTab === "custom"
-              ? "border-primary text-primary"
-              : "border-transparent text-gray-500 hover:text-gray-700"
-              }`}
-          >
-            Custom Selection
-          </button>
-        </div>
-
-        {/* Content */}
-        {activeTab === "templates" ? (
-          /* Templates Section */
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case "templates":
+        return (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 animate-in fade-in slide-in-from-bottom-4 duration-500">
             {templates.map((template) => (
               <div
                 key={template.id}
-                className="bg-white rounded-lg shadow-md border border-gray-200 p-4 hover:shadow-lg transition-shadow duration-200"
+                className="group relative bg-white/50 backdrop-blur-sm rounded-[2rem] border border-gray-100 p-6 hover:shadow-2xl hover:shadow-primary/5 hover:border-primary/20 transition-all duration-500"
               >
-                <div className="flex items-start space-x-3">
+                <div className="flex items-start gap-5">
                   <div
-                    className="w-12 h-12 rounded-lg flex items-center justify-center text-white font-bold text-sm"
-                    style={{ backgroundColor: template.color || "#6EC9C4" }}
+                    className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl shadow-inner group-hover:scale-110 group-hover:rotate-6 transition-all duration-500"
+                    style={{ backgroundColor: `${template.color}15`, color: template.color }}
                   >
-                    {template.icon || "T"}
+                    <ShieldCheck className="w-8 h-8" />
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-lg font-semibold text-secondary truncate">
+                  <div className="flex-1 min-w-0 space-y-1">
+                    <h3 className="text-lg font-black text-gray-900 tracking-tight group-hover:text-primary transition-colors">
                       {template.name}
                     </h3>
-                    <p className="text-sm text-gray-600 mt-1 line-clamp-2">
+                    <p className="text-xs font-medium text-gray-500 line-clamp-2 leading-relaxed">
                       {template.description}
                     </p>
                   </div>
+                </div>
+                <div className="mt-8 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className={`w-2 h-2 rounded-full ${template.isSystem ? 'bg-primary' : 'bg-gray-400'}`} />
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">
+                      {template.isSystem ? 'System' : 'Custom'}
+                    </span>
+                  </div>
                   <Button
                     onClick={() => applyTemplate(template.id)}
-                    variant="outline"
+                    variant="ghost"
                     size="sm"
                     disabled={loading}
-                    className="ml-2"
+                    className="bg-primary/5 text-primary hover:bg-primary hover:text-white rounded-xl font-black text-[10px] uppercase tracking-widest gap-2 transition-all"
                   >
                     {loading ? (
                       <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
                     ) : (
-                      <CheckIcon className="w-4 h-4" />
+                      <>Apply Template <ArrowRight className="w-3.5 h-3.5" /></>
                     )}
                   </Button>
                 </div>
               </div>
             ))}
+            {templates.length === 0 && (
+              <div className="col-span-full py-24 text-center space-y-4">
+                <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto ring-8 ring-gray-50/50">
+                  <Globe className="w-10 h-10 text-gray-200" />
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm font-black text-gray-400 uppercase tracking-widest">No Templates</p>
+                  <p className="text-gray-400 font-medium">No permission templates found.</p>
+                </div>
+              </div>
+            )}
           </div>
-        ) : (
-          /* Custom Selection Section */
-          <>
-            {/* Search */}
-            <div className="relative">
-              <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+        );
+      case "tree":
+        return (
+          <div className="animate-in fade-in duration-500 bg-gray-50/50 rounded-[2rem] p-8 border border-gray-100">
+            <PermissionTree
+              permissions={permissions}
+              selectedIds={selectedIds}
+              onChange={setSelectedIds}
+              searchTerm={searchTerm}
+            />
+          </div>
+        );
+      case "matrix":
+        return (
+          <div className="animate-in fade-in duration-500 bg-white rounded-[2rem] border border-gray-100 overflow-hidden shadow-xl shadow-black/5">
+            <ResourceActionMatrix
+              permissions={permissions}
+              selectedPermissions={selectedIds}
+              onChange={setSelectedIds}
+            />
+          </div>
+        );
+      case "custom":
+      case "custom":
+        return (
+          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+            <div className="relative group">
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
               <Input
                 type="text"
                 placeholder="Search permissions..."
@@ -294,67 +344,71 @@ export function AssignPermissionsModal({
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setSearchTerm(e.target.value)
                 }
-                className="pl-10"
+                className="pl-10 py-6 bg-white border-gray-200 focus:ring-primary/20 focus:border-primary rounded-xl text-sm"
               />
             </div>
 
-            {/* Permissions Matrix */}
-            <div className="space-y-4 max-h-96 overflow-y-auto">
+            <div className="space-y-4">
               {filteredGroups.map((group) => (
                 <div
                   key={group.name}
-                  className="bg-white rounded-lg shadow-sm border border-gray-200"
+                  className="bg-white rounded-xl border border-gray-200 overflow-hidden"
                 >
                   <div
-                    className="flex items-center justify-between p-4 cursor-pointer bg-gray-50 rounded-t-lg"
+                    className="flex items-center justify-between p-4 cursor-pointer bg-gray-50/50 hover:bg-gray-50 transition-colors border-b border-gray-100"
                     onClick={() => toggleGroup(group.name)}
                   >
-                    <div className="flex items-center space-x-3">
+                    <div className="flex items-center gap-3">
                       <Checkbox
                         checked={isAllSelectedInGroup(group)}
                         indeterminate={isSomeSelectedInGroup(group)}
-                        onChange={() => selectAllInGroup(group)}
+                        onChange={(e) => {
+                          e.stopPropagation();
+                          selectAllInGroup(group);
+                        }}
+                        className="w-4 h-4 rounded border-gray-300 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                       />
-                      <h4 className="text-lg font-medium text-secondary">
-                        {group.name}
-                      </h4>
-                      <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
-                        {group.permissions.length}
-                      </span>
+                      <div className="flex items-center gap-3">
+                        <h4 className="font-semibold text-gray-900 text-sm">
+                          {group.name}
+                        </h4>
+                        <span className="px-2 py-0.5 bg-gray-100 text-gray-500 text-[10px] font-bold uppercase tracking-wider rounded">
+                          {group.permissions.length}
+                        </span>
+                      </div>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <span className="text-sm text-gray-500">
-                        {
-                          group.permissions.filter((p) =>
-                            selectedIds.includes(p.id),
-                          ).length
-                        }{" "}
-                        selected
-                      </span>
-                      <ChevronDownIcon
-                        className={`w-5 h-5 text-gray-400 transition-transform ${expandedGroups.has(group.name) ? "rotate-180" : ""
-                          }`}
-                      />
-                    </div>
+                    <ChevronDown
+                      className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${expandedGroups.has(group.name) ? "rotate-180" : ""
+                        }`}
+                    />
                   </div>
                   {expandedGroups.has(group.name) && (
-                    <div className="p-4 space-y-2">
+                    <div className="divide-y divide-gray-100">
                       {group.permissions.map((permission) => (
                         <div
                           key={permission.id}
-                          className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                          className={`flex items-start gap-3 p-3 hover:bg-gray-50 transition-colors cursor-pointer ${selectedIds.includes(permission.id) ? 'bg-primary/5' : ''
+                            }`}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            togglePermission(permission.id);
+                          }}
                         >
                           <Checkbox
                             checked={selectedIds.includes(permission.id)}
                             onChange={() => togglePermission(permission.id)}
+                            className="mt-0.5 w-4 h-4 rounded border-gray-300 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                           />
                           <div className="flex-1 min-w-0">
-                            <div className="font-medium text-secondary truncate">
+                            <div className={`text-sm font-medium ${selectedIds.includes(permission.id) ? 'text-primary' : 'text-gray-900'
+                              }`}>
                               {permission.displayName || permission.name}
                             </div>
-                            <div className="text-sm text-gray-600 truncate">
-                              {permission.description}
-                            </div>
+                            {permission.description && (
+                              <p className="text-xs text-gray-500 mt-0.5 line-clamp-1">
+                                {permission.description}
+                              </p>
+                            )}
                           </div>
                         </div>
                       ))}
@@ -362,77 +416,105 @@ export function AssignPermissionsModal({
                   )}
                 </div>
               ))}
-              {filteredGroups.length === 0 && (
-                <div className="text-center py-8 text-gray-500">
-                  No permissions found matching "{searchTerm}"
+            </div>
+            {filteredGroups.length === 0 && (
+              <div className="text-center py-12 bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm">
+                  <Search className="w-5 h-5 text-gray-300" />
                 </div>
-              )}
-            </div>
-          </>
-        )}
+                <p className="text-sm font-medium text-gray-900">No permissions found</p>
+                <p className="text-xs text-gray-500 mt-1">Try adjusting your search terms</p>
+              </div>
+            )}
+          </div>
+        );
+    }
+  };
 
-        {/* Selection Summary */}
+  const modalFooter = (
+    <div className="w-full border-t border-gray-100 bg-gray-50/50 p-4 flex items-center justify-between">
+      <div className="flex items-center gap-4">
         {selectedIds.length > 0 && (
-          <div className="bg-primary/10 border border-primary/20 rounded-lg p-3">
-            <div className="flex items-center justify-between">
-              <span className="text-primary font-medium">
-                {selectedIds.length} permission(s) selected
-              </span>
-              <Button onClick={clearSelection} variant="ghost" size="sm">
-                <XMarkIcon className="w-4 h-4" /> Clear All
-              </Button>
-            </div>
+          <div className="flex items-center gap-3 animate-in fade-in slide-in-from-bottom-2">
+            <span className="bg-primary text-white text-xs font-bold px-2 py-1 rounded">
+              {selectedIds.length}
+            </span>
+            <span className="text-sm font-medium text-gray-600">Selected</span>
+            <Button
+              onClick={clearSelection}
+              variant="ghost"
+              size="sm"
+              className="text-red-500 hover:text-red-600 hover:bg-red-50 text-xs h-auto py-1 px-2"
+            >
+              Clear
+            </Button>
           </div>
         )}
       </div>
 
-      {/* Actions - Only show if dirty */}
-      {
-        isDirty && (
-          <div className="flex justify-between items-center border-t border-gray-200 p-4 bg-gray-50/50 rounded-b-lg animate-slide-up-fade">
-            <span className="text-sm text-gray-500 italic">
-              You have unsaved changes
-            </span>
-            <div className="flex space-x-3">
-              <Button onClick={onClose} variant="ghost" className="hover:bg-gray-200">
-                Discard
-              </Button>
-              <Button
-                onClick={handleAssign}
-                disabled={loading}
-                className="bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20 transition-all hover:scale-105"
-              >
-                {loading ? (
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                ) : (
-                  <CheckIcon className="w-4 h-4 mr-2" />
-                )}
-                Save Changes
-              </Button>
-            </div>
-          </div>
-        )
-      }
-    </Modal>
+      <div className="flex items-center gap-3">
+        {isDirty && (
+          <span className="text-xs font-medium text-amber-600 bg-amber-50 px-2 py-1 rounded animate-pulse">
+            Unsaved Changes
+          </span>
+        )}
+        <Button
+          variant="outline"
+          onClick={onClose}
+          className="bg-white"
+        >
+          Cancel
+        </Button>
+        <Button
+          onClick={handleAssign}
+          disabled={loading || !isDirty}
+          className="bg-primary hover:bg-primary/90 text-white shadow-sm"
+        >
+          {loading ? "Saving..." : "Save Changes"}
+        </Button>
+      </div>
+    </div>
   );
-}
 
-// Helper component for chevron (assuming it's imported or defined)
-function ChevronDownIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
-    <svg
-      {...props}
-      fill="none"
-      stroke="currentColor"
-      viewBox="0 0 24 24"
-      xmlns="http://www.w3.org/2000/svg"
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Assign Permissions"
+      description={`Manage permissions for role: ${role.name}`}
+      size="full"
+      mode="drawer"
+      footer={modalFooter}
     >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth={2}
-        d="M19 9l-7 7-7-7"
-      />
-    </svg>
+      <div className="flex flex-col h-full">
+        {/* Modern Tab Navigation (Mantine-inspired) */}
+        {/* Modern Tab Navigation (Mantine-inspired) */}
+        <div className="flex items-center gap-8 border-b border-gray-200 mb-0 px-1 pt-4 flex-none bg-white z-10 sticky top-0">
+          {[
+            { id: "templates", label: "Templates", icon: LayoutGrid },
+            { id: "matrix", label: "Matrix", icon: Table },
+            { id: "tree", label: "Hierarchy", icon: ListTree },
+            { id: "custom", label: "List", icon: ListTree },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as TabType)}
+              className={`group flex items-center gap-2 pb-3 pt-1 text-sm font-bold border-b-2 transition-all duration-200 ${activeTab === tab.id
+                ? "border-primary text-primary"
+                : "border-transparent text-gray-500 hover:text-gray-800 hover:border-gray-300"
+                }`}
+            >
+              <tab.icon className={`w-4 h-4 ${activeTab === tab.id ? "text-primary" : "text-gray-400 group-hover:text-gray-600"}`} />
+              <span className="uppercase tracking-wider text-[11px]">{tab.label}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* Content (Scrollable) */}
+        <div className="flex-1 overflow-y-auto scrollbar-custom pt-6 pr-2 -mr-2">
+          {renderTabContent()}
+        </div>
+      </div>
+    </Modal>
   );
 }

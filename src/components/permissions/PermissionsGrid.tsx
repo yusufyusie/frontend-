@@ -1,8 +1,12 @@
 'use client';
 
+import { ShieldAlert } from 'lucide-react';
 import type { Permission } from '@/services/permissions.service';
 import { PermissionGroupSection } from './PermissionGroupSection';
 
+/**
+ * Props for the PermissionsGrid component
+ */
 interface PermissionsGridProps {
     groupedPermissions: Record<string, Permission[]>;
     expandedGroups: Set<string>;
@@ -14,6 +18,10 @@ interface PermissionsGridProps {
     onViewDetailsClick: (permission: Permission) => void;
 }
 
+/**
+ * High-level organizational component for permission management
+ * Orchestrates rendering of permission groups and manages empty states
+ */
 export function PermissionsGrid({
     groupedPermissions,
     expandedGroups,
@@ -28,11 +36,16 @@ export function PermissionsGrid({
 
     if (groupEntries.length === 0) {
         return (
-            <div className="card text-center p-12">
-                <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-                </svg>
-                <p className="text-gray-500 text-lg">No permissions found matching your criteria</p>
+            <div className="col-span-full card border-dashed border-2 py-20 bg-gray-50/50 flex flex-col items-center justify-center text-center">
+                <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+                    <ShieldAlert className="w-8 h-8 text-gray-300" />
+                </div>
+                <div>
+                    <h3 className="text-lg font-bold text-gray-900">No Rules Match</h3>
+                    <p className="text-sm text-gray-400 mt-1 max-w-xs mx-auto">
+                        We couldn't find any permissions matching your current taxonomy or search filters.
+                    </p>
+                </div>
             </div>
         );
     }
