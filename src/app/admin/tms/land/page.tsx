@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, RefreshCw, Map, Grid3x3, MapPin, TrendingUp } from 'lucide-react';
+import { Button, Group, Stack, Box, Text, Paper, Title, LoadingOverlay } from '@mantine/core';
+import { Plus, RefreshCw, Map, Grid3x3, MapPin, TrendingUp, X, Save } from 'lucide-react';
 import { landResourcesService, LandResource, LandResourceType } from '@/services/land-resources.service';
 import { LandForm } from '@/components/organisms/tms/LandForm';
 import { AdvancedTreeGrid, TreeNode } from '@/components/organisms/tms/AdvancedTreeGrid';
@@ -12,6 +13,7 @@ export default function LandPage() {
     const [treeData, setTreeData] = useState<LandResource[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [opened, setOpened] = useState(false);
+    const [isFormValid, setIsFormValid] = useState(false);
     const [activeResource, setActiveResource] = useState<Partial<LandResource> | null>(null);
     const [metrics, setMetrics] = useState({
         zones: 0,
@@ -56,6 +58,7 @@ export default function LandPage() {
         if (resource) {
             setActiveResource(resource);
             setOpened(true);
+            setIsFormValid(true); // Assuming existing data is valid, or let form update it
         }
     };
 
@@ -75,6 +78,7 @@ export default function LandPage() {
             code: `${parent.code}-`
         });
         setOpened(true);
+        setIsFormValid(false);
     };
 
     const handleDelete = async (node: TreeNode) => {
@@ -95,6 +99,7 @@ export default function LandPage() {
     const handleCreateNewZone = () => {
         setActiveResource({ type: LandResourceType.ZONE });
         setOpened(true);
+        setIsFormValid(false);
     };
 
     const handleSubmit = async (data: Partial<LandResource>) => {
@@ -242,14 +247,46 @@ export default function LandPage() {
             <Modal
                 isOpen={opened}
                 onClose={() => setOpened(false)}
-                title={activeResource?.id ? 'Edit Land Resource' : 'Create New Land Resource'}
+                title={activeResource?.id ? 'Edit Land Resource' : 'New Land Resource'}
                 description="Territorial Management"
                 size="lg"
+                footer={
+                    <Group justify="flex-end" gap="md">
+                        <Button
+                            variant="subtle"
+                            color="gray"
+                            onClick={() => setOpened(false)}
+                            leftSection={<X size={18} />}
+                            radius="xl"
+                            size="md"
+                            className="hover:bg-gray-200/50 text-gray-700 font-bold"
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            variant="filled"
+                            bg="#0C7C92"
+                            onClick={() => {
+                                document.getElementById('land-form')?.dispatchEvent(
+                                    new Event('submit', { cancelable: true, bubbles: true })
+                                );
+                            }}
+                            disabled={!isFormValid}
+                            leftSection={<Save size={18} />}
+                            radius="xl"
+                            size="md"
+                            className={`shadow-lg shadow-teal-100 ${!isFormValid ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        >
+                            Save Land Resource
+                        </Button>
+                    </Group>
+                }
             >
                 <LandForm
                     initialData={activeResource || {}}
                     onSubmit={handleSubmit}
                     isLoading={isLoading}
+                    onValidityChange={setIsFormValid}
                 />
             </Modal>
         </div>

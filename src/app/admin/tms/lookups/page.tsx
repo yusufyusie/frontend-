@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { ActionIcon, Group, Stack, Box, Text, Paper, Title, Tabs, Badge, TextInput } from '@mantine/core';
-import { GitBranch, Database, Settings, Plus, Info, LayoutList, Search } from 'lucide-react';
+import { ActionIcon, Group, Stack, Box, Text, Paper, Title, Tabs, Badge, TextInput, Button } from '@mantine/core';
+import { GitBranch, Database, Settings, Plus, Info, LayoutList, Search, X, Save } from 'lucide-react';
 import { PageHeader } from '@/components/molecules/tms/PageHeader';
 import { lookupsService, SystemLookup } from '@/services/lookups.service';
 import { LookupTree } from '@/components/organisms/tms/LookupTree';
@@ -28,6 +28,7 @@ export default function LookupsPage() {
     const [modalOpened, setModalOpened] = useState(false);
     const [editingLookup, setEditingLookup] = useState<Partial<SystemLookup> | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const [isFormValid, setIsFormValid] = useState(false);
 
     useEffect(() => {
         setMounted(true);
@@ -83,11 +84,13 @@ export default function LookupsPage() {
             isActive: true,
             displayOrder: lookups.length + 1
         });
+        setIsFormValid(false); // Reset validity
         setModalOpened(true);
     };
 
     const handleEdit = (lookup: SystemLookup) => {
         setEditingLookup(lookup);
+        setIsFormValid(true); // Assume valid on edit, form will re-validate
         setModalOpened(true);
     };
 
@@ -294,6 +297,7 @@ export default function LookupsPage() {
                                                 isActive: true,
                                                 level: (node.level || 1) + 1
                                             });
+                                            setIsFormValid(false);
                                             setModalOpened(true);
                                         }}
                                     />
@@ -322,14 +326,46 @@ export default function LookupsPage() {
             <Modal
                 isOpen={modalOpened}
                 onClose={() => setModalOpened(false)}
-                title={editingLookup?.id ? 'Edit Lookup' : 'Create New Lookup'}
-                description={selectedCategory}
-                size="md"
+                title={editingLookup?.id ? 'Edit Lookup' : 'New Lookup'}
+                description={selectedCategory.replace('_', ' ')}
+                size="lg"
+                footer={
+                    <Group justify="flex-end" gap="md">
+                        <Button
+                            variant="subtle"
+                            color="gray"
+                            onClick={() => setModalOpened(false)}
+                            size="md"
+                            radius="xl"
+                            leftSection={<X size={18} />}
+                            className="hover:bg-gray-200/50 text-gray-700 font-bold"
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            variant="filled"
+                            bg="#0C7C92"
+                            onClick={() => {
+                                document.getElementById('lookup-form')?.dispatchEvent(
+                                    new Event('submit', { cancelable: true, bubbles: true })
+                                );
+                            }}
+                            size="md"
+                            radius="xl"
+                            disabled={!isFormValid}
+                            leftSection={<Save size={18} />}
+                            className={`shadow-lg shadow-teal-100 transition-all ${isFormValid ? 'hover:shadow-xl active:scale-95' : 'opacity-50 cursor-not-allowed'}`}
+                        >
+                            Save Configuration
+                        </Button>
+                    </Group>
+                }
             >
                 <LookupForm
                     initialData={editingLookup || {}}
                     onSubmit={handleSubmit}
                     isLoading={isLoading}
+                    onValidityChange={setIsFormValid}
                 />
             </Modal>
         </Stack>

@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, RefreshCw, Building2, Layers, Home, Eye, Edit, Trash2 } from 'lucide-react';
+import { Plus, RefreshCw, Building2, Layers, Home, Eye, Edit, Trash2, X, Save } from 'lucide-react';
+import { Button, Group } from '@mantine/core';
 import { buildingsService, Building } from '@/services/buildings.service';
 import { BuildingForm } from '@/components/organisms/tms/BuildingForm';
 import { Modal } from '@/components/Modal';
@@ -12,6 +13,7 @@ export default function BuildingsPage() {
     const [buildings, setBuildings] = useState<Building[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [opened, setOpened] = useState(false);
+    const [isFormValid, setIsFormValid] = useState(false);
     const [metrics, setMetrics] = useState({
         totalBuildings: 0,
         totalFloors: 0,
@@ -86,7 +88,10 @@ export default function BuildingsPage() {
                     <p className="text-gray-500 mt-1">Physical infrastructure management and floor planning</p>
                 </div>
                 <button
-                    onClick={() => setOpened(true)}
+                    onClick={() => {
+                        setOpened(true);
+                        setIsFormValid(false);
+                    }}
                     className="btn btn-primary flex items-center gap-2 w-full sm:w-auto justify-center"
                 >
                     <Plus className="w-5 h-5" />
@@ -228,8 +233,39 @@ export default function BuildingsPage() {
                 title="Register New Building"
                 description="Infrastructure Management"
                 size="lg"
+                footer={
+                    <Group justify="flex-end" gap="md">
+                        <Button
+                            variant="subtle"
+                            color="gray"
+                            onClick={() => setOpened(false)}
+                            leftSection={<X size={18} />}
+                            radius="xl"
+                            size="md"
+                            className="hover:bg-gray-200/50 text-gray-700 font-bold"
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            variant="filled"
+                            bg="#0C7C92"
+                            onClick={() => {
+                                document.getElementById('building-form')?.dispatchEvent(
+                                    new Event('submit', { cancelable: true, bubbles: true })
+                                );
+                            }}
+                            disabled={!isFormValid}
+                            leftSection={<Save size={18} />}
+                            radius="xl"
+                            size="md"
+                            className={`shadow-lg shadow-teal-100 ${!isFormValid ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        >
+                            Save Building
+                        </Button>
+                    </Group>
+                }
             >
-                <BuildingForm onSubmit={handleCreate} isLoading={isLoading} />
+                <BuildingForm onSubmit={handleCreate} isLoading={isLoading} onValidityChange={setIsFormValid} />
             </Modal>
         </div>
     );

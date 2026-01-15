@@ -1,7 +1,8 @@
 'use client';
 
 import { ReactNode, useEffect, useRef } from 'react';
-import { X } from 'lucide-react';
+import { X, Layers, Check, AlertTriangle, AlertCircle } from 'lucide-react';
+import { Text } from '@mantine/core';
 
 interface ModalProps {
     isOpen: boolean;
@@ -16,9 +17,8 @@ interface ModalProps {
 }
 
 /**
- * Universal Modal System
- * Provides a consistent, accessible, and responsive container for contextual operations.
- * Supports multiple size variants and semantic color themes.
+ * Premium Standard Modal System
+ * Matches the requested aesthetic: White header, branded teal icons, Card-based grouping.
  */
 export function Modal({
     isOpen,
@@ -34,20 +34,15 @@ export function Modal({
     const modalRef = useRef<HTMLDivElement>(null);
     const previousFocus = useRef<HTMLElement | null>(null);
 
-    // Document body scroll locking and accessibility focus management
     useEffect(() => {
         if (isOpen) {
             previousFocus.current = document.activeElement as HTMLElement;
             document.body.style.overflow = 'hidden';
-
-            // Establish focus within the modal context
             setTimeout(() => {
                 modalRef.current?.focus();
             }, 100);
         } else {
             document.body.style.overflow = 'unset';
-
-            // Restore previous interaction context
             previousFocus.current?.focus();
         }
 
@@ -56,7 +51,6 @@ export function Modal({
         };
     }, [isOpen]);
 
-    // Global keyboard event orchestration (Escape key containment)
     useEffect(() => {
         const handleEscape = (e: KeyboardEvent) => {
             if (e.key === 'Escape' && isOpen) {
@@ -72,7 +66,7 @@ export function Modal({
 
     const sizeClasses = {
         sm: 'max-w-md',
-        md: 'max-w-lg',
+        md: 'max-w-xl',
         lg: 'max-w-2xl',
         xl: 'max-w-4xl',
         '2xl': 'max-w-5xl',
@@ -81,115 +75,111 @@ export function Modal({
         full: 'w-full'
     };
 
-    const headerVariants = {
-        default: 'bg-gradient-to-r from-primary to-primary-600 border-t-4 border-accent shadow-lg shadow-primary/10',
-        success: 'bg-gradient-to-r from-success to-success-600 border-t-4 border-success-700 shadow-lg shadow-success/10',
-        warning: 'bg-gradient-to-r from-warning to-warning-600 border-t-4 border-warning-700 shadow-lg shadow-warning/10',
-        danger: 'bg-gradient-to-r from-error to-error-600 border-t-4 border-error-700 shadow-lg shadow-error/10'
+    const StatusIcon = () => {
+        switch (variant) {
+            case 'success': return <Check className="h-6 w-6 text-emerald-600" />;
+            case 'warning': return <AlertTriangle className="h-6 w-6 text-amber-600" />;
+            case 'danger': return <AlertCircle className="h-6 w-6 text-rose-600" />;
+            default: return <Layers className="h-6 w-6 text-[#0C7C92]" />;
+        }
+    };
+
+    const iconBg = {
+        default: 'bg-[#0C7C92]/10',
+        success: 'bg-emerald-50',
+        warning: 'bg-amber-50',
+        danger: 'bg-rose-50'
     };
 
     return (
         <div
-            className="fixed inset-0 z-50 overflow-y-auto"
+            className="fixed inset-0 z-50 overflow-hidden"
             role="dialog"
             aria-modal="true"
             aria-labelledby="modal-title"
         >
-            {/* Backdrop layer with visual occlusion and containment */}
             <div
-                className="fixed inset-0 bg-gray-950/70 backdrop-blur-md transition-all duration-300 animate-fade-in"
+                className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity duration-300"
                 onClick={onClose}
                 aria-hidden="true"
             />
 
-            {/* Modal layout container - Conditional based on mode */}
-            <div className={`flex min-h-full ${mode === 'modal' ? 'items-center justify-center p-4 sm:p-6' : ''}`}>
+            <div className={`flex min-h-full ${mode === 'modal' ? 'items-center justify-center p-4' : ''}`}>
                 <div
                     ref={modalRef}
-                    className={`relative w-full ${size == 'full' && mode !== 'drawer' ? 'max-w-7xl' : sizeClasses[size]} transform bg-white shadow-3xl transition-all duration-300 flex flex-col border border-white/10
+                    className={`relative w-full ${size == 'full' && mode !== 'drawer' ? 'max-w-7xl' : sizeClasses[size]} transform bg-white shadow-2xl transition-all duration-300 flex flex-col overflow-hidden
                         ${mode === 'modal'
-                            ? 'rounded-3xl animate-modal-slide-up max-h-[95vh]'
-                            : 'fixed inset-y-0 right-0 h-full rounded-l-3xl animate-slide-in-right shadow-2xl'
+                            ? 'rounded-[2.5rem] animate-in fade-in zoom-in-95 max-h-[92vh]'
+                            : 'fixed inset-y-0 right-0 h-full rounded-l-[2.5rem] animate-in slide-in-from-right shadow-2xl'
                         }`}
-                    style={{
-                        maxWidth: mode === 'drawer' ? 'calc(100vw - 320px)' : undefined
-                    }}
                     onClick={(e) => e.stopPropagation()}
                     tabIndex={-1}
                 >
-                    {/* Integrated Design Header - Fixed */}
-                    <div className={`${headerVariants[variant]} px-8 py-5 flex-shrink-0 relative overflow-hidden transition-all duration-500 shadow-md z-20 ${mode === 'modal' ? 'rounded-t-3xl' : 'rounded-tl-3xl'}`}>
-                        <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full -mr-24 -mt-24 blur-3xl pointer-events-none animate-pulse" />
-                        <div className="flex items-center justify-between relative z-10">
-                            <div className="flex items-center gap-5">
-                                <div className="p-2.5 bg-white/15 rounded-2xl backdrop-blur-md border border-white/20 shadow-inner">
-                                    <h3
-                                        id="modal-title"
-                                        className="text-xl md:text-2xl font-black text-white drop-shadow-lg tracking-tight leading-none"
-                                    >
+                    {/* Header: White, Professional, Branded Icon */}
+                    <div className="px-6 py-5 flex-shrink-0 bg-white border-b border-gray-100 z-30">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                                <div className={`p-2 rounded-xl ${iconBg[variant]}`}>
+                                    <StatusIcon />
+                                </div>
+                                <div className="flex flex-col sm:flex-row sm:items-baseline sm:gap-3">
+                                    <h3 id="modal-title" className="text-xl font-extrabold text-[#0C7C92] tracking-tight">
                                         {title}
                                     </h3>
-                                </div>
-                                {description && (
-                                    <div className="hidden sm:block">
-                                        <p className="text-white/90 text-[10px] font-black uppercase tracking-[0.2em] leading-none border-l-2 border-white/30 pl-5 py-1">
+                                    {description && (
+                                        <Text size="sm" fw={600} c="dimmed" className="hidden sm:block">
                                             {description}
-                                        </p>
-                                    </div>
-                                )}
+                                        </Text>
+                                    )}
+                                </div>
                             </div>
                             <button
                                 onClick={onClose}
-                                className="rounded-2xl p-2.5 text-white/90 hover:bg-white/25 hover:text-white transition-all duration-500 hover:rotate-90 focus:outline-none focus:ring-4 focus:ring-white/40 backdrop-blur-xl border border-white/10 group"
-                                aria-label="Terminate transaction"
+                                className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-all duration-200 active:scale-95"
+                                aria-label="Close modal"
                             >
-                                <X className="h-5 w-5 transition-transform group-hover:scale-110" aria-hidden="true" />
+                                <X size={24} />
                             </button>
                         </div>
                     </div>
 
-                    {/* Operational Surface Area (Smart Scrollable) */}
-                    <div className="flex-1 overflow-y-auto custom-scrollbar bg-white/50 backdrop-blur-sm relative z-10">
-                        <div className="px-8 py-8 animate-fade-in-up">
+                    {/* Scrollable Body: Soft Background for Card Contrast */}
+                    <div className="flex-1 overflow-y-auto scrollbar-custom bg-gray-100/80 p-6">
+                        <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
                             {children}
                         </div>
                     </div>
 
-                    {/* Action Footer (Sticky/Persistent) */}
+                    {/* Footer: Persistent, Aligned Right, Premium Background */}
                     {footer && (
-                        <div className={`border-t border-gray-100 px-8 py-6 bg-gray-50/80 backdrop-blur-md flex-shrink-0 z-20 shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.05)] ${mode === 'modal' ? 'rounded-b-3xl' : 'rounded-bl-3xl'}`}>
+                        <div className="px-6 py-5 bg-gray-100/50 border-t border-gray-200 flex-shrink-0 z-20">
                             <div className="flex justify-end gap-3 items-center">
                                 {footer}
                             </div>
                         </div>
                     )}
-
-                    {/* Background Texture Overlay */}
-                    <div className="absolute inset-0 opacity-[0.02] pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] z-0 rounded-3xl" />
                 </div>
             </div>
 
             <style jsx global>{`
                 .custom-scrollbar::-webkit-scrollbar {
-                    width: 6px;
+                    width: 8px;
                 }
                 .custom-scrollbar::-webkit-scrollbar-track {
                     background: transparent;
                 }
                 .custom-scrollbar::-webkit-scrollbar-thumb {
                     background: #e2e8f0;
-                    border-radius: 10px;
+                    border-radius: 20px;
+                    border: 2px solid transparent;
+                    background-clip: content-box;
                 }
                 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
                     background: #cbd5e1;
+                    background-clip: content-box;
                 }
-                @keyframes fade-in-up {
-                    from { opacity: 0; transform: translateY(10px); }
-                    to { opacity: 1; transform: translateY(0); }
-                }
-                .animate-fade-in-up {
-                    animation: fade-in-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-                }
+                @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+                .animate-fade-in { animation: fade-in 0.3s ease-out; }
             `}</style>
         </div>
     );

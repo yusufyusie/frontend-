@@ -9,9 +9,10 @@ interface Props {
     isLoading?: boolean;
     category?: string;
     parentId?: number | null;
+    onValidityChange?: (isValid: boolean) => void;
 }
 
-export const LookupForm = ({ initialData, onSubmit, isLoading, category, parentId }: Props) => {
+export const LookupForm = ({ initialData, onSubmit, isLoading, category, parentId, onValidityChange }: Props) => {
     const [formData, setFormData] = useState<Partial<SystemLookup>>({
         lookupCode: '',
         lookupValue: { en: '', am: '' },
@@ -40,6 +41,18 @@ export const LookupForm = ({ initialData, onSubmit, isLoading, category, parentI
         });
     }, []);
 
+    // Validation Effect
+    useEffect(() => {
+        const isValid = Boolean(
+            formData.lookupCategory &&
+            formData.lookupCode &&
+            formData.lookupValue?.en &&
+            formData.level &&
+            formData.displayOrder
+        );
+        onValidityChange?.(isValid);
+    }, [formData, onValidityChange]);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         await onSubmit(formData);
@@ -48,58 +61,67 @@ export const LookupForm = ({ initialData, onSubmit, isLoading, category, parentI
     return (
         <Box pos="relative">
             <LoadingOverlay visible={isLoading} overlayProps={{ blur: 2, radius: 'xl' }} />
-            <form onSubmit={handleSubmit}>
+            <form id="lookup-form" onSubmit={handleSubmit}>
                 <Stack gap="xl">
-                    <Paper withBorder p="xl" radius="xl" bg="gray.0/30">
-                        <Group gap="sm" mb="lg">
-                            <Box p={8} bg="tms-teal.0" style={{ borderRadius: '12px' }}>
-                                <Tag size={20} className="text-teal-700" />
+                    <Paper withBorder p="lg" radius="2rem" shadow="sm" className="border-slate-100">
+                        <Group gap="md" mb="xl">
+                            <Box p={12} bg="#0C7C92" style={{ borderRadius: '1rem' }} className="shadow-lg shadow-teal-100">
+                                <Tag size={24} className="text-white" />
                             </Box>
-                            <Box>
-                                <Title order={5} fw={800} lts="-0.3px" c="tms-navy">Classification Data</Title>
-                                <Text size="xs" c="dimmed" fw={500}>Define how this lookup behaves in the system.</Text>
-                            </Box>
+                            <div>
+                                <Title order={4} fw={800} lts="-0.5px" c="#16284F" style={{ display: 'inline-block', marginRight: '0.75rem' }}>Classification Data</Title>
+                                <Text span size="xs" c="dimmed" fw={700} tt="uppercase" lts="1px">Identification & Domain</Text>
+                            </div>
                         </Group>
 
-                        <Stack gap="md">
+                        <Stack gap="xl">
                             <Select
                                 label="Category Domain"
-                                placeholder="Select or type a category"
+                                description="Select the system domain for this classification entry"
+                                placeholder="Select category"
                                 data={categories.map(c => ({ value: c, label: c }))}
                                 value={formData.lookupCategory}
                                 onChange={(val) => setFormData(prev => ({ ...prev, lookupCategory: val || '' }))}
                                 searchable
                                 required
                                 disabled={!!category}
-                                radius="md"
-                                size="md"
+                                radius="xl"
+                                size="lg"
+                                styles={{
+                                    label: { fontWeight: 700, marginBottom: 8, color: '#16284F' },
+                                    input: { border: '2px solid #f1f5f9', '&:focus': { borderColor: '#0C7C92' } }
+                                }}
                             />
 
                             <TextInput
                                 label="Identification Code"
-                                placeholder="e.g. ACTIVE, PENDING_APPROVAL"
+                                description="Unique system code (UPPERCASE)"
+                                placeholder="e.g. ACTIVE"
                                 value={formData.lookupCode}
                                 onChange={(e) => setFormData(prev => ({ ...prev, lookupCode: e.currentTarget.value.toUpperCase() }))}
                                 required
-                                radius="md"
-                                size="md"
-                                styles={{ input: { fontWeight: 600, textTransform: 'uppercase' } }}
+                                radius="xl"
+                                size="lg"
+                                styles={{
+                                    label: { fontWeight: 700, marginBottom: 8, color: '#16284F' },
+                                    input: { border: '2px solid #f1f5f9', '&:focus': { borderColor: '#0C7C92' }, fontWeight: 800 }
+                                }}
                             />
                         </Stack>
                     </Paper>
 
-                    <Paper withBorder p="xl" radius="xl">
-                        <Group gap="sm" mb="lg">
-                            <Box p={8} bg="tms-teal.0" style={{ borderRadius: '12px' }}>
-                                <Globe size={20} className="text-teal-700" />
+                    <Paper withBorder p="lg" radius="2rem" shadow="sm" className="border-slate-100">
+                        <Group gap="md" mb="xl">
+                            <Box p={12} bg="#0C7C92" style={{ borderRadius: '1rem' }} className="shadow-lg shadow-teal-100">
+                                <Globe size={24} className="text-white" />
                             </Box>
-                            <Box>
-                                <Title order={5} fw={800} lts="-0.3px" c="tms-navy">Internationalization</Title>
-                                <Text size="xs" c="dimmed" fw={500}>Bilingual display values for the user interface.</Text>
-                            </Box>
+                            <div>
+                                <Title order={4} fw={800} lts="-0.5px" c="#16284F" style={{ display: 'inline-block', marginRight: '0.75rem' }}>Internationalization</Title>
+                                <Text span size="xs" c="dimmed" fw={700} tt="uppercase" lts="1px">Display Name</Text>
+                            </div>
                         </Group>
 
-                        <Stack gap="md">
+                        <Stack gap="lg">
                             <TextInput
                                 label="Display Name (English)"
                                 placeholder="Value visible to English users"
@@ -115,39 +137,25 @@ export const LookupForm = ({ initialData, onSubmit, isLoading, category, parentI
                                     }));
                                 }}
                                 required
-                                radius="md"
-                            />
-                            <TextInput
-                                label="Display Name (Amharic)"
-                                placeholder="Value visible to Amharic users"
-                                value={formData.lookupValue?.am || ''}
-                                onChange={(e) => {
-                                    const value = e.currentTarget.value;
-                                    setFormData(prev => ({
-                                        ...prev,
-                                        lookupValue: {
-                                            en: prev.lookupValue?.en || '',
-                                            am: value
-                                        }
-                                    }));
-                                }}
-                                radius="md"
+                                radius="xl"
+                                size="md"
+                                styles={{ label: { fontWeight: 700, color: '#16284F' } }}
                             />
                         </Stack>
                     </Paper>
 
-                    <Paper withBorder p="xl" radius="xl" bg="gray.0/10">
-                        <Group gap="sm" mb="lg">
-                            <Box p={8} bg="tms-teal.0" style={{ borderRadius: '12px' }}>
-                                <Layers size={20} className="text-teal-700" />
+                    <Paper withBorder p="xl" radius="2rem" shadow="sm" className="border-slate-100">
+                        <Group gap="md" mb="xl">
+                            <Box p={12} bg="#0C7C92" style={{ borderRadius: '1rem' }} className="shadow-lg shadow-teal-100">
+                                <Layers size={24} className="text-white" />
                             </Box>
-                            <Box>
-                                <Title order={5} fw={800} lts="-0.3px" c="tms-navy">Hierarchy & Order</Title>
-                                <Text size="xs" c="dimmed" fw={500}>Position and access control settings.</Text>
-                            </Box>
+                            <div>
+                                <Title order={4} fw={800} lts="-0.5px" c="#16284F" style={{ display: 'inline-block', marginRight: '0.75rem' }}>Hierarchy & Logic</Title>
+                                <Text span size="xs" c="dimmed" fw={700} tt="uppercase" lts="1px">Access & Ordering</Text>
+                            </div>
                         </Group>
 
-                        <Stack gap="md">
+                        <Stack gap="xl">
                             <Group grow>
                                 <NumberInput
                                     label="Hierarchy Level"
@@ -155,7 +163,9 @@ export const LookupForm = ({ initialData, onSubmit, isLoading, category, parentI
                                     value={formData.level}
                                     onChange={(val) => setFormData(prev => ({ ...prev, level: Number(val) || 1 }))}
                                     required
-                                    radius="md"
+                                    radius="xl"
+                                    size="md"
+                                    styles={{ label: { fontWeight: 700, color: '#16284F' } }}
                                 />
                                 <NumberInput
                                     label="Sort Priority"
@@ -163,41 +173,34 @@ export const LookupForm = ({ initialData, onSubmit, isLoading, category, parentI
                                     value={formData.displayOrder}
                                     onChange={(val) => setFormData(prev => ({ ...prev, displayOrder: Number(val) || 1 }))}
                                     required
-                                    radius="md"
+                                    radius="xl"
+                                    size="md"
+                                    styles={{ label: { fontWeight: 700, color: '#16284F' } }}
                                 />
                             </Group>
 
-                            <Divider my="sm" variant="dashed" />
+                            <Divider variant="dashed" />
 
                             <Group gap="xl">
                                 <Checkbox
-                                    label={<Text size="sm" fw={600} c="tms-navy">Entry is Active</Text>}
+                                    label={<Text size="sm" fw={800} c="#16284F">Active Status</Text>}
+                                    description="Enable usage in system records"
                                     checked={formData.isActive}
                                     onChange={(e) => setFormData(prev => ({ ...prev, isActive: e.currentTarget.checked }))}
-                                    color="tms-teal"
+                                    color="#0C7C92"
+                                    styles={{ label: { cursor: 'pointer' } }}
                                 />
                                 <Checkbox
-                                    label={<Text size="sm" fw={600}>System Protected</Text>}
+                                    label={<Text size="sm" fw={800} c="#16284F">Protected Mode</Text>}
+                                    description="Prevent accidental deletion"
                                     checked={formData.isSystem}
                                     onChange={(e) => setFormData(prev => ({ ...prev, isSystem: e.currentTarget.checked }))}
-                                    color="red"
+                                    color="#0C7C92"
+                                    styles={{ label: { cursor: 'pointer' } }}
                                 />
                             </Group>
                         </Stack>
                     </Paper>
-
-                    <Button
-                        type="submit"
-                        leftSection={<Save size={20} />}
-                        loading={isLoading}
-                        size="xl"
-                        radius="xl"
-                        bg="#0C7C92"
-                        className="shadow-xl hover:shadow-2xl transition-all active:scale-[0.98] mt-4"
-                        fullWidth
-                    >
-                        Save Configuration
-                    </Button>
                 </Stack>
             </form>
         </Box>

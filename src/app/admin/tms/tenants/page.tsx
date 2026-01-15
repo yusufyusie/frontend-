@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, Search, Filter, RefreshCw, Eye, Edit, Trash2, MoreVertical, Users, Building2, FileText, TrendingUp, Mail, Phone, ExternalLink } from 'lucide-react';
+import { Plus, Search, Filter, RefreshCw, Eye, Edit, Trash2, MoreVertical, Users, Building2, FileText, TrendingUp, Mail, Phone, ExternalLink, X, Save } from 'lucide-react';
+import { Button, Group } from '@mantine/core';
 import { tenantsService, Tenant } from '@/services/tenants.service';
 import { TenantForm } from '@/components/organisms/tms/TenantForm';
 import { TenantStatusBadge } from '@/components/atoms/tms/TenantStatusBadge';
@@ -13,6 +14,7 @@ export default function TenantDirectoryPage() {
     const [tenants, setTenants] = useState<Tenant[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [opened, setOpened] = useState(false);
+    const [isFormValid, setIsFormValid] = useState(false);
     const [filters, setFilters] = useState({ search: '', statusId: '', category: '' });
     const [activeTab, setActiveTab] = useState('all');
 
@@ -90,7 +92,10 @@ export default function TenantDirectoryPage() {
                     <p className="text-gray-500 mt-1">Centralized database for IT Park registered companies</p>
                 </div>
                 <button
-                    onClick={() => setOpened(true)}
+                    onClick={() => {
+                        setOpened(true);
+                        setIsFormValid(false);
+                    }}
                     className="btn btn-primary flex items-center gap-2 w-full sm:w-auto justify-center"
                 >
                     <Plus className="w-5 h-5" />
@@ -272,11 +277,42 @@ export default function TenantDirectoryPage() {
             <Modal
                 isOpen={opened}
                 onClose={() => setOpened(false)}
-                title="Register New Tenant Company"
+                title="Register New Tenant"
                 description="Onboarding Workflow"
                 size="xl"
+                footer={
+                    <Group justify="flex-end" gap="md">
+                        <Button
+                            variant="subtle"
+                            color="gray"
+                            onClick={() => setOpened(false)}
+                            leftSection={<X size={18} />}
+                            radius="xl"
+                            size="md"
+                            className="hover:bg-gray-200/50 text-gray-700 font-bold"
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            variant="filled"
+                            bg="#0C7C92"
+                            onClick={() => {
+                                document.getElementById('tenant-form')?.dispatchEvent(
+                                    new Event('submit', { cancelable: true, bubbles: true })
+                                );
+                            }}
+                            disabled={!isFormValid}
+                            leftSection={<Save size={18} />}
+                            radius="xl"
+                            size="md"
+                            className={`shadow-lg shadow-teal-100 ${!isFormValid ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        >
+                            Save Tenant Profile
+                        </Button>
+                    </Group>
+                }
             >
-                <TenantForm onSubmit={handleOnboard} isLoading={isLoading} />
+                <TenantForm onSubmit={handleOnboard} isLoading={isLoading} onValidityChange={setIsFormValid} />
             </Modal>
         </div>
     );
