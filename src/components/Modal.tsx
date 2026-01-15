@@ -117,48 +117,80 @@ export function Modal({
                     onClick={(e) => e.stopPropagation()}
                     tabIndex={-1}
                 >
-                    {/* Integrated Design Header */}
-                    <div className={`${headerVariants[variant]} px-8 py-4 flex-shrink-0 relative overflow-hidden ${mode === 'modal' ? 'rounded-t-3xl' : 'rounded-tl-3xl'}`}>
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 blur-2xl pointer-events-none" />
+                    {/* Integrated Design Header - Fixed */}
+                    <div className={`${headerVariants[variant]} px-8 py-5 flex-shrink-0 relative overflow-hidden transition-all duration-500 shadow-md z-20 ${mode === 'modal' ? 'rounded-t-3xl' : 'rounded-tl-3xl'}`}>
+                        <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full -mr-24 -mt-24 blur-3xl pointer-events-none animate-pulse" />
                         <div className="flex items-center justify-between relative z-10">
-                            <div className="flex items-center gap-4">
-                                <h3
-                                    id="modal-title"
-                                    className="text-xl font-black text-white drop-shadow-md tracking-tight"
-                                >
-                                    {title}
-                                </h3>
+                            <div className="flex items-center gap-5">
+                                <div className="p-2.5 bg-white/15 rounded-2xl backdrop-blur-md border border-white/20 shadow-inner">
+                                    <h3
+                                        id="modal-title"
+                                        className="text-xl md:text-2xl font-black text-white drop-shadow-lg tracking-tight leading-none"
+                                    >
+                                        {title}
+                                    </h3>
+                                </div>
                                 {description && (
-                                    <p className="text-white/80 text-xs font-bold uppercase tracking-widest leading-none border-l-2 border-white/20 pl-4 py-0.5">
-                                        {description}
-                                    </p>
+                                    <div className="hidden sm:block">
+                                        <p className="text-white/90 text-[10px] font-black uppercase tracking-[0.2em] leading-none border-l-2 border-white/30 pl-5 py-1">
+                                            {description}
+                                        </p>
+                                    </div>
                                 )}
                             </div>
                             <button
                                 onClick={onClose}
-                                className="rounded-xl p-2 text-white/90 hover:bg-white/20 hover:text-white transition-all duration-300 hover:rotate-90 focus:outline-none focus:ring-4 focus:ring-white/30 backdrop-blur-sm"
+                                className="rounded-2xl p-2.5 text-white/90 hover:bg-white/25 hover:text-white transition-all duration-500 hover:rotate-90 focus:outline-none focus:ring-4 focus:ring-white/40 backdrop-blur-xl border border-white/10 group"
                                 aria-label="Terminate transaction"
                             >
-                                <X className="h-4 w-4" aria-hidden="true" />
+                                <X className="h-5 w-5 transition-transform group-hover:scale-110" aria-hidden="true" />
                             </button>
                         </div>
                     </div>
 
-                    {/* Operational Surface Area (Scrollable) */}
-                    <div className="px-8 pt-6 flex-1 overflow-hidden flex flex-col bg-white">
-                        <div className="h-full flex flex-col">
+                    {/* Operational Surface Area (Smart Scrollable) */}
+                    <div className="flex-1 overflow-y-auto custom-scrollbar bg-white/50 backdrop-blur-sm relative z-10">
+                        <div className="px-8 py-8 animate-fade-in-up">
                             {children}
                         </div>
                     </div>
 
-                    {/* Action Footer (Sticky) */}
+                    {/* Action Footer (Sticky/Persistent) */}
                     {footer && (
-                        <div className={`border-t border-gray-100 px-8 py-5 bg-gray-50 flex-shrink-0 ${mode === 'modal' ? 'rounded-b-3xl' : 'rounded-bl-3xl'}`}>
-                            {footer}
+                        <div className={`border-t border-gray-100 px-8 py-6 bg-gray-50/80 backdrop-blur-md flex-shrink-0 z-20 shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.05)] ${mode === 'modal' ? 'rounded-b-3xl' : 'rounded-bl-3xl'}`}>
+                            <div className="flex justify-end gap-3 items-center">
+                                {footer}
+                            </div>
                         </div>
                     )}
+
+                    {/* Background Texture Overlay */}
+                    <div className="absolute inset-0 opacity-[0.02] pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] z-0 rounded-3xl" />
                 </div>
             </div>
+
+            <style jsx global>{`
+                .custom-scrollbar::-webkit-scrollbar {
+                    width: 6px;
+                }
+                .custom-scrollbar::-webkit-scrollbar-track {
+                    background: transparent;
+                }
+                .custom-scrollbar::-webkit-scrollbar-thumb {
+                    background: #e2e8f0;
+                    border-radius: 10px;
+                }
+                .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+                    background: #cbd5e1;
+                }
+                @keyframes fade-in-up {
+                    from { opacity: 0; transform: translateY(10px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+                .animate-fade-in-up {
+                    animation: fade-in-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+                }
+            `}</style>
         </div>
     );
 }

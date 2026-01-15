@@ -1,0 +1,73 @@
+import { api } from '../lib/api';
+
+export interface TenantContact {
+    id: number;
+    tenantId: number;
+    firstName: string;
+    lastName: string;
+    position?: string;
+    email: string;
+    phone?: string;
+    isPrimary: boolean;
+}
+
+export interface Tenant {
+    id: number;
+    nameEn: string;
+    nameAm?: string;
+    companyRegNumber: string;
+    tinNumber?: string;
+    businessCategoryId?: number;
+    statusId?: number;
+    email?: string;
+    phone?: string;
+    website?: string;
+    address?: string;
+    metadata?: any;
+    createdAt?: string;
+    updatedAt?: string;
+    contacts?: TenantContact[];
+    _count?: {
+        contacts: number;
+        documents: number;
+    };
+}
+
+class TenantsService {
+    private readonly endpoint = '/tenants';
+
+    async getAll(params?: any) {
+        return api.get<Tenant[]>(this.endpoint, { params });
+    }
+
+    async getOne(id: number) {
+        return api.get<Tenant>(`${this.endpoint}/${id}`);
+    }
+
+    async create(data: Partial<Tenant>) {
+        return api.post<Tenant>(this.endpoint, data);
+    }
+
+    async update(id: number, data: Partial<Tenant>) {
+        return api.patch<Tenant>(`${this.endpoint}/${id}`, data);
+    }
+
+    async delete(id: number) {
+        return api.delete(`${this.endpoint}/${id}`);
+    }
+
+    // Contacts
+    async addContact(tenantId: number, data: Partial<TenantContact>) {
+        return api.post<TenantContact>(`${this.endpoint}/${tenantId}/contacts`, data);
+    }
+
+    async getContacts(tenantId: number) {
+        return api.get<TenantContact[]>(`${this.endpoint}/${tenantId}/contacts`);
+    }
+
+    async deleteContact(contactId: number) {
+        return api.delete(`${this.endpoint}/contacts/${contactId}`);
+    }
+}
+
+export const tenantsService = new TenantsService();

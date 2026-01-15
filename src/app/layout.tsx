@@ -1,8 +1,9 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
-import { ToastContainer } from '@/components/Toast';
-import { AuthProvider } from '@/components/AuthProvider';
+import '@mantine/core/styles.css';
+import { ColorSchemeScript } from '@mantine/core';
+import { Providers } from '@/components/Providers';
 
 const inter = Inter({
     subsets: ['latin'],
@@ -68,7 +69,7 @@ export default function RootLayout({
     return (
         <html lang="en" dir="ltr">
             <head>
-                {/* Preconnect to external domains for better performance */}
+                <ColorSchemeScript defaultColorScheme="light" />
                 <link rel="preconnect" href="https://fonts.googleapis.com" />
                 <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
                 <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
@@ -99,13 +100,11 @@ export default function RootLayout({
                     Skip to main content
                 </a>
 
-                <AuthProvider>
+                <Providers>
                     <div id="main-content" role="main">
                         {children}
                     </div>
-                </AuthProvider>
-
-                <ToastContainer />
+                </Providers>
 
                 {/* Live region for screen reader announcements */}
                 <div
