@@ -15,6 +15,8 @@ export interface LandResource {
     nameAm: string;
     areaM2?: number;
     metadata: any;
+    createdAt?: string;
+    updatedAt?: string;
     children?: LandResource[];
     _count?: {
         children: number;

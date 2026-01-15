@@ -41,7 +41,8 @@ export const PageHeader = ({ title, description, breadcrumbs, actions }: PageHea
                         )
                     ))}
                 </Breadcrumbs>
-                <Title order={1} fw={900} trackingTight>
+                {/* Fixed: Use style for letter-spacing to avoid trackingTight warning */}
+                <Title order={1} fw={900} style={{ letterSpacing: '-0.5px' }}>
                     {title}
                 </Title>
                 {description && (

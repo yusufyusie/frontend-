@@ -3,10 +3,10 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { Container, Title, Text, Group, Button, Paper, Stack, Grid, Badge, Box, LoadingOverlay, Breadcrumbs, Anchor, Tabs, Divider, SimpleGrid } from '@mantine/core';
-import { Building2, Globe, Mail, Phone, MapPin, Calculator, FileCheck, History, ArrowLeft, Settings, ShieldCheck } from 'lucide-react';
-import { tenantsService, Tenant } from '../../../../services/tenants.service';
-import { TenantContactList } from '../../../../components/organisms/tms/TenantContactList';
-import { TenantStatusBadge } from '../../../../components/atoms/tms/TenantStatusBadge';
+import { Building2, Globe, Mail, Phone, MapPin, Calculator, FileCheck, History, ArrowLeft, Settings, ShieldCheck, Users } from 'lucide-react';
+import { tenantsService, Tenant } from '@/services/tenants.service';
+import { TenantContactList } from '@/components/organisms/tms/TenantContactList';
+import { TenantStatusBadge } from '@/components/atoms/tms/TenantStatusBadge';
 import { toast } from '@/components/Toast';
 import Link from 'next/link';
 

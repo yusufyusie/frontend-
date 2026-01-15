@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Paper, Group, Stack, Text, Button, ActionIcon, Avatar, Badge, Box, Modal, TextInput, Checkbox } from '@mantine/core';
 import { Users, Plus, Trash2, Mail, Phone, Crown, Briefcase } from 'lucide-react';
-import { tenantsService, TenantContact } from '../../../services/tenants.service';
+import { tenantsService, TenantContact } from '@/services/tenants.service';
 import { useDisclosure } from '@mantine/hooks';
-import { toast } from '../../Toast';
+import { toast } from '@/components/Toast';
 
 interface Props {
     tenantId: number;

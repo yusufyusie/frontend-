@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { Plus, RefreshCw, Map, Grid3x3, MapPin, TrendingUp } from 'lucide-react';
-import { landResourcesService, LandResource, LandResourceType } from '../../../../services/land-resources.service';
-import { LandForm } from '../../../../components/organisms/tms/LandForm';
-import { AdvancedTreeGrid, TreeNode } from '../../../../components/organisms/tms/AdvancedTreeGrid';
+import { landResourcesService, LandResource, LandResourceType } from '@/services/land-resources.service';
+import { LandForm } from '@/components/organisms/tms/LandForm';
+import { AdvancedTreeGrid, TreeNode } from '@/components/organisms/tms/AdvancedTreeGrid';
 import { Modal } from '@/components/Modal';
 import { toast } from '@/components/Toast';
 

@@ -1,6 +1,6 @@
 import { Paper, Group, Stack, Text, Badge, ActionIcon, Box, SimpleGrid } from '@mantine/core';
 import { Building2, Layers, DoorOpen, Eye, Trash2 } from 'lucide-react';
-import { Building } from '../../../services/buildings.service';
+import { Building } from '@/services/buildings.service';
 import Link from 'next/link';
 
 interface Props {
@@ -46,7 +46,7 @@ export const BuildingCard = ({ building, onDelete }: Props) => {
                 </Group>
             </Group>
 
-            <SimpleGrid cols={2} gap="sm" mt="md">
+            <SimpleGrid cols={2} spacing="sm" mt="md">
                 <Paper withBorder p="xs" radius="sm" bg="gray.0">
                     <Group gap="xs">
                         <Layers size={14} className="text-gray-500" />

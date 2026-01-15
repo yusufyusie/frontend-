@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Paper, Group, Stack, Text, Button, ActionIcon, Box, SimpleGrid, Tabs, TextInput, NumberInput, Select, Divider, Title, Badge } from '@mantine/core';
 import { Layers, Plus, Trash2, Home, Maximize2 } from 'lucide-react';
-import { buildingsService, Floor, Room } from '../../../services/buildings.service';
-import { lookupsService, SystemLookup } from '../../../services/lookups.service';
-import { toast } from '../../Toast';
+import { buildingsService, Floor, Room } from '@/services/buildings.service';
+import { lookupsService, SystemLookup } from '@/services/lookups.service';
+import { toast } from '@/components/Toast';
 
 interface Props {
     buildingId: number;
@@ -18,7 +18,7 @@ export const FloorManager = ({ buildingId }: Props) => {
 
     // Form states for adding
     const [newFloor, setNewFloor] = useState({ code: '', nameEn: '', floorNumber: 0 });
-    const [newRoom, setNewRoom] = useState({ code: '', nameEn: '', areaM2: 0, statusId: undefined });
+    const [newRoom, setNewRoom] = useState<{ code: string; nameEn: string; areaM2: number; statusId?: number }>({ code: '', nameEn: '', areaM2: 0, statusId: undefined });
 
     useEffect(() => {
         fetchFloors();
@@ -179,7 +179,7 @@ export const FloorManager = ({ buildingId }: Props) => {
                                     />
                                     <Select
                                         label="Status"
-                                        data={roomStatusTypes.map(s => ({ value: s.id?.toString() || '', label: s.lookupValue?.en || '' }))}
+                                        data={(roomStatusTypes || []).map((s: any) => ({ value: String(s.id || ''), label: String(s.lookupValue?.en || '') }))}
                                         value={newRoom.statusId?.toString()}
                                         onChange={val => setNewRoom({ ...newRoom, statusId: val ? parseInt(val) : undefined } as any)}
                                     />

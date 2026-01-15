@@ -5,12 +5,14 @@ export interface Building {
     plotId: number;
     code: string;
     nameEn: string;
-    // nameAm removed
+    nameAm?: string;
     buildingTypeId?: number;
     constructionStatusId?: number;
     totalFloors: number;
     basementFloors: number;
     metadata: any;
+    createdAt?: string;
+    updatedAt?: string;
     floors?: Floor[];
 }
 
@@ -19,8 +21,10 @@ export interface Floor {
     buildingId: number;
     code: string;
     nameEn: string;
-    // nameAm removed
+    nameAm?: string;
     floorNumber: number;
+    createdAt?: string;
+    updatedAt?: string;
     rooms?: Room[];
     _count?: { rooms: number };
 }
@@ -30,8 +34,11 @@ export interface Room {
     floorId: number;
     code: string;
     nameEn: string;
+    nameAm?: string;
     areaM2: number;
     statusId?: number;
+    createdAt?: string;
+    updatedAt?: string;
 }
 
 class BuildingsService {

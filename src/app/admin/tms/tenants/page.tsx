@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { Plus, Search, Filter, RefreshCw, Eye, Edit, Trash2, MoreVertical, Users, Building2, FileText, TrendingUp, Mail, Phone, ExternalLink } from 'lucide-react';
-import { tenantsService, Tenant } from '../../../../services/tenants.service';
-import { TenantForm } from '../../../../components/organisms/tms/TenantForm';
-import { TenantStatusBadge } from '../../../../components/atoms/tms/TenantStatusBadge';
+import { tenantsService, Tenant } from '@/services/tenants.service';
+import { TenantForm } from '@/components/organisms/tms/TenantForm';
+import { TenantStatusBadge } from '@/components/atoms/tms/TenantStatusBadge';
 import { Modal } from '@/components/Modal';
 import { toast } from '@/components/Toast';
 import Link from 'next/link';

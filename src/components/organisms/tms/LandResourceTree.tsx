@@ -1,8 +1,8 @@
 import { ActionIcon, Group, Stack, Text, Box, Collapse, Paper, Badge } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { ChevronRight, ChevronDown, Edit, Plus, Trash2, Building2 } from 'lucide-react';
-import { LandResource, LandResourceType } from '../../../services/land-resources.service';
-import { ResourceIcon } from '../../atoms/tms/ResourceIcon';
+import { LandResource, LandResourceType } from '@/services/land-resources.service';
+import { ResourceIcon } from '@/components/atoms/tms/ResourceIcon';
 
 interface NodeProps {
     node: LandResource;

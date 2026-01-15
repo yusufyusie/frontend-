@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Stack, TextInput, Group, Select, Button, Box, LoadingOverlay, Title, Divider } from '@mantine/core';
 import { Save, Building2, FileText, Globe, Phone, Mail, MapPin } from 'lucide-react';
-import { Tenant, tenantsService } from '../../../services/tenants.service';
-import { lookupsService, SystemLookup } from '../../../services/lookups.service';
-import { MultiLangInput } from '../MultiLangInput';
+import { Tenant, tenantsService } from '@/services/tenants.service';
+import { lookupsService, SystemLookup } from '@/services/lookups.service';
+import { MultiLangInput } from '@/components/molecules/tms/MultiLangInput';
 
 interface Props {
     initialData?: Partial<Tenant>;

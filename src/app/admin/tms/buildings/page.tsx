@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { Plus, RefreshCw, Building2, Layers, Home, Eye, Edit, Trash2 } from 'lucide-react';
-import { buildingsService, Building } from '../../../../services/buildings.service';
-import { BuildingForm } from '../../../../components/organisms/tms/BuildingForm';
+import { buildingsService, Building } from '@/services/buildings.service';
+import { BuildingForm } from '@/components/organisms/tms/BuildingForm';
 import { Modal } from '@/components/Modal';
 import { toast } from '@/components/Toast';
 import Link from 'next/link';
