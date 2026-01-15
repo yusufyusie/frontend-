@@ -31,7 +31,10 @@ export const LookupForm = ({ initialData, onSubmit, isLoading, category, parentI
         lookupsService.getAll().then(res => {
             const data = (res as any).data || res;
             if (Array.isArray(data)) {
-                const uniqueCategories = [...new Set(data.map((l: SystemLookup) => l.lookupCategory))];
+                const uniqueCategories = [...new Set(data
+                    .map((l: SystemLookup) => l.lookupCategory)
+                    .filter(c => typeof c === 'string' && c.length > 0)
+                )];
                 setCategories(uniqueCategories);
             }
         });
@@ -49,12 +52,12 @@ export const LookupForm = ({ initialData, onSubmit, isLoading, category, parentI
                 <Stack gap="xl">
                     <Paper withBorder p="xl" radius="xl" bg="gray.0/30">
                         <Group gap="sm" mb="lg">
-                            <Box p={8} bg="teal.0" style={{ borderRadius: '12px' }}>
-                                <Tag size={20} className="text-teal-600" />
+                            <Box p={8} bg="tms-teal.0" style={{ borderRadius: '12px' }}>
+                                <Tag size={20} className="text-teal-700" />
                             </Box>
                             <Box>
-                                <Title order={5} fw={800} lts="-0.3px">Classification Data</Title>
-                                <Text size="xs" c="dimmed">Define how this lookup behaves in the system.</Text>
+                                <Title order={5} fw={800} lts="-0.3px" c="tms-navy">Classification Data</Title>
+                                <Text size="xs" c="dimmed" fw={500}>Define how this lookup behaves in the system.</Text>
                             </Box>
                         </Group>
 
@@ -87,12 +90,12 @@ export const LookupForm = ({ initialData, onSubmit, isLoading, category, parentI
 
                     <Paper withBorder p="xl" radius="xl">
                         <Group gap="sm" mb="lg">
-                            <Box p={8} bg="blue.0" style={{ borderRadius: '12px' }}>
-                                <Globe size={20} className="text-blue-600" />
+                            <Box p={8} bg="tms-teal.0" style={{ borderRadius: '12px' }}>
+                                <Globe size={20} className="text-teal-700" />
                             </Box>
                             <Box>
-                                <Title order={5} fw={800} lts="-0.3px">Internationalization</Title>
-                                <Text size="xs" c="dimmed">Bilingual display values for the user interface.</Text>
+                                <Title order={5} fw={800} lts="-0.3px" c="tms-navy">Internationalization</Title>
+                                <Text size="xs" c="dimmed" fw={500}>Bilingual display values for the user interface.</Text>
                             </Box>
                         </Group>
 
@@ -100,22 +103,34 @@ export const LookupForm = ({ initialData, onSubmit, isLoading, category, parentI
                             <TextInput
                                 label="Display Name (English)"
                                 placeholder="Value visible to English users"
-                                value={formData.lookupValue?.en}
-                                onChange={(e) => setFormData(prev => ({
-                                    ...prev,
-                                    lookupValue: { ...prev.lookupValue!, en: e.currentTarget.value }
-                                }))}
+                                value={formData.lookupValue?.en || ''}
+                                onChange={(e) => {
+                                    const value = e.currentTarget.value;
+                                    setFormData(prev => ({
+                                        ...prev,
+                                        lookupValue: {
+                                            en: value,
+                                            am: prev.lookupValue?.am || ''
+                                        }
+                                    }));
+                                }}
                                 required
                                 radius="md"
                             />
                             <TextInput
                                 label="Display Name (Amharic)"
                                 placeholder="Value visible to Amharic users"
-                                value={formData.lookupValue?.am}
-                                onChange={(e) => setFormData(prev => ({
-                                    ...prev,
-                                    lookupValue: { ...prev.lookupValue!, am: e.currentTarget.value }
-                                }))}
+                                value={formData.lookupValue?.am || ''}
+                                onChange={(e) => {
+                                    const value = e.currentTarget.value;
+                                    setFormData(prev => ({
+                                        ...prev,
+                                        lookupValue: {
+                                            en: prev.lookupValue?.en || '',
+                                            am: value
+                                        }
+                                    }));
+                                }}
                                 radius="md"
                             />
                         </Stack>
@@ -123,12 +138,12 @@ export const LookupForm = ({ initialData, onSubmit, isLoading, category, parentI
 
                     <Paper withBorder p="xl" radius="xl" bg="gray.0/10">
                         <Group gap="sm" mb="lg">
-                            <Box p={8} bg="violet.0" style={{ borderRadius: '12px' }}>
-                                <Layers size={20} className="text-violet-600" />
+                            <Box p={8} bg="tms-teal.0" style={{ borderRadius: '12px' }}>
+                                <Layers size={20} className="text-teal-700" />
                             </Box>
                             <Box>
-                                <Title order={5} fw={800} lts="-0.3px">Hierarchy & Order</Title>
-                                <Text size="xs" c="dimmed">Position and access control settings.</Text>
+                                <Title order={5} fw={800} lts="-0.3px" c="tms-navy">Hierarchy & Order</Title>
+                                <Text size="xs" c="dimmed" fw={500}>Position and access control settings.</Text>
                             </Box>
                         </Group>
 
@@ -156,10 +171,10 @@ export const LookupForm = ({ initialData, onSubmit, isLoading, category, parentI
 
                             <Group gap="xl">
                                 <Checkbox
-                                    label={<Text size="sm" fw={600}>Entry is Active</Text>}
+                                    label={<Text size="sm" fw={600} c="tms-navy">Entry is Active</Text>}
                                     checked={formData.isActive}
                                     onChange={(e) => setFormData(prev => ({ ...prev, isActive: e.currentTarget.checked }))}
-                                    color="teal"
+                                    color="tms-teal"
                                 />
                                 <Checkbox
                                     label={<Text size="sm" fw={600}>System Protected</Text>}

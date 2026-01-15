@@ -33,7 +33,7 @@ const LookupNode = ({ node, onEdit, onAddChild, onDelete }: NodeProps) => {
                         {hasChildren ? (
                             <ActionIcon
                                 variant="light"
-                                color="teal"
+                                color="tms-teal"
                                 onClick={toggle}
                                 size="md"
                                 radius="md"
@@ -54,7 +54,7 @@ const LookupNode = ({ node, onEdit, onAddChild, onDelete }: NodeProps) => {
                                 )}
                             </Group>
                             <Group gap={6}>
-                                <Text size="xs" fw={700} className="text-teal-600 bg-teal-50 px-1.5 py-0.5 rounded">
+                                <Text size="xs" fw={700} className="text-teal-700 bg-teal-50 px-1.5 py-0.5 rounded">
                                     {node.lookupCode}
                                 </Text>
                                 {node.metadata?.color && (
@@ -68,13 +68,13 @@ const LookupNode = ({ node, onEdit, onAddChild, onDelete }: NodeProps) => {
                         <LookupStatusBadge active={node.isActive} />
 
                         <Tooltip label="Edit Details" withArrow position="top">
-                            <ActionIcon variant="light" color="blue" onClick={() => onEdit(node)} size="md" radius="md">
+                            <ActionIcon variant="light" color="tms-navy" onClick={() => onEdit(node)} size="md" radius="md">
                                 <Edit size={16} />
                             </ActionIcon>
                         </Tooltip>
 
                         <Tooltip label="Append Child" withArrow position="top">
-                            <ActionIcon variant="light" color="teal" onClick={() => onAddChild(node)} size="md" radius="md">
+                            <ActionIcon variant="light" color="tms-teal" onClick={() => onAddChild(node)} size="md" radius="md">
                                 <Plus size={16} />
                             </ActionIcon>
                         </Tooltip>

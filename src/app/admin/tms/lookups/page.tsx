@@ -57,9 +57,9 @@ export default function LookupsPage() {
         const filterNodes = (nodes: SystemLookup[]): SystemLookup[] => {
             return nodes.reduce((acc, node) => {
                 const matches =
-                    node.lookupValue.en.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    node.lookupValue.am.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    node.lookupCode.toLowerCase().includes(searchTerm.toLowerCase());
+                    (node.lookupValue?.en || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    (node.lookupValue?.am || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    (node.lookupCode || '').toLowerCase().includes(searchTerm.toLowerCase());
 
                 const filteredChildren = node.children ? filterNodes(node.children) : [];
 
@@ -136,7 +136,8 @@ export default function LookupsPage() {
                         label: 'New Lookup',
                         onClick: handleCreate,
                         icon: Plus,
-                        variant: 'primary'
+                        variant: 'primary',
+                        color: 'tms-teal'
                     }
                 ]}
             />
@@ -160,11 +161,11 @@ export default function LookupsPage() {
                             transform: 'translateX(4px)'
                         },
                         '&[data-active]': {
-                            backgroundColor: '#0C7C92', // Branded Teal
+                            backgroundColor: '#0C7C92', // Brand Teal
                             color: 'white',
                             boxShadow: '0 8px 20px rgba(12, 124, 146, 0.15)',
                             '&:hover': {
-                                backgroundColor: '#0A697B',
+                                backgroundColor: '#6EC9C4', // Hover to Navy
                             }
                         }
                     },
@@ -172,31 +173,29 @@ export default function LookupsPage() {
                         borderRight: 0,
                         backgroundColor: 'transparent',
                         padding: '0',
-                        width: '240px',
-                        minWidth: '240px',
-                        maxWidth: '240px',
-                        flexShrink: 0 // Prevent shrinking/expanding
+                        width: '184px',
+                        minWidth: '184px',
+                        flexShrink: 0
                     },
                     panel: {
                         flex: 1,
                         backgroundColor: 'white',
-                        padding: '24px',
+                        padding: '30px',
                         borderRadius: '24px',
                         border: '1px solid #edf2f7',
-                        minHeight: '700px',
-                        boxShadow: '0 10px 30px rgba(0,0,0,0.04)',
+                        minHeight: '740px',
+                        boxShadow: '0 12px 40px rgba(0,0,0,0.03)',
                         position: 'relative',
-                        overflow: 'hidden',
-                        maxWidth: 'calc(100% - 256px)' // Account for width + gap
+                        overflow: 'hidden'
                     }
                 })}
             >
                 <Tabs.List>
-                    <Box mb="xl" px="md">
+                    <Box mb="lg" px="md">
                         <Text size="xs" fw={800} c="dimmed" tt="uppercase" style={{ letterSpacing: '2px' }} mb={4}>
                             Lookup Domains
                         </Text>
-                        <Box h={3} w={40} bg="#0C7C92" style={{ borderRadius: '100px' }} />
+                        <Box h={2} w={30} bg="#0C7C92" style={{ borderRadius: '100px' }} />
                     </Box>
 
                     {CATEGORIES.map(cat => (
@@ -209,41 +208,38 @@ export default function LookupsPage() {
                         </Tabs.Tab>
                     ))}
 
-                    <Box mt="auto" pt="xl" px="md">
-                        <Paper bg="teal.0" p="lg" radius="xl" style={{ border: '1px dashed #0C7C9233' }}>
-                            <Group justify="space-between" mb={8}>
-                                <Text size="xs" fw={800} c="teal.9">Statistics</Text>
-                                <Badge color="teal" size="sm" variant="filled" radius="sm">
-                                    {lookups.length} Roots
+                    <Box mt="auto" pt="xl" px="xs">
+                        <Paper bg="tms-mint.0" p="md" radius="lg" style={{ border: '1px dashed #6EC9C499' }}>
+                            <Group justify="space-between">
+                                <Text size="xs" fw={800} c="tms-navy.9">Count</Text>
+                                <Badge color="tms-mint" size="xs" variant="filled">
+                                    {lookups.length}
                                 </Badge>
                             </Group>
-                            <Text size="xs" c="teal.7" lh={1.5} style={{ wordBreak: 'break-word' }}>
-                                Manage system-wide classification entries for this domain.
-                            </Text>
                         </Paper>
                     </Box>
                 </Tabs.List>
 
+
                 {CATEGORIES.map(cat => (
                     <Tabs.Panel key={cat.value} value={cat.value}>
-                        {/* Decorative Background Element */}
                         <Box
                             pos="absolute"
                             top={-50}
                             right={-50}
                             w={200}
                             h={200}
-                            bg="teal.0"
-                            style={{ borderRadius: '100%', opacity: 0.5, zIndex: 0 }}
+                            bg="tms-mint.0"
+                            style={{ borderRadius: '100%', opacity: 0.3, zIndex: 0 }}
                         />
 
                         <Box pos="relative" style={{ zIndex: 1 }}>
                             <Group justify="space-between" mb={40} align="flex-start">
                                 <Box>
-                                    <Title order={3} fw={900} c="gray.8" style={{ letterSpacing: '-0.5px' }}>
+                                    <Title order={3} fw={900} c="tms-navy" style={{ letterSpacing: '-0.5px' }}>
                                         {cat.label}
                                     </Title>
-                                    <Text size="sm" c="dimmed" mt={4}>
+                                    <Text size="sm" c="dimmed" mt={4} fw={500}>
                                         Manage classification values and hierarchical dependencies for {cat.label.toLowerCase()}.
                                     </Text>
                                 </Box>

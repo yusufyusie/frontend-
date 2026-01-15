@@ -8,7 +8,7 @@ interface Props {
 export const LookupStatusBadge = ({ active }: Props) => {
     return (
         <Badge
-            color={active ? 'green' : 'gray'}
+            color={active ? 'tms-mint' : 'gray'}
             variant="light"
             leftSection={active ? <Check size={12} /> : <X size={12} />}
             radius="sm"
