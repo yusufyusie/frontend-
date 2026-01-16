@@ -50,8 +50,9 @@ export function Sidebar({ isOpen = true, isCollapsed = false, onClose }: Sidebar
 
             if (menus && menus.length > 0) {
                 setMenuItems(menus);
-                const parentIds = menus.filter(m => m.children && m.children.length > 0).map(m => m.id);
-                setExpandedMenus(new Set(parentIds));
+                // Removed auto-expansion of menus
+                // const parentIds = menus.filter(m => m.children && m.children.length > 0).map(m => m.id);
+                // setExpandedMenus(new Set(parentIds));
 
             } else {
 
