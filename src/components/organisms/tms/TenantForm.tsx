@@ -1,9 +1,8 @@
-import { useState, useEffect } from 'react';
-import { Stack, TextInput, Group, Select, Button, Box, LoadingOverlay, Title, Divider, Paper, Text } from '@mantine/core';
-import { Save, Building2, FileText, Globe, Phone, Mail, MapPin } from 'lucide-react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { Stack, TextInput, Group, Select, Button, Box, LoadingOverlay, Title, Divider, Paper, Text, rem } from '@mantine/core';
+import { Building2, FileText, Globe, Phone, Mail, MapPin, Sparkles } from 'lucide-react';
 import { Tenant, tenantsService } from '@/services/tenants.service';
 import { lookupsService, SystemLookup } from '@/services/lookups.service';
-import { MultiLangInput } from '@/components/molecules/tms/MultiLangInput';
 
 interface Props {
     initialData?: Partial<Tenant>;
@@ -28,166 +27,173 @@ export const TenantForm = ({ initialData, onSubmit, isLoading, onValidityChange 
 
     const [bizCategories, setBizCategories] = useState<SystemLookup[]>([]);
     const [statusTypes, setStatusTypes] = useState<SystemLookup[]>([]);
+    const lastValidity = useRef<boolean>(false);
 
     useEffect(() => {
         lookupsService.getByCategory('BUSINESS_CATEGORIES').then(res => setBizCategories((res as any).data || res));
         lookupsService.getByCategory('TENANT_STATUS').then(res => setStatusTypes((res as any).data || res));
     }, []);
 
-    // Validation Effect
+    const bizCategoryData = useMemo(
+        () => bizCategories.map(c => ({ value: c.id.toString(), label: c.lookupValue.en })),
+        [bizCategories]
+    );
+
+    const statusData = useMemo(
+        () => statusTypes.map(s => ({ value: s.id.toString(), label: s.lookupValue.en })),
+        [statusTypes]
+    );
+
     useEffect(() => {
-        const isValid = Boolean(
-            formData.nameEn &&
-            formData.companyRegNumber
-        );
-        onValidityChange?.(isValid);
-    }, [formData, onValidityChange]);
+        const isValid = Boolean(formData.nameEn && formData.companyRegNumber);
+        if (isValid !== lastValidity.current) {
+            lastValidity.current = isValid;
+            onValidityChange?.(isValid);
+        }
+    }, [formData.nameEn, formData.companyRegNumber, onValidityChange]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         await onSubmit(formData);
     };
 
+    const inputStyles = {
+        label: {
+            fontWeight: 800,
+            color: '#16284F',
+            fontSize: rem(13),
+            marginBottom: rem(8),
+            textTransform: 'uppercase' as const,
+            letterSpacing: rem(1)
+        },
+        input: {
+            borderRadius: rem(16),
+            height: rem(56),
+            fontSize: rem(15),
+            border: '2px solid #f1f5f9',
+            backgroundColor: '#f8fafc',
+            transition: 'all 0.2s ease',
+            '&:focus': {
+                borderColor: '#0C7C92',
+                backgroundColor: '#fff',
+                boxShadow: '0 8px 16px -4px rgba(12, 124, 146, 0.1)'
+            }
+        }
+    };
+
     return (
         <Box pos="relative">
             <LoadingOverlay visible={isLoading} overlayProps={{ blur: 2 }} />
             <form id="tenant-form" onSubmit={handleSubmit}>
-                <Stack gap="xl">
-                    {/* Identity Section */}
-                    <Paper withBorder p="lg" radius="2rem" shadow="sm" className="border-slate-100">
-                        <Group gap="md" mb="xl">
-                            <Box p={12} bg="#0C7C92" style={{ borderRadius: '1rem' }} className="shadow-lg shadow-teal-100">
-                                <Building2 size={24} className="text-white" />
+                <Stack gap="2.5rem">
+                    {/* LEAGAL IDENTITY */}
+                    <Box>
+                        <Group gap="sm" mb="xl">
+                            <Box p={8} bg="blue.0" style={{ borderRadius: '50%' }}>
+                                <Sparkles size={18} className="text-blue-600" />
                             </Box>
-                            <div>
-                                <Title order={4} fw={800} lts="-0.5px" c="#16284F" style={{ display: 'inline-block', marginRight: '0.75rem' }}>Company Identity</Title>
-                                <Text span size="xs" c="dimmed" fw={700} tt="uppercase" lts="1px">Legal & Registration</Text>
-                            </div>
+                            <Text size="sm" fw={900} c="#16284F" tt="uppercase" lts="2px">Legal Identity</Text>
                         </Group>
 
-                        <Stack gap="lg">
+                        <Stack gap="xl">
                             <TextInput
-                                label="Company Name (English)"
+                                label="Official Company Name"
+                                placeholder="Enter legal entity name"
                                 value={formData.nameEn}
                                 onChange={(e) => setFormData({ ...formData, nameEn: e.currentTarget.value })}
                                 required
-                                radius="xl"
                                 size="md"
-                                styles={{ label: { fontWeight: 700, color: '#16284F' } }}
+                                styles={inputStyles}
                             />
-                            <Group grow>
+
+                            <Group grow gap="xl">
                                 <TextInput
-                                    label="Registration Number"
-                                    placeholder="e.g. ET/AA/12345"
-                                    leftSection={<FileText size={18} />}
+                                    label="Trade License #"
+                                    placeholder="ET/AA/---"
+                                    leftSection={<FileText size={18} className="text-slate-400" />}
                                     value={formData.companyRegNumber}
                                     onChange={(e) => setFormData({ ...formData, companyRegNumber: e.currentTarget.value })}
                                     required
-                                    radius="xl"
                                     size="md"
-                                    styles={{ label: { fontWeight: 700, color: '#16284F' } }}
+                                    styles={inputStyles}
                                 />
                                 <TextInput
                                     label="TIN Number"
-                                    placeholder="10 digits"
+                                    placeholder="10-digit number"
                                     value={formData.tinNumber}
                                     onChange={(e) => setFormData({ ...formData, tinNumber: e.currentTarget.value })}
-                                    radius="xl"
                                     size="md"
-                                    styles={{ label: { fontWeight: 700, color: '#16284F' } }}
+                                    styles={inputStyles}
                                 />
                             </Group>
                         </Stack>
-                    </Paper>
+                    </Box>
 
-                    {/* Contact Section */}
-                    <Paper withBorder p="lg" radius="2rem" shadow="sm" className="border-slate-100">
-                        <Group gap="md" mb="xl">
-                            <Box p={12} bg="#0C7C92" style={{ borderRadius: '1rem' }} className="shadow-lg shadow-teal-100">
-                                <Globe size={24} className="text-white" />
+                    {/* COMMUNICATIONS */}
+                    <Box pt="xl">
+                        <Group gap="sm" mb="xl">
+                            <Box p={8} bg="teal.0" style={{ borderRadius: '50%' }}>
+                                <Globe size={18} className="text-teal-600" />
                             </Box>
-                            <div>
-                                <Title order={4} fw={800} lts="-0.5px" c="#16284F" style={{ display: 'inline-block', marginRight: '0.75rem' }}>Contact Details</Title>
-                                <Text span size="xs" c="dimmed" fw={700} tt="uppercase" lts="1px">Communication Channels</Text>
-                            </div>
+                            <Text size="sm" fw={900} c="#16284F" tt="uppercase" lts="2px">Communications</Text>
                         </Group>
 
-                        <Stack gap="lg">
-                            <Group grow>
+                        <Stack gap="xl">
+                            <Group grow gap="xl">
                                 <TextInput
                                     label="Public Email"
-                                    leftSection={<Mail size={18} />}
+                                    placeholder="admin@company.com"
+                                    leftSection={<Mail size={18} className="text-slate-400" />}
                                     value={formData.email}
                                     onChange={(e) => setFormData({ ...formData, email: e.currentTarget.value })}
-                                    radius="xl"
                                     size="md"
-                                    styles={{ label: { fontWeight: 700, color: '#16284F' } }}
+                                    styles={inputStyles}
                                 />
                                 <TextInput
-                                    label="Public Phone"
-                                    leftSection={<Phone size={18} />}
+                                    label="Primary Phone"
+                                    placeholder="+251 --- ---"
+                                    leftSection={<Phone size={18} className="text-slate-400" />}
                                     value={formData.phone}
                                     onChange={(e) => setFormData({ ...formData, phone: e.currentTarget.value })}
-                                    radius="xl"
                                     size="md"
-                                    styles={{ label: { fontWeight: 700, color: '#16284F' } }}
+                                    styles={inputStyles}
                                 />
                             </Group>
                             <TextInput
-                                label="Website"
-                                placeholder="https://"
-                                leftSection={<Globe size={18} />}
-                                value={formData.website}
-                                onChange={(e) => setFormData({ ...formData, website: e.currentTarget.value })}
-                                radius="xl"
-                                size="md"
-                                styles={{ label: { fontWeight: 700, color: '#16284F' } }}
-                            />
-                            <TextInput
                                 label="Physical Address"
-                                leftSection={<MapPin size={18} />}
+                                placeholder="Building, Street, City"
+                                leftSection={<MapPin size={18} className="text-slate-400" />}
                                 value={formData.address}
                                 onChange={(e) => setFormData({ ...formData, address: e.currentTarget.value })}
-                                radius="xl"
                                 size="md"
-                                styles={{ label: { fontWeight: 700, color: '#16284F' } }}
+                                styles={inputStyles}
                             />
                         </Stack>
-                    </Paper>
+                    </Box>
 
-                    {/* Classification Section */}
-                    <Paper withBorder p="lg" radius="2rem" shadow="sm" className="border-slate-100">
-                        <Group gap="md" mb="xl">
-                            <Box p={12} bg="#0C7C92" style={{ borderRadius: '1rem' }} className="shadow-lg shadow-teal-100">
-                                <FileText size={24} className="text-white" />
-                            </Box>
-                            <div>
-                                <Title order={4} fw={800} lts="-0.5px" c="#16284F" style={{ display: 'inline-block', marginRight: '0.75rem' }}>Categorization</Title>
-                                <Text span size="xs" c="dimmed" fw={700} tt="uppercase" lts="1px">Business Classification</Text>
-                            </div>
-                        </Group>
-
-                        <Group grow>
+                    {/* CLASSIFICATION */}
+                    <Box pt="xl">
+                        <Group grow gap="xl">
                             <Select
-                                label="Business Category"
-                                data={bizCategories.map(c => ({ value: c.id.toString(), label: c.lookupValue.en }))}
+                                label="Business Sector"
+                                data={bizCategoryData}
                                 value={formData.businessCategoryId?.toString()}
                                 onChange={(val) => setFormData({ ...formData, businessCategoryId: val ? parseInt(val) : undefined })}
-                                radius="xl"
                                 size="md"
-                                styles={{ label: { fontWeight: 700, color: '#16284F' } }}
+                                styles={inputStyles}
+                                placeholder="Select category"
                             />
                             <Select
-                                label="Onboarding Status"
-                                data={statusTypes.map(s => ({ value: s.id.toString(), label: s.lookupValue.en }))}
+                                label="Operational Status"
+                                data={statusData}
                                 value={formData.statusId?.toString()}
                                 onChange={(val) => setFormData({ ...formData, statusId: val ? parseInt(val) : undefined })}
-                                radius="xl"
                                 size="md"
-                                styles={{ label: { fontWeight: 700, color: '#16284F' } }}
+                                styles={inputStyles}
+                                placeholder="Assign status"
                             />
                         </Group>
-                    </Paper>
+                    </Box>
                 </Stack>
             </form>
         </Box>

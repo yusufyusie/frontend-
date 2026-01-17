@@ -90,7 +90,7 @@ export default function RootLayout({
                     }}
                 />
             </head>
-            <body className={inter.className}>
+            <body className={inter.className} suppressHydrationWarning>
                 {/* Skip to main content link for accessibility */}
                 <a
                     href="#main-content"
