@@ -12,6 +12,7 @@ import { useRoles } from '@/hooks/roles/useRoles';
 import { useRoleFilters } from '@/hooks/roles/useRoleFilters';
 import { useMultiSelect } from '@/hooks/shared/useMultiSelect';
 import { useModalState } from '@/hooks/shared/useModalState';
+import { useRouter } from 'next/navigation';
 
 // Page Components
 import { RolesPageHeader } from '@/components/roles/RolesPageHeader';
@@ -22,7 +23,6 @@ import { RolesGrid } from '@/components/roles/RolesGrid';
 // Modals
 import { CreateRoleModal } from '@/components/roles/modals/CreateRoleModal';
 import { EditRoleModal } from '@/components/roles/modals/EditRoleModal';
-import { AssignPermissionsModal } from '@/components/roles/modals/AssignPermissionsModal';
 
 import type { Role } from '@/services/roles.service';
 
@@ -33,6 +33,8 @@ import type { Role } from '@/services/roles.service';
  * and presentational components following Single Responsibility Principle
  */
 export default function AdminRolesPage() {
+    const router = useRouter();
+
     // Data Management
     const {
         roles,
@@ -58,7 +60,6 @@ export default function AdminRolesPage() {
     const editModal = useModalState<Role>();
     const deleteModal = useModalState<Role>();
     const bulkDeleteModal = useModalState<void>();
-    const assignPermissionsModal = useModalState<Role>();
     const assignMenusModal = useModalState<Role>();
 
     /**
@@ -90,10 +91,10 @@ export default function AdminRolesPage() {
     };
 
     /**
-     * Handle assign permissions
+     * Handle assign permissions - Navigate to dedicated page
      */
-    const handleAssignPermissions = async (roleId: number, permissionIds: number[]) => {
-        await assignPermissions(roleId, permissionIds);
+    const handleAssignPermissions = (role: Role) => {
+        router.push(`/admin/roles/${role.id}/permissions`);
     };
 
     // Loading State
@@ -148,7 +149,7 @@ export default function AdminRolesPage() {
                 onToggleSelect={selection.toggle}
                 onEditClick={editModal.open}
                 onDeleteClick={deleteModal.open}
-                onAssignPermissionsClick={assignPermissionsModal.open}
+                onAssignPermissionsClick={handleAssignPermissions}
                 onAssignMenusClick={assignMenusModal.open}
             />
 
@@ -164,14 +165,6 @@ export default function AdminRolesPage() {
                 onClose={editModal.close}
                 onUpdate={update}
                 role={editModal.selectedItem}
-            />
-
-            <AssignPermissionsModal
-                isOpen={assignPermissionsModal.isOpen}
-                onClose={assignPermissionsModal.close}
-                onAssign={handleAssignPermissions}
-                role={assignPermissionsModal.selectedItem}
-                permissions={permissions}
             />
 
             <Modal
