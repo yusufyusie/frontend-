@@ -140,22 +140,49 @@ export default function TenantDetailPage() {
                             <SimpleGrid cols={2} spacing="lg">
                                 <Paper withBorder p="lg" radius="md">
                                     <Text size="sm" c="dimmed" mb="xs">Active Occupancy</Text>
-                                    <Text size="xl" fw={900}>0 m²</Text>
-                                    <Text size="xs" c="blue" mt={4}>No active leases found</Text>
+                                    <Text size="xl" fw={900}>
+                                        {tenant.leases?.reduce((acc: number, l: any) => acc + Number(l.actualAreaM2), 0).toLocaleString() || 0} m²
+                                    </Text>
+                                    <Text size="xs" c="blue" mt={4}>
+                                        {tenant.leases?.length || 0} active spatial bindings
+                                    </Text>
                                 </Paper>
                                 <Paper withBorder p="lg" radius="md">
-                                    <Text size="sm" c="dimmed" mb="xs">Financial Balance</Text>
-                                    <Text size="xl" fw={900}>0.00 ETB</Text>
-                                    <Text size="xs" c="green" mt={4}>Account settled</Text>
+                                    <Text size="sm" c="dimmed" mb="xs">Area Variance</Text>
+                                    <Text size="xl" fw={900}>
+                                        {(tenant.leases?.reduce((acc: number, l: any) => acc + (Number(l.actualAreaM2) - Number(l.contractAreaM2)), 0)).toFixed(2)} m²
+                                    </Text>
+                                    <Text size="xs" c="orange" mt={4}>Cumulative delta across assets</Text>
                                 </Paper>
                             </SimpleGrid>
 
                             <Paper withBorder p="xl" radius="md" mt="lg">
-                                <Title order={4} mb="md">Onboarding Progress</Title>
-                                <Text size="sm" c="dimmed">
-                                    Tenant has completed initial profile registration.
-                                    Next step: Upload required business license and TIN certification in the Documents tab.
-                                </Text>
+                                <Title order={4} mb="md">Company Asset Portfolio</Title>
+                                {tenant.leases?.length === 0 ? (
+                                    <Text size="sm" c="dimmed">No spatial assets assigned yet. Use the Onboarding Wizard to assign plots or rooms.</Text>
+                                ) : (
+                                    <Stack gap="md">
+                                        {tenant.leases?.map((lease: any) => (
+                                            <Paper key={lease.id} withBorder p="md" radius="md" bg="gray.0">
+                                                <Group justify="space-between">
+                                                    <Group>
+                                                        <MapPin size={20} className="text-blue-600" />
+                                                        <Box>
+                                                            <Text fw={700}>{lease.landResource?.code || lease.room?.code}</Text>
+                                                            <Text size="xs" c="dimmed">{lease.landResource?.nameEn || `${lease.room?.floor?.building?.nameEn} - Floor ${lease.room?.floor?.level}`}</Text>
+                                                        </Box>
+                                                    </Group>
+                                                    <Box style={{ textAlign: 'right' }}>
+                                                        <Text fw={900}>{Number(lease.actualAreaM2).toLocaleString()} m²</Text>
+                                                        <Badge size="xs" variant="light">
+                                                            {lease.contractNumber}
+                                                        </Badge>
+                                                    </Box>
+                                                </Group>
+                                            </Paper>
+                                        ))}
+                                    </Stack>
+                                )}
                             </Paper>
                         </Tabs.Panel>
 
@@ -173,10 +200,55 @@ export default function TenantDetailPage() {
                         </Tabs.Panel>
 
                         <Tabs.Panel value="contracts">
-                            <Paper withBorder p="xl" radius="md" bg="gray.0" style={{ textAlign: 'center' }}>
-                                <Calculator size={40} className="mx-auto text-gray-400 mb-4" />
-                                <Text c="dimmed">Lease management is scheduled for Phase 4.</Text>
-                            </Paper>
+                            <Stack gap="lg">
+                                <Group justify="space-between">
+                                    <Title order={4}>Spatial Sublease Agreements</Title>
+                                    <Button variant="light" size="xs" color="blue">New Contract</Button>
+                                </Group>
+
+                                {tenant.leases?.length === 0 ? (
+                                    <Paper withBorder p="xl" radius="md" bg="gray.0" style={{ textAlign: 'center' }}>
+                                        <Calculator size={40} className="mx-auto text-gray-400 mb-4" />
+                                        <Text c="dimmed">No active lease contracts found for this tenant.</Text>
+                                    </Paper>
+                                ) : (
+                                    <Stack gap="md">
+                                        {tenant.leases?.map((lease: any) => (
+                                            <Paper key={lease.id} withBorder p="xl" radius="lg" shadow="xs">
+                                                <Group justify="space-between" mb="md">
+                                                    <Group>
+                                                        <Box p={10} bg="blue.0" style={{ borderRadius: '1rem' }}>
+                                                            <FileCheck size={24} className="text-blue-600" />
+                                                        </Box>
+                                                        <Box>
+                                                            <Text fw={900} size="lg">{lease.contractNumber}</Text>
+                                                            <Text size="xs" c="dimmed" tt="uppercase" lts="1px">Execution Date: {new Date(lease.startDate).toLocaleDateString()}</Text>
+                                                        </Box>
+                                                    </Group>
+                                                    <Badge size="xl" variant="dot" color="teal">ACTIVE LEASE</Badge>
+                                                </Group>
+
+                                                <SimpleGrid cols={3} spacing="md">
+                                                    <Box>
+                                                        <Text size="xs" c="dimmed" fw={700} tt="uppercase">Contract Area</Text>
+                                                        <Text fw={700}>{Number(lease.contractAreaM2).toLocaleString()} m²</Text>
+                                                    </Box>
+                                                    <Box>
+                                                        <Text size="xs" c="dimmed" fw={700} tt="uppercase">Actual Area</Text>
+                                                        <Text fw={700}>{Number(lease.actualAreaM2).toLocaleString()} m²</Text>
+                                                    </Box>
+                                                    <Box>
+                                                        <Text size="xs" c="dimmed" fw={700} tt="uppercase">Variance</Text>
+                                                        <Text fw={700} c={Math.abs(Number(lease.actualAreaM2) - Number(lease.contractAreaM2)) > 5 ? 'red' : 'teal'}>
+                                                            {(Number(lease.actualAreaM2) - Number(lease.contractAreaM2)).toFixed(2)} m²
+                                                        </Text>
+                                                    </Box>
+                                                </SimpleGrid>
+                                            </Paper>
+                                        ))}
+                                    </Stack>
+                                )}
+                            </Stack>
                         </Tabs.Panel>
                     </Tabs>
                 </Grid.Col>

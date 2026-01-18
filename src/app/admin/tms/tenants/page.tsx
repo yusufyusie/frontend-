@@ -5,6 +5,7 @@ import { Plus, Search, Filter, RefreshCw, Eye, Edit, Trash2, MoreVertical, Users
 import { tenantsService, Tenant } from '@/services/tenants.service';
 import { TenantOnboardingWizard } from '@/components/organisms/tms/TenantOnboardingWizardMaster';
 import { TenantStatusBadge } from '@/components/atoms/tms/TenantStatusBadge';
+import { SpatialStats } from '@/components/organisms/tms/SpatialStats';
 import { toast } from '@/components/Toast';
 import Link from 'next/link';
 
@@ -136,6 +137,9 @@ export default function TenantDirectoryPage() {
                     </div>
                 </div>
             </div>
+
+            {/* Manager's Spatial Overview (Phase 3) */}
+            <SpatialStats />
 
             {/* Search Filter */}
             <div className="card p-0 overflow-hidden">

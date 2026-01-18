@@ -35,6 +35,7 @@ import {
     Lightbulb,
     ShieldCheck,
     Briefcase,
+    MapPin,
 } from 'lucide-react';
 import { Tenant } from '@/services/tenants.service';
 import { TenantForm } from './TenantForm';

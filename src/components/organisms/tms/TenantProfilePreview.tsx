@@ -109,16 +109,21 @@ export const TenantProfilePreview = ({ data, bizCategoryLabel, statusLabel }: Te
                         <Paper p="lg" radius="1.5rem" bg="slate.50" style={{ border: '1px solid #f1f5f9' }}>
                             <Group gap="xs" mb={4}>
                                 <Zap size={14} className="text-teal-600" />
-                                <Text size="xs" c="dimmed" fw={800} tt="uppercase" lts="1px">TIN Status</Text>
+                                <Group gap={4} wrap="nowrap">
+                                    <Text size="xs" c="dimmed" fw={800} tt="uppercase" lts="1px">TIN Status</Text>
+                                    {data.tinNumber && <CheckCircle2 size={10} className="text-teal-500" />}
+                                </Group>
                             </Group>
                             <Text size="sm" fw={800} c="#16284F">{data.tinNumber || 'PENDING'}</Text>
                         </Paper>
                         <Paper p="lg" radius="1.5rem" bg="slate.50" style={{ border: '1px solid #f1f5f9' }}>
                             <Group gap="xs" mb={4}>
                                 <MapPin size={14} className="text-orange-600" />
-                                <Text size="xs" c="dimmed" fw={800} tt="uppercase" lts="1px">Region</Text>
+                                <Text size="xs" c="dimmed" fw={800} tt="uppercase" lts="1px">Assignment</Text>
                             </Group>
-                            <Text size="sm" fw={800} c="#16284F">AA, Ethiopia</Text>
+                            <Text size="sm" fw={800} c="#16284F" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                {(data as any).metadata?.spatial?.contractNumber || 'NOT BOUND'}
+                            </Text>
                         </Paper>
                     </div>
 

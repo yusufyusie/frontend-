@@ -163,7 +163,7 @@ export default function LookupsPage() {
                             backgroundColor: '#f1f5f9',
                             transform: 'translateX(4px)'
                         },
-                        '&[data-active]': {
+                        '&[dataActive]': {
                             backgroundColor: '#0C7C92', // Brand Teal
                             color: 'white',
                             boxShadow: '0 8px 20px rgba(12, 124, 146, 0.15)',
