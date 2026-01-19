@@ -27,9 +27,14 @@ export interface Tenant {
     createdAt?: string;
     updatedAt?: string;
     contacts?: TenantContact[];
+    documents?: any[];
+    leases?: any[];
+    status?: any;
+    businessCategory?: any;
     _count?: {
         contacts: number;
         documents: number;
+        leases?: number;
     };
 }
 

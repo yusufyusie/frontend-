@@ -12,7 +12,7 @@ interface SpatialData {
     contractNumber: string;
     contractAreaM2: number;
     actualAreaM2: number;
-    startDate: Date;
+    startDate: Date | string;
     constructionStatusId?: number;
 }
 
@@ -58,7 +58,7 @@ export const SpatialStep = ({ data, onChange, onValidityChange }: Props) => {
                     <Text size="sm" fw={900} c="#16284F" tt="uppercase" lts="2px">Space Allocation</Text>
                 </Group>
 
-                <SimpleGrid cols={2} gap="xl">
+                <SimpleGrid cols={2} spacing="xl">
                     <Paper
                         withBorder
                         p="xl"

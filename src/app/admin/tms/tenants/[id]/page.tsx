@@ -141,7 +141,7 @@ export default function TenantDetailPage() {
                                 <Paper withBorder p="lg" radius="md">
                                     <Text size="sm" c="dimmed" mb="xs">Active Occupancy</Text>
                                     <Text size="xl" fw={900}>
-                                        {tenant.leases?.reduce((acc: number, l: any) => acc + Number(l.actualAreaM2), 0).toLocaleString() || 0} m²
+                                        {(tenant.leases?.reduce((acc: number, l: any) => acc + Number(l.actualAreaM2), 0) || 0).toLocaleString()} m²
                                     </Text>
                                     <Text size="xs" c="blue" mt={4}>
                                         {tenant.leases?.length || 0} active spatial bindings
@@ -150,7 +150,7 @@ export default function TenantDetailPage() {
                                 <Paper withBorder p="lg" radius="md">
                                     <Text size="sm" c="dimmed" mb="xs">Area Variance</Text>
                                     <Text size="xl" fw={900}>
-                                        {(tenant.leases?.reduce((acc: number, l: any) => acc + (Number(l.actualAreaM2) - Number(l.contractAreaM2)), 0)).toFixed(2)} m²
+                                        {(tenant.leases?.reduce((acc: number, l: any) => acc + (Number(l.actualAreaM2) - Number(l.contractAreaM2)), 0) || 0).toFixed(2)} m²
                                     </Text>
                                     <Text size="xs" c="orange" mt={4}>Cumulative delta across assets</Text>
                                 </Paper>
