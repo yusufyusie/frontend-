@@ -110,11 +110,11 @@ export const SpatialStep = ({ data, onChange, onValidityChange }: Props) => {
     };
 
     return (
-        <Stack gap="2.5rem">
+        <Stack gap="2.5rem" className="animate-fade-in">
             {/* SEARCH & SELECTION */}
             <Box>
                 <Group gap="sm" mb="xl">
-                    <Box p={8} bg="blue.0" style={{ borderRadius: '50%' }}>
+                    <Box p={8} bg="blue.0" style={{ borderRadius: '12px' }} className="shadow-sm">
                         <MapPin size={18} className="text-blue-600" />
                     </Box>
                     <Text size="sm" fw={900} c="#16284F" tt="uppercase" lts="2px">Space Allocation</Text>
@@ -124,57 +124,68 @@ export const SpatialStep = ({ data, onChange, onValidityChange }: Props) => {
                     <Paper
                         withBorder
                         p="xl"
-                        radius="md"
+                        radius="lg"
+                        className={`hover-lift transition-all duration-300 ${data.resourceType === 'PLOT' ? 'shadow-lg border-teal-500 bg-teal-50/30' : 'bg-white/50'}`}
                         style={{
                             cursor: 'pointer',
-                            borderColor: data.resourceType === 'PLOT' ? '#0C7C92' : '#f1f5f9',
-                            backgroundColor: data.resourceType === 'PLOT' ? '#f0f9fa' : '#fff'
+                            borderColor: data.resourceType === 'PLOT' ? '#0C7C92' : undefined,
+                            backdropFilter: 'blur(8px)'
                         }}
                         onClick={() => onChange({ ...data, resourceType: 'PLOT', roomId: undefined })}
                     >
-                        <Stack align="center" gap="xs">
-                            <MapPin size={32} color={data.resourceType === 'PLOT' ? '#0C7C92' : '#94a3b8'} />
-                            <Text fw={700}>Land Plot</Text>
-                            <Text size="xs" c="dimmed">Assign a numbered plot from a Block/Zone</Text>
+                        <Stack align="center" gap="md">
+                            <Box p="md" bg={data.resourceType === 'PLOT' ? 'teal.1' : 'gray.0'} style={{ borderRadius: '50%' }} className="transition-base">
+                                <MapPin size={32} color={data.resourceType === 'PLOT' ? '#0C7C92' : '#94a3b8'} />
+                            </Box>
+                            <Box style={{ textAlign: 'center' }}>
+                                <Text fw={800} size="lg" c={data.resourceType === 'PLOT' ? 'teal.9' : 'gray.8'}>Land Plot</Text>
+                                <Text size="xs" c="dimmed">Assign a numbered plot from a Block/Zone</Text>
+                            </Box>
                         </Stack>
                     </Paper>
 
                     <Paper
                         withBorder
                         p="xl"
-                        radius="md"
+                        radius="lg"
+                        className={`hover-lift transition-all duration-300 ${data.resourceType === 'ROOM' ? 'shadow-lg border-teal-500 bg-teal-50/30' : 'bg-white/50'}`}
                         style={{
                             cursor: 'pointer',
-                            borderColor: data.resourceType === 'ROOM' ? '#0C7C92' : '#f1f5f9',
-                            backgroundColor: data.resourceType === 'ROOM' ? '#f0f9fa' : '#fff'
+                            borderColor: data.resourceType === 'ROOM' ? '#0C7C92' : undefined,
+                            backdropFilter: 'blur(8px)'
                         }}
                         onClick={() => onChange({ ...data, resourceType: 'ROOM', landResourceId: undefined })}
                     >
-                        <Stack align="center" gap="xs">
-                            <Building2 size={32} color={data.resourceType === 'ROOM' ? '#0C7C92' : '#94a3b8'} />
-                            <Text fw={700}>Building Space</Text>
-                            <Text size="xs" c="dimmed">Assign a specific floor or room in a building</Text>
+                        <Stack align="center" gap="md">
+                            <Box p="md" bg={data.resourceType === 'ROOM' ? 'teal.1' : 'gray.0'} style={{ borderRadius: '50%' }} className="transition-base">
+                                <Building2 size={32} color={data.resourceType === 'ROOM' ? '#0C7C92' : '#94a3b8'} />
+                            </Box>
+                            <Box style={{ textAlign: 'center' }}>
+                                <Text fw={800} size="lg" c={data.resourceType === 'ROOM' ? 'teal.9' : 'gray.8'}>Building Space</Text>
+                                <Text size="xs" c="dimmed">Assign a specific floor or room in a building</Text>
+                            </Box>
                         </Stack>
                     </Paper>
                 </SimpleGrid>
             </Box>
 
             {/* RESOURCE PICKER */}
-            <Box>
+            <Box className="animate-scale-up" key={data.resourceType}>
                 {data.resourceType === 'PLOT' ? (
                     <Stack gap="md">
                         <Select
                             label="Select Zone"
-                            placeholder="Choose zone"
+                            placeholder="Choose destination zone"
                             data={zoneOptions}
                             value={selectedZoneId}
                             onChange={(val) => setSelectedZoneId(val)}
                             searchable
                             styles={inputStyles}
+                            className="hover-glow rounded-2xl"
                         />
 
                         {selectedZoneId && (
-                            <SimpleGrid cols={2} spacing="md">
+                            <SimpleGrid cols={2} spacing="md" className="animate-slide-down">
                                 <Select
                                     label="Select Block"
                                     placeholder="Choose block"
@@ -204,20 +215,21 @@ export const SpatialStep = ({ data, onChange, onValidityChange }: Props) => {
                     <Stack gap="md">
                         <Select
                             label="Select Building"
-                            placeholder="Choose building"
+                            placeholder="Choose facility"
                             data={buildingOptions}
                             value={selectedBuildingId}
                             onChange={(val) => setSelectedBuildingId(val)}
                             searchable
                             leftSection={<Building2 size={16} />}
                             styles={inputStyles}
+                            className="hover-glow rounded-2xl"
                         />
 
                         {selectedBuildingId && (
-                            <SimpleGrid cols={2} spacing="md">
+                            <SimpleGrid cols={2} spacing="md" className="animate-slide-down">
                                 <Select
                                     label="Select Floor"
-                                    placeholder="Choose floor"
+                                    placeholder="Choose level"
                                     data={floorOptions}
                                     value={selectedFloorId}
                                     onChange={(val) => setSelectedFloorId(val)}
@@ -226,7 +238,7 @@ export const SpatialStep = ({ data, onChange, onValidityChange }: Props) => {
                                 />
                                 <Select
                                     label="Select Room"
-                                    placeholder="Choose room"
+                                    placeholder="Choose unit"
                                     data={roomOptions}
                                     value={data.roomId?.toString()}
                                     onChange={(val) => {
@@ -246,7 +258,7 @@ export const SpatialStep = ({ data, onChange, onValidityChange }: Props) => {
             {/* CONTRACT DETAILS */}
             <Box>
                 <Group gap="sm" mb="xl">
-                    <Box p={8} bg="orange.0" style={{ borderRadius: '50%' }}>
+                    <Box p={8} bg="orange.0" style={{ borderRadius: '12px' }} className="shadow-sm">
                         <FileText size={18} className="text-orange-600" />
                     </Box>
                     <Text size="sm" fw={900} c="#16284F" tt="uppercase" lts="2px">Contractual Metrics</Text>
@@ -280,10 +292,18 @@ export const SpatialStep = ({ data, onChange, onValidityChange }: Props) => {
                         />
                         <Box>
                             <Text size="xs" fw={800} c="#16284F" tt="uppercase" lts="1px" mb={8}>Actual Surveyed Area (m²)</Text>
-                            <Paper withBorder p="md" radius="md" bg="gray.0">
+                            <Paper withBorder p="md" radius="lg" bg="gray.0" className="shadow-inner border-dashed">
                                 <Group justify="space-between">
-                                    <Text fw={900} size="xl">{data.actualAreaM2 || 0}</Text>
-                                    <Badge color={Math.abs((data.contractAreaM2 || 0) - (data.actualAreaM2 || 0)) > 5 ? 'red' : 'green'}>
+                                    <Stack gap={0}>
+                                        <Text size="xs" c="dimmed" fw={700}>VERIFIED AREA</Text>
+                                        <Text fw={900} size="xl">{data.actualAreaM2 || 0} m²</Text>
+                                    </Stack>
+                                    <Badge
+                                        size="lg"
+                                        variant="filled"
+                                        color={Math.abs((data.contractAreaM2 || 0) - (data.actualAreaM2 || 0)) > 5 ? 'red' : 'teal'}
+                                        className="shadow-sm"
+                                    >
                                         {((data.actualAreaM2 || 0) - (data.contractAreaM2 || 0)).toFixed(2)} Variance
                                     </Badge>
                                 </Group>
@@ -293,11 +313,13 @@ export const SpatialStep = ({ data, onChange, onValidityChange }: Props) => {
                 </Stack>
             </Box>
 
-            <Paper p="md" radius="md" bg="blue.0" withBorder style={{ borderColor: '#bfdbfe' }}>
-                <Group gap="xs" align="flex-start">
-                    <Info size={16} className="text-blue-600 mt-1" />
-                    <Text size="xs" c="blue.9">
-                        **Automated Integrity Check**: If the variance between Contract and Actual area exceeds 5%, an internal audit will be triggered automatically upon registration.
+            <Paper p="md" radius="lg" bg="blue.0" withBorder style={{ borderColor: '#bfdbfe', borderLeftWidth: rem(6) }} className="glass">
+                <Group gap="md" align="flex-start" wrap="nowrap">
+                    <Box p={4} bg="white" style={{ borderRadius: '50%' }}>
+                        <Info size={16} className="text-blue-600" />
+                    </Box>
+                    <Text size="xs" c="blue.9" fw={500}>
+                        <Text component="span" fw={800}>Automated Integrity Check:</Text> If the variance between Contract and Actual area exceeds 5%, an internal audit will be triggered automatically upon registration.
                     </Text>
                 </Group>
             </Paper>
