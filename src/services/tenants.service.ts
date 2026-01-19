@@ -73,6 +73,19 @@ class TenantsService {
     async deleteContact(contactId: number) {
         return api.delete(`${this.endpoint}/contacts/${contactId}`);
     }
+
+    // Documents
+    async addDocument(tenantId: number, data: any) {
+        return api.post(`${this.endpoint}/${tenantId}/documents`, data);
+    }
+
+    async getDocuments(tenantId: number) {
+        return api.get(`${this.endpoint}/${tenantId}/documents`);
+    }
+
+    async deleteDocument(documentId: number) {
+        return api.delete(`${this.endpoint}/documents/${documentId}`);
+    }
 }
 
 export const tenantsService = new TenantsService();

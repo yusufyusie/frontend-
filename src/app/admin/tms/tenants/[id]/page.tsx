@@ -193,9 +193,46 @@ export default function TenantDetailPage() {
                         </Tabs.Panel>
 
                         <Tabs.Panel value="documents">
-                            <Paper withBorder p="xl" radius="md" bg="gray.0" style={{ textAlign: 'center' }}>
-                                <FileCheck size={40} className="mx-auto text-gray-400 mb-4" />
-                                <Text c="dimmed">Document management will be available in the next lifecycle update.</Text>
+                            <Paper withBorder p="xl" radius="md">
+                                <Group justify="space-between" mb="lg">
+                                    <Box>
+                                        <Title order={4}>KM / KYC Documents</Title>
+                                        <Text size="xs" c="dimmed">Manage compliance and legal documentation</Text>
+                                    </Box>
+                                    <Button variant="light" size="xs">Upload Document</Button>
+                                </Group>
+
+                                {tenant.documents?.length === 0 ? (
+                                    <Box py={40} style={{ textAlign: 'center' }}>
+                                        <FileCheck size={40} className="mx-auto text-gray-400 mb-4" />
+                                        <Text c="dimmed">No documents found for this company.</Text>
+                                    </Box>
+                                ) : (
+                                    <Stack gap="md">
+                                        {tenant.documents?.map((doc: any) => (
+                                            <Paper key={doc.id} withBorder p="md" radius="md" bg="gray.0">
+                                                <Group justify="space-between">
+                                                    <Group>
+                                                        <FileCheck size={20} className="text-blue-600" />
+                                                        <Box>
+                                                            <Text fw={700}>{doc.name}</Text>
+                                                            <Group gap="xs">
+                                                                <Badge size="xs" variant="outline">{doc.status}</Badge>
+                                                                {doc.expiryDate && (
+                                                                    <Text size="xs" c="dimmed">Expires: {new Date(doc.expiryDate).toLocaleDateString()}</Text>
+                                                                )}
+                                                            </Group>
+                                                        </Box>
+                                                    </Group>
+                                                    <Group>
+                                                        <Button variant="subtle" size="xs" component="a" href={doc.fileUrl} target="_blank">View</Button>
+                                                        <Button variant="subtle" size="xs" color="red">Remove</Button>
+                                                    </Group>
+                                                </Group>
+                                            </Paper>
+                                        ))}
+                                    </Stack>
+                                )}
                             </Paper>
                         </Tabs.Panel>
 

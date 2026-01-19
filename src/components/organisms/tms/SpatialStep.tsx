@@ -23,19 +23,81 @@ interface Props {
 }
 
 export const SpatialStep = ({ data, onChange, onValidityChange }: Props) => {
+    const [availableZones, setAvailableZones] = useState<any[]>([]);
+    const [availableBlocks, setAvailableBlocks] = useState<any[]>([]);
     const [availablePlots, setAvailablePlots] = useState<any[]>([]);
+
+    const [availableBuildings, setAvailableBuildings] = useState<any[]>([]);
+    const [availableFloors, setAvailableFloors] = useState<any[]>([]);
     const [availableRooms, setAvailableRooms] = useState<any[]>([]);
 
+    const [selectedZoneId, setSelectedZoneId] = useState<string | null>(null);
+    const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
+    const [selectedBuildingId, setSelectedBuildingId] = useState<string | null>(null);
+    const [selectedFloorId, setSelectedFloorId] = useState<string | null>(null);
+
     useEffect(() => {
-        // Fetch valid resources (In a real app, you'd fetch only VACANT ones)
-        landResourcesService.getAll({ type: 'PLOT' }).then(res => setAvailablePlots((res as any).data || res));
-        // Simple search for available rooms - this would be expanded
+        // Fetch Root level resources
+        landResourcesService.getAll({ type: 'ZONE' }).then(res => setAvailableZones((res as any).data || res));
+        buildingsService.getAll().then(res => setAvailableBuildings((res as any).data || res));
     }, []);
 
-    const plotOptions = useMemo(() =>
-        availablePlots.map(p => ({ value: p.id.toString(), label: `${p.code} (${p.areaM2} m²)` })),
-        [availablePlots]
-    );
+    // Fetch blocks when zone changes
+    useEffect(() => {
+        if (selectedZoneId) {
+            landResourcesService.getAll({ type: 'BLOCK', parentId: selectedZoneId }).then(res => {
+                setAvailableBlocks((res as any).data || res);
+                setSelectedBlockId(null);
+                setAvailablePlots([]);
+            });
+        } else {
+            setAvailableBlocks([]);
+            setSelectedBlockId(null);
+        }
+    }, [selectedZoneId]);
+
+    // Fetch plots when block changes
+    useEffect(() => {
+        if (selectedBlockId) {
+            landResourcesService.getAll({ type: 'PLOT', parentId: selectedBlockId }).then(res => {
+                setAvailablePlots((res as any).data || res);
+            });
+        } else {
+            setAvailablePlots([]);
+        }
+    }, [selectedBlockId]);
+
+    // Fetch floors when building changes
+    useEffect(() => {
+        if (selectedBuildingId) {
+            buildingsService.getFloors(parseInt(selectedBuildingId)).then(res => {
+                setAvailableFloors((res as any).data || res);
+                setSelectedFloorId(null);
+            });
+        } else {
+            setAvailableFloors([]);
+            setSelectedFloorId(null);
+        }
+    }, [selectedBuildingId]);
+
+    // Fetch rooms when floor changes
+    useEffect(() => {
+        if (selectedFloorId) {
+            buildingsService.getRooms(parseInt(selectedFloorId)).then(res => {
+                setAvailableRooms((res as any).data || res);
+            });
+        } else {
+            setAvailableRooms([]);
+        }
+    }, [selectedFloorId]);
+
+    const zoneOptions = useMemo(() => availableZones.map(z => ({ value: z.id.toString(), label: z.nameEn })), [availableZones]);
+    const blockOptions = useMemo(() => availableBlocks.map(b => ({ value: b.id.toString(), label: b.nameEn })), [availableBlocks]);
+    const plotOptions = useMemo(() => availablePlots.map(p => ({ value: p.id.toString(), label: `${p.code} (${p.areaM2} m²)` })), [availablePlots]);
+
+    const buildingOptions = useMemo(() => availableBuildings.map(b => ({ value: b.id.toString(), label: b.nameEn })), [availableBuildings]);
+    const floorOptions = useMemo(() => availableFloors.map(f => ({ value: f.id.toString(), label: f.nameEn })), [availableFloors]);
+    const roomOptions = useMemo(() => availableRooms.map(r => ({ value: r.id.toString(), label: `${r.code} (${r.areaM2} m²)` })), [availableRooms]);
 
     useEffect(() => {
         const isValid = Boolean(data.contractNumber && data.startDate && (data.landResourceId || data.roomId));
@@ -100,21 +162,84 @@ export const SpatialStep = ({ data, onChange, onValidityChange }: Props) => {
             {/* RESOURCE PICKER */}
             <Box>
                 {data.resourceType === 'PLOT' ? (
-                    <Select
-                        label="Select Land Plot"
-                        placeholder="Choose plot code"
-                        data={plotOptions}
-                        value={data.landResourceId?.toString()}
-                        onChange={(val) => {
-                            const plot = availablePlots.find(p => p.id.toString() === val);
-                            onChange({ ...data, landResourceId: val ? parseInt(val) : undefined, actualAreaM2: plot?.areaM2 || 0 });
-                        }}
-                        searchable
-                        leftSection={<Search size={16} />}
-                        styles={inputStyles}
-                    />
+                    <Stack gap="md">
+                        <Select
+                            label="Select Zone"
+                            placeholder="Choose zone"
+                            data={zoneOptions}
+                            value={selectedZoneId}
+                            onChange={(val) => setSelectedZoneId(val)}
+                            searchable
+                            styles={inputStyles}
+                        />
+
+                        {selectedZoneId && (
+                            <SimpleGrid cols={2} spacing="md">
+                                <Select
+                                    label="Select Block"
+                                    placeholder="Choose block"
+                                    data={blockOptions}
+                                    value={selectedBlockId}
+                                    onChange={(val) => setSelectedBlockId(val)}
+                                    searchable
+                                    styles={inputStyles}
+                                />
+                                <Select
+                                    label="Select Plot"
+                                    placeholder="Choose plot"
+                                    data={plotOptions}
+                                    value={data.landResourceId?.toString()}
+                                    onChange={(val) => {
+                                        const plot = availablePlots.find(p => p.id.toString() === val);
+                                        onChange({ ...data, landResourceId: val ? parseInt(val) : undefined, actualAreaM2: plot?.areaM2 || 0 });
+                                    }}
+                                    searchable
+                                    disabled={!selectedBlockId}
+                                    styles={inputStyles}
+                                />
+                            </SimpleGrid>
+                        )}
+                    </Stack>
                 ) : (
-                    <Text size="sm" c="dimmed" fs="italic">Building room selection will be available after selecting building and floor (Integrated in next step).</Text>
+                    <Stack gap="md">
+                        <Select
+                            label="Select Building"
+                            placeholder="Choose building"
+                            data={buildingOptions}
+                            value={selectedBuildingId}
+                            onChange={(val) => setSelectedBuildingId(val)}
+                            searchable
+                            leftSection={<Building2 size={16} />}
+                            styles={inputStyles}
+                        />
+
+                        {selectedBuildingId && (
+                            <SimpleGrid cols={2} spacing="md">
+                                <Select
+                                    label="Select Floor"
+                                    placeholder="Choose floor"
+                                    data={floorOptions}
+                                    value={selectedFloorId}
+                                    onChange={(val) => setSelectedFloorId(val)}
+                                    searchable
+                                    styles={inputStyles}
+                                />
+                                <Select
+                                    label="Select Room"
+                                    placeholder="Choose room"
+                                    data={roomOptions}
+                                    value={data.roomId?.toString()}
+                                    onChange={(val) => {
+                                        const room = availableRooms.find(r => r.id.toString() === val);
+                                        onChange({ ...data, roomId: val ? parseInt(val) : undefined, actualAreaM2: room?.areaM2 || 0 });
+                                    }}
+                                    searchable
+                                    disabled={!selectedFloorId}
+                                    styles={inputStyles}
+                                />
+                            </SimpleGrid>
+                        )}
+                    </Stack>
                 )}
             </Box>
 
@@ -139,7 +264,7 @@ export const SpatialStep = ({ data, onChange, onValidityChange }: Props) => {
                         <DateInput
                             label="Lease Start Date"
                             placeholder="Picker date"
-                            value={data.startDate}
+                            value={data.startDate ? new Date(data.startDate) : undefined}
                             onChange={(val) => onChange({ ...data, startDate: val || new Date() })}
                             styles={inputStyles}
                         />
