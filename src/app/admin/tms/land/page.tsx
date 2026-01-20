@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Button, Group, Stack, Box, Text, Paper, Title, LoadingOverlay } from '@mantine/core';
-import { Plus, RefreshCw, Map, Grid3x3, MapPin, TrendingUp, X, Save } from 'lucide-react';
+import { Plus, RefreshCw, Map, Grid3x3, MapPin, TrendingUp, X as CloseIcon, Save } from 'lucide-react';
 import { landResourcesService, LandResource, LandResourceType } from '@/services/land-resources.service';
 import { LandForm } from '@/components/organisms/tms/LandForm';
 import { AdvancedTreeGrid, TreeNode } from '@/components/organisms/tms/AdvancedTreeGrid';
@@ -256,7 +256,7 @@ export default function LandPage() {
                             variant="subtle"
                             color="gray"
                             onClick={() => setOpened(false)}
-                            leftSection={<X size={18} />}
+                            leftSection={<CloseIcon size={18} />}
                             radius="xl"
                             size="md"
                             className="hover:bg-gray-200/50 text-gray-700 font-bold"

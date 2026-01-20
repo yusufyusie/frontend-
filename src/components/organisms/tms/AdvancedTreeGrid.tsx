@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, ReactNode } from 'react';
-import { ChevronRight, ChevronDown, Plus, Edit, Trash2, Search } from 'lucide-react';
+import { ChevronRight, ChevronDown, Plus, Edit, Trash2, Search as SearchIcon } from 'lucide-react';
 import { Badge } from '@mantine/core';
 
 export interface TreeNode {
@@ -178,7 +178,7 @@ export function AdvancedTreeGrid({
             {/* Search Bar */}
             {searchable && (
                 <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                     <input
                         type="text"
                         value={searchTerm}
@@ -195,7 +195,7 @@ export function AdvancedTreeGrid({
                     filteredData.map(node => renderNode(node))
                 ) : (
                     <div className="text-center py-12 text-gray-400">
-                        <Search size={48} className="mx-auto mb-3 opacity-50" />
+                        <SearchIcon size={48} className="mx-auto mb-3 opacity-50" />
                         <p className="text-sm">No items match your search</p>
                     </div>
                 )}
