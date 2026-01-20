@@ -100,7 +100,7 @@ export const LandForm = ({ initialData, onSubmit, isLoading, parentId, defaultTy
 
                         <Stack gap="lg">
                             <TextInput
-                                label="Name (English)"
+                                label="Resource Name"
                                 value={formData.nameEn}
                                 onChange={(e) => setFormData({ ...formData, nameEn: e.currentTarget.value })}
                                 required

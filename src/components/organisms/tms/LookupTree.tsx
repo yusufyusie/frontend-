@@ -68,21 +68,43 @@ const LookupNode = ({ node, onEdit, onAddChild, onDelete }: NodeProps) => {
                         <LookupStatusBadge active={node.isActive} />
 
                         <Tooltip label="Edit Details" withArrow position="top">
-                            <ActionIcon variant="light" color="tms-navy" onClick={() => onEdit(node)} size="md" radius="md">
-                                <Edit size={16} />
+                            <ActionIcon
+                                variant="light"
+                                color="blue"
+                                onClick={() => onEdit(node)}
+                                size="md"
+                                radius="md"
+                                className="border border-blue-100 shadow-sm transition-all active:scale-90 hover:shadow-md"
+                            >
+                                <Edit size={16} strokeWidth={2.5} />
                             </ActionIcon>
                         </Tooltip>
 
                         <Tooltip label="Append Child" withArrow position="top">
-                            <ActionIcon variant="light" color="tms-teal" onClick={() => onAddChild(node)} size="md" radius="md">
-                                <Plus size={16} />
+                            <ActionIcon
+                                variant="light"
+                                color="teal"
+                                onClick={() => onAddChild(node)}
+                                size="md"
+                                radius="md"
+                                className="border border-teal-100 shadow-sm transition-all active:scale-90 hover:shadow-md"
+                                style={{ color: '#0C7C92' }}
+                            >
+                                <Plus size={16} strokeWidth={2.5} />
                             </ActionIcon>
                         </Tooltip>
 
                         {!node.isSystem && (
                             <Tooltip label="Delete Lookup" withArrow position="top">
-                                <ActionIcon variant="light" color="red" onClick={() => onDelete(node)} size="md" radius="md">
-                                    <Trash2 size={16} />
+                                <ActionIcon
+                                    variant="light"
+                                    color="red"
+                                    onClick={() => onDelete(node)}
+                                    size="md"
+                                    radius="md"
+                                    className="border border-rose-100 shadow-sm transition-all active:scale-90 hover:shadow-md"
+                                >
+                                    <Trash2 size={16} strokeWidth={2.5} color="#EF4444" />
                                 </ActionIcon>
                             </Tooltip>
                         )}

@@ -179,17 +179,17 @@ export default function ResourcesPage() {
                 <div className="flex gap-2">
                     <button
                         onClick={() => editModal.open(resource)}
-                        className="p-2 text-teal-600 hover:bg-teal-50 rounded-lg transition-colors"
+                        className="p-2 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg transition-all border border-blue-100 shadow-sm active:scale-90"
                         title="Edit"
                     >
-                        <Icons.Edit2 className="w-4 h-4" />
+                        <Icons.Edit2 className="w-4 h-4" strokeWidth={2.5} />
                     </button>
                     <button
                         onClick={() => deleteModal.open(resource)}
-                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        className="p-2 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-lg transition-all border border-rose-100 shadow-sm active:scale-90"
                         title="Delete"
                     >
-                        <Icons.Trash2 className="w-4 h-4" />
+                        <Icons.Trash2 className="w-4 h-4" strokeWidth={2.5} />
                     </button>
                 </div>
             ),
@@ -232,9 +232,9 @@ export default function ResourcesPage() {
                     </div>
                     <button
                         onClick={() => bulkDeleteModal.open()}
-                        className="btn btn-danger flex items-center gap-2"
+                        className="px-4 py-2 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-xl transition-all border border-rose-100 shadow-sm active:scale-90 flex items-center gap-2 font-bold text-sm"
                     >
-                        <Icons.Trash2 className="w-4 h-4" />
+                        <Icons.Trash2 className="w-4 h-4" strokeWidth={2.5} />
                         Delete Selected
                     </button>
                 </div>

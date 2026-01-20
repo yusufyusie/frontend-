@@ -249,8 +249,8 @@ export function ResourceActionMatrix({ permissions, selectedPermissions, onChang
                                         title={`Toggle all ${action}`}
                                     >
                                         <span className={`text-[10px] font-black uppercase tracking-widest ${getActionColor(action)}`}>{action}</span>
-                                        <div className={`p-1 rounded-md bg-gray-100 group-hover:bg-white group-hover:shadow-sm border border-transparent group-hover:border-gray-200 transition-all`}>
-                                            {getActionIcon(action)}
+                                        <div className={`p-1.5 rounded-lg bg-gray-100 group-hover:bg-white group-hover:shadow-md border border-gray-200/50 group-hover:border-gray-300 transition-all active:scale-95`}>
+                                            {React.cloneElement(getActionIcon(action) as React.ReactElement<any>, { strokeWidth: 3 })}
                                         </div>
                                     </button>
                                 </th>

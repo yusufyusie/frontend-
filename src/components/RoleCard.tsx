@@ -92,34 +92,35 @@ export function RoleCard({
             </div>
 
             {/* Administrative control matrix */}
-            <div className="grid grid-cols-2 gap-2 pt-4 border-t border-gray-50">
+            <div className="grid grid-cols-2 gap-3 pt-4 border-t border-gray-50">
                 <button
                     onClick={onAssignPermissions}
-                    className="flex items-center justify-center gap-2 px-3 py-2 bg-gray-50 text-gray-600 rounded-xl hover:bg-primary/5 hover:text-primary transition-all font-bold text-[10px] uppercase tracking-widest"
+                    className="flex items-center justify-center gap-2 px-3 py-2.5 bg-secondary/5 text-secondary rounded-xl hover:bg-secondary/10 transition-all font-bold text-[10px] uppercase tracking-widest border border-secondary/10 shadow-sm"
                 >
-                    <Key className="w-3.5 h-3.5" />
+                    <Key className="w-3.5 h-3.5" strokeWidth={2.5} />
                     <span>ACL</span>
                 </button>
                 <button
                     onClick={onAssignMenus}
-                    className="flex items-center justify-center gap-2 px-3 py-2 bg-gray-50 text-gray-600 rounded-xl hover:bg-secondary/5 hover:text-secondary transition-all font-bold text-[10px] uppercase tracking-widest"
+                    className="flex items-center justify-center gap-2 px-3 py-2.5 bg-teal-50 text-teal-700 rounded-xl hover:bg-teal-100 transition-all font-bold text-[10px] uppercase tracking-widest border border-teal-100 shadow-sm"
+                    style={{ color: '#0C7C92', borderColor: 'rgba(12, 124, 146, 0.2)' }}
                 >
-                    <Settings className="w-3.5 h-3.5" />
+                    <Settings className="w-3.5 h-3.5" strokeWidth={2.5} />
                     <span>Menus</span>
                 </button>
                 <button
                     onClick={onEdit}
-                    className="flex items-center justify-center gap-2 px-3 py-2 bg-gray-50 text-gray-600 rounded-xl hover:bg-gray-900 hover:text-white transition-all font-bold text-[10px] uppercase tracking-widest"
+                    className="flex items-center justify-center gap-2 px-3 py-2.5 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 transition-all font-bold text-[10px] uppercase tracking-widest border border-blue-100 shadow-sm"
                 >
-                    <Edit className="w-3.5 h-3.5" />
+                    <Edit className="w-3.5 h-3.5" strokeWidth={2.5} />
                     <span>Edit</span>
                 </button>
                 <button
                     onClick={onDelete}
                     disabled={role.isSystem}
-                    className={`flex items-center justify-center gap-2 px-3 py-2 rounded-xl transition-all font-bold text-[10px] uppercase tracking-widest ${role.isSystem ? 'bg-gray-50 text-gray-300 cursor-not-allowed' : 'bg-gray-50 text-gray-600 hover:bg-red-50 hover:text-red-600'}`}
+                    className={`flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl transition-all font-bold text-[10px] uppercase tracking-widest border ${role.isSystem ? 'bg-gray-50 text-gray-300 cursor-not-allowed border-gray-100' : 'bg-rose-50 text-rose-600 hover:bg-rose-100 border-rose-100 shadow-sm'}`}
                 >
-                    <Trash className="w-3.5 h-3.5" />
+                    <Trash className="w-3.5 h-3.5" strokeWidth={2.5} />
                     <span>Drop</span>
                 </button>
             </div>

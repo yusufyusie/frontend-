@@ -15,7 +15,6 @@ export interface TreeNode {
 
 interface AdvancedTreeGridProps {
     data: TreeNode[];
-    onExpand?: (node: TreeNode) => void;
     onEdit?: (node: TreeNode) => void;
     onDelete?: (node: TreeNode) => void;
     onAddChild?: (node: TreeNode) => void;
@@ -25,7 +24,6 @@ interface AdvancedTreeGridProps {
 
 export function AdvancedTreeGrid({
     data,
-    onExpand,
     onEdit,
     onDelete,
     onAddChild,
@@ -50,20 +48,17 @@ export function AdvancedTreeGrid({
         autoExpand(data);
     }, [data, initialExpandLevel]);
 
-    // Filter tree based on search
     const filterTree = (nodes: TreeNode[]): TreeNode[] => {
         if (!searchTerm) return nodes;
-
         return nodes.reduce((acc, node) => {
-            const matches = node.label.toLowerCase().includes(searchTerm.toLowerCase());
+            const matches = node.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                (node.meta?.occupantName?.toLowerCase().includes(searchTerm.toLowerCase()));
             const filteredChildren = node.children ? filterTree(node.children) : [];
-
             if (matches || filteredChildren.length > 0) {
                 acc.push({
                     ...node,
                     children: filteredChildren.length > 0 ? filteredChildren : node.children
                 });
-                // Auto-expand nodes that match search
                 if (filteredChildren.length > 0) {
                     setExpandedIds(prev => new Set(prev).add(node.id));
                 }
@@ -77,11 +72,8 @@ export function AdvancedTreeGrid({
     const toggleExpand = (nodeId: number) => {
         setExpandedIds(prev => {
             const newSet = new Set(prev);
-            if (newSet.has(nodeId)) {
-                newSet.delete(nodeId);
-            } else {
-                newSet.add(nodeId);
-            }
+            if (newSet.has(nodeId)) newSet.delete(nodeId);
+            else newSet.add(nodeId);
             return newSet;
         });
     };
@@ -89,83 +81,96 @@ export function AdvancedTreeGrid({
     const renderNode = (node: TreeNode, level: number = 0) => {
         const isExpanded = expandedIds.has(node.id);
         const hasChildren = node.children && node.children.length > 0;
+        const meta = node.meta || {};
 
         return (
-            <div key={node.id}>
+            <div key={node.id} className="border-b border-gray-50 last:border-0">
                 <div
-                    className="group flex items-center gap-2 py-2.5 px-3 hover:bg-primary-50 rounded-lg transition-all border border-transparent hover:border-primary-100"
-                    style={{ paddingLeft: `${level * 24 + 12}px` }}
+                    className="group flex items-center hover:bg-gray-50/80 transition-all text-xs"
                 >
-                    {/* Expand/Collapse Button */}
-                    {hasChildren ? (
-                        <button
-                            onClick={() => toggleExpand(node.id)}
-                            className="p-1 hover:bg-primary-100 rounded transition-all flex-shrink-0"
-                        >
-                            {isExpanded ? (
-                                <ChevronDown size={16} className="text-primary" />
-                            ) : (
-                                <ChevronRight size={16} className="text-gray-400" />
-                            )}
-                        </button>
-                    ) : (
-                        <div className="w-6" /> // Spacer for alignment
-                    )}
+                    {/* Name Column */}
+                    <div className="flex items-center gap-2 py-3 px-4 w-[350px] flex-shrink-0" style={{ paddingLeft: `${level * 24 + 16}px` }}>
+                        {hasChildren ? (
+                            <button onClick={() => toggleExpand(node.id)} className="p-1 hover:bg-gray-200 rounded text-gray-400">
+                                {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                            </button>
+                        ) : <div className="w-6" />}
 
-                    {/* Icon */}
-                    {node.icon && (
-                        <div className="flex-shrink-0 text-primary">
-                            {node.icon}
-                        </div>
-                    )}
+                        <div className="text-primary/70">{node.icon}</div>
+                        <span className="font-bold text-gray-800 truncate">{node.label}</span>
+                    </div>
 
-                    {/* Label */}
-                    <span className="flex-1 font-semibold text-gray-900 text-sm">
-                        {node.label}
-                    </span>
+                    {/* Occupant Column */}
+                    <div className="px-4 py-3 w-[200px] flex-shrink-0 border-l border-gray-50">
+                        {meta.occupantName === 'v' ? (
+                            <span className="text-gray-400 italic font-medium">v (Vacant)</span>
+                        ) : (
+                            <span className="font-semibold text-teal-700">{meta.occupantName || '-'}</span>
+                        )}
+                    </div>
 
-                    {/* Badge */}
-                    {node.badge && (
-                        <Badge variant="light" color={node.badge.color} size="sm">
-                            {node.badge.text}
-                        </Badge>
-                    )}
+                    {/* Actual Area Column */}
+                    <div className="px-4 py-3 w-[150px] flex-shrink-0 border-l border-gray-50 text-right font-mono">
+                        {meta.areaM2 ? Number(meta.areaM2).toLocaleString() : '-'} <span className="text-[10px] text-gray-400">m²</span>
+                    </div>
 
-                    {/* Actions */}
-                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        {onAddChild && hasChildren && (
+                    {/* Contract Area Column */}
+                    <div className="px-4 py-3 w-[150px] flex-shrink-0 border-l border-gray-50 text-right font-mono">
+                        {meta.contractAreaM2 ? Number(meta.contractAreaM2).toLocaleString() : '0'} <span className="text-[10px] text-gray-400">m²</span>
+                    </div>
+
+                    {/* Variance Column */}
+                    <div className="px-4 py-3 w-[150px] flex-shrink-0 border-l border-gray-50 text-right font-bold">
+                        <span className={meta.areaVarianceM2 > 0 ? 'text-blue-600' : 'text-gray-900'}>
+                            {meta.areaVarianceM2 ? Number(meta.areaVarianceM2).toLocaleString() : '0'}
+                        </span>
+                        <span className="text-[10px] text-gray-400 ml-1">Δ</span>
+                    </div>
+
+                    {/* Status Column */}
+                    <div className="px-4 py-3 w-[120px] flex-shrink-0 border-l border-gray-50">
+                        {meta.occupancyStatus && (
+                            <Badge variant="dot" color={meta.occupancyStatus === 'Occupied' ? 'teal' : 'gray'} size="sm">
+                                {meta.occupancyStatus}
+                            </Badge>
+                        )}
+                    </div>
+
+                    {/* Actions Column */}
+                    <div className="px-4 py-3 w-[150px] flex-shrink-0 flex justify-end gap-2 border-l border-gray-50 bg-gray-50/20">
+                        {onAddChild && (
                             <button
                                 onClick={() => onAddChild(node)}
-                                className="p-1.5 text-gray-400 hover:text-success hover:bg-success-50 rounded-lg transition-all"
+                                className="p-1.5 text-teal-600 hover:bg-teal-50 rounded-lg transition-all border border-teal-100 shadow-sm active:scale-90"
                                 title="Add Child"
                             >
-                                <Plus size={14} />
+                                <Plus size={16} strokeWidth={2.5} />
                             </button>
                         )}
                         {onEdit && (
                             <button
                                 onClick={() => onEdit(node)}
-                                className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+                                className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-all border border-blue-100 shadow-sm active:scale-90"
                                 title="Edit"
                             >
-                                <Edit size={14} />
+                                <Edit size={16} strokeWidth={2.5} />
                             </button>
                         )}
                         {onDelete && (
                             <button
                                 onClick={() => onDelete(node)}
-                                className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                                className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg transition-all border border-rose-100 shadow-sm active:scale-90"
                                 title="Delete"
                             >
-                                <Trash2 size={14} />
+                                <Trash2 size={16} strokeWidth={2.5} />
                             </button>
                         )}
                     </div>
                 </div>
 
-                {/* Render Children */}
+                {/* Children */}
                 {hasChildren && isExpanded && (
-                    <div className="border-l-2 border-gray-100 ml-4">
+                    <div className="bg-gray-50/30">
                         {node.children!.map(child => renderNode(child, level + 1))}
                     </div>
                 )}
@@ -174,31 +179,50 @@ export function AdvancedTreeGrid({
     };
 
     return (
-        <div className="space-y-4">
-            {/* Search Bar */}
-            {searchable && (
-                <div className="relative">
-                    <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <input
-                        type="text"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        placeholder="Search hierarchy..."
-                        className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all text-sm"
-                    />
-                </div>
-            )}
-
-            {/* Tree Structure */}
-            <div className="space-y-1">
-                {filteredData.length > 0 ? (
-                    filteredData.map(node => renderNode(node))
-                ) : (
-                    <div className="text-center py-12 text-gray-400">
-                        <SearchIcon size={48} className="mx-auto mb-3 opacity-50" />
-                        <p className="text-sm">No items match your search</p>
+        <div className="border border-gray-100 rounded-xl overflow-hidden bg-white shadow-sm">
+            {/* Toolbar */}
+            <div className="p-4 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center">
+                {searchable && (
+                    <div className="relative w-80">
+                        <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                        <input
+                            type="text"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            placeholder="Search by Name or Occupant..."
+                            className="w-full pl-9 pr-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all text-xs"
+                        />
                     </div>
                 )}
+            </div>
+
+            {/* Scrollable Container */}
+            <div className="overflow-x-auto custom-scrollbar">
+                <div className="min-w-[1270px]">
+                    {/* Grid Header */}
+                    <div className="flex bg-gray-100/50 border-b border-gray-100 text-[10px] font-black uppercase tracking-widest text-gray-500 py-3">
+                        <div className="px-4 w-[350px] flex-shrink-0">Spatial Resource Hierarchy</div>
+                        <div className="px-4 w-[200px] flex-shrink-0 border-l border-gray-200/50">Occupant Name</div>
+                        <div className="px-4 w-[150px] flex-shrink-0 border-l border-gray-200/50 text-right">Actual Area</div>
+                        <div className="px-4 w-[150px] flex-shrink-0 border-l border-gray-200/50 text-right">Contract Area</div>
+                        <div className="px-4 w-[150px] flex-shrink-0 border-l border-gray-200/50 text-right">Variance Δ</div>
+                        <div className="px-4 w-[120px] flex-shrink-0 border-l border-gray-200/50">Status</div>
+                        <div className="px-4 w-[150px] flex-shrink-0 border-l border-gray-200/50 text-right text-teal-800 font-bold">Actions</div>
+                    </div>
+
+                    {/* Grid Body */}
+                    <div>
+                        {filteredData.length > 0 ? (
+                            filteredData.map(node => renderNode(node))
+                        ) : (
+                            <div className="text-center py-20 text-gray-400">
+                                <SearchIcon size={48} className="mx-auto mb-4 opacity-20" />
+                                <p className="font-bold">No results found</p>
+                                <p className="text-[10px] mt-1">Try adjusting your search criteria</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
             </div>
         </div>
     );

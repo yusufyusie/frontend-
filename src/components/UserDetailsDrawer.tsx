@@ -4,6 +4,27 @@ import { useState, useEffect } from 'react';
 import { usersService, type User } from '@/services/users.service';
 import { rolesService, type Role } from '@/services/roles.service';
 import { toast } from '@/components/Toast';
+import {
+    User as UserIcon,
+    Shield,
+    Key,
+    Tag,
+    Edit,
+    Save,
+    X,
+    Trash2,
+    Check,
+    ShieldCheck,
+    UserCircle,
+    Info,
+    Clock,
+    Calendar,
+    Mail,
+    Hash,
+    Activity,
+    Plus
+} from 'lucide-react';
+import React from 'react'; // Added React import for React.cloneElement
 
 interface UserDetailsDrawerProps {
     userId: number | null;
@@ -101,7 +122,7 @@ export function UserDetailsDrawer({ userId, isOpen, onClose, onUpdate }: UserDet
         <>
             {/* Backdrop */}
             <div
-                className="fixed inset-0 bg-black bg-opacity-30 z-40 transition-opacity"
+                className="fixed inset-0 bg-black/30 z-40 transition-opacity backdrop-blur-[2px]"
                 onClick={onClose}
             />
 
@@ -109,58 +130,63 @@ export function UserDetailsDrawer({ userId, isOpen, onClose, onUpdate }: UserDet
             <div className="fixed right-0 top-0 h-full w-full md:w-[600px] bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out overflow-y-auto">
                 {loading ? (
                     <div className="flex items-center justify-center h-full">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
                     </div>
                 ) : user ? (
                     <div className="flex flex-col h-full">
                         {/* Header */}
-                        <div className="bg-primary p-6">
-                            <div className="flex items-start justify-between mb-4">
+                        <div className="bg-primary p-6 relative overflow-hidden">
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 blur-3xl"></div>
+                            <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full -ml-12 -mb-12 blur-2xl"></div>
+
+                            <div className="flex items-start justify-between mb-4 relative z-10">
                                 <h2 className="text-2xl font-bold text-white">User Details</h2>
                                 <button
                                     onClick={onClose}
-                                    className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+                                    className="p-2 hover:bg-white/20 rounded-xl transition-all border border-transparent hover:border-white/30 active:scale-90"
                                 >
-                                    <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
+                                    <X className="w-6 h-6 text-white" strokeWidth={2.5} />
                                 </button>
                             </div>
 
                             {/* User Avatar & Basic Info */}
-                            <div className="flex items-center gap-4 mb-4">
-                                <div className="w-20 h-20 rounded-full bg-white/20 backdrop-blur-lg flex items-center justify-center text-white text-3xl font-bold border-4 border-white/30">
+                            <div className="flex items-center gap-5 mb-4 relative z-10">
+                                <div className="w-20 h-20 rounded-2xl bg-white/20 backdrop-blur-lg flex items-center justify-center text-white text-3xl font-black border-2 border-white/30 shadow-xl">
                                     {user.username.substring(0, 2).toUpperCase()}
                                 </div>
                                 <div className="text-white">
-                                    <h3 className="text-2xl font-bold">{user.username}</h3>
-                                    <p className="text-primary-100">{user.email}</p>
-                                    <span className={`inline-block mt-1 px-3 py-1 rounded-full text-xs font-semibold ${user.isActive ? 'bg-success-500' : 'bg-error-500'
+                                    <h3 className="text-2xl font-black tracking-tight">{user.username}</h3>
+                                    <p className="text-white/70 font-medium">{user.email}</p>
+                                    <span className={`inline-flex items-center gap-1.5 mt-2 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${user.isActive ? 'bg-teal-400/20 text-teal-100 border border-teal-400/30' : 'bg-rose-400/20 text-rose-100 border border-rose-400/30'
                                         }`}>
-                                        {user.isActive ? 'ACTIVE' : 'INACTIVE'}
+                                        <div className={`w-1.5 h-1.5 rounded-full ${user.isActive ? 'bg-teal-400 animate-pulse' : 'bg-rose-400'}`}></div>
+                                        {user.isActive ? 'Active' : 'Suspended'}
                                     </span>
                                 </div>
                             </div>
                         </div>
 
                         {/* Tabs */}
-                        <div className="border-b border-gray-200 bg-gray-50">
-                            <nav className="flex gap-1 px-6">
+                        <div className="border-b border-gray-100 bg-gray-50/50 p-2">
+                            <nav className="flex gap-1">
                                 {[
-                                    { id: 'overview', label: 'Overview', icon: '👤' },
-                                    { id: 'roles', label: 'Roles', icon: '🎭' },
-                                    { id: 'permissions', label: 'Permissions', icon: '🔐' },
-                                    { id: 'claims', label: 'Claims', icon: '🏷️' }
+                                    { id: 'overview', label: 'Overview', icon: <UserIcon className="w-4 h-4" /> },
+                                    { id: 'roles', label: 'Roles', icon: <Shield className="w-4 h-4" /> },
+                                    { id: 'permissions', label: 'Permissions', icon: <Key className="w-4 h-4" /> },
+                                    { id: 'claims', label: 'Claims', icon: <Tag className="w-4 h-4" /> }
                                 ].map(tab => (
                                     <button
                                         key={tab.id}
                                         onClick={() => setActiveTab(tab.id as Tab)}
-                                        className={`px-4 py-3 font-medium text-sm transition-colors border-b-2 ${activeTab === tab.id
-                                            ? 'border-primary-600 text-primary-600'
-                                            : 'border-transparent text-gray-600 hover:text-gray-900'
+                                        className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all group ${activeTab === tab.id
+                                            ? 'bg-white text-primary shadow-sm border border-gray-100'
+                                            : 'text-gray-500 hover:bg-white/50 hover:text-gray-900'
                                             }`}
                                     >
-                                        <span className="mr-2">{tab.icon}</span>
+                                        <span className={`p-1.5 rounded-lg transition-colors ${activeTab === tab.id ? 'bg-primary/10 text-primary' : 'bg-gray-100 text-gray-400 group-hover:bg-gray-200'
+                                            }`}>
+                                            {React.cloneElement(tab.icon as any, { strokeWidth: 2.5 })}
+                                        </span>
                                         {tab.label}
                                     </button>
                                 ))}
@@ -168,108 +194,128 @@ export function UserDetailsDrawer({ userId, isOpen, onClose, onUpdate }: UserDet
                         </div>
 
                         {/* Tab Content */}
-                        <div className="flex-1 overflow-y-auto p-6">
+                        <div className="flex-1 overflow-y-auto p-6 space-y-8">
                             {activeTab === 'overview' && (
-                                <div className="space-y-6">
+                                <div className="space-y-6 animate-fade-in">
                                     <div className="flex justify-between items-center">
-                                        <h3 className="text-lg font-semibold text-gray-900">User Information</h3>
+                                        <div className="flex items-center gap-2">
+                                            <div className="p-2 bg-primary/10 rounded-lg">
+                                                <UserCircle className="w-5 h-5 text-primary" strokeWidth={2.5} />
+                                            </div>
+                                            <h3 className="text-lg font-black text-gray-900 uppercase tracking-tight">Identity Profile</h3>
+                                        </div>
                                         {!isEditing ? (
                                             <button
                                                 onClick={() => setIsEditing(true)}
-                                                className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors text-sm font-medium"
+                                                className="px-4 py-2 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 transition-all text-sm font-bold border border-blue-100 shadow-sm active:scale-95 flex items-center gap-2"
                                             >
-                                                Edit
+                                                <Edit className="w-4 h-4" strokeWidth={2.5} />
+                                                Edit Profile
                                             </button>
                                         ) : (
                                             <div className="flex gap-2">
                                                 <button
                                                     onClick={() => setIsEditing(false)}
-                                                    className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-sm"
+                                                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-all text-sm font-bold border border-gray-200 shadow-sm active:scale-95"
                                                 >
                                                     Cancel
                                                 </button>
                                                 <button
                                                     onClick={handleSaveEdit}
-                                                    className="px-4 py-2 bg-success-600 text-white rounded-lg hover:bg-success-700 transition-colors text-sm"
+                                                    className="px-4 py-2 bg-teal-50 text-teal-700 rounded-xl hover:bg-teal-100 transition-all text-sm font-bold border border-teal-100/50 shadow-md active:scale-95 flex items-center gap-2"
+                                                    style={{ color: '#0C7C92' }}
                                                 >
-                                                    Save
+                                                    <Save className="w-4 h-4" strokeWidth={2.5} />
+                                                    Save Changes
                                                 </button>
                                             </div>
                                         )}
                                     </div>
 
                                     {isEditing ? (
-                                        <div className="space-y-4">
+                                        <div className="grid grid-cols-1 gap-4 p-4 bg-gray-50 rounded-2xl border border-gray-100">
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                                                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Username</label>
                                                 <input
                                                     type="text"
                                                     value={editForm.username}
                                                     onChange={(e) => setEditForm({ ...editForm, username: e.target.value })}
-                                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
+                                                    className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all font-bold"
                                                 />
                                             </div>
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                                                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Email Address</label>
                                                 <input
                                                     type="email"
                                                     value={editForm.email}
                                                     onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
-                                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
+                                                    className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all font-bold"
                                                 />
                                             </div>
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                                                <select
-                                                    value={editForm.isActive ? 'active' : 'inactive'}
-                                                    onChange={(e) => setEditForm({ ...editForm, isActive: e.target.value === 'active' })}
-                                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
-                                                >
-                                                    <option value="active">Active</option>
-                                                    <option value="inactive">Inactive</option>
-                                                </select>
+                                                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Account Lifecycle Status</label>
+                                                <div className="grid grid-cols-2 gap-2">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setEditForm({ ...editForm, isActive: true })}
+                                                        className={`px-4 py-3 rounded-xl border text-sm font-black transition-all ${editForm.isActive ? 'bg-teal-50 border-teal-200 text-teal-700 shadow-sm' : 'bg-gray-100 border-gray-200 text-gray-400 opacity-50'}`}
+                                                    >
+                                                        Active
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setEditForm({ ...editForm, isActive: false })}
+                                                        className={`px-4 py-3 rounded-xl border text-sm font-black transition-all ${!editForm.isActive ? 'bg-rose-50 border-rose-200 text-rose-700 shadow-sm' : 'bg-gray-100 border-gray-200 text-gray-400 opacity-50'}`}
+                                                    >
+                                                        Suspended
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                     ) : (
                                         <>
                                             {/* Stats Cards */}
                                             <div className="grid grid-cols-3 gap-4">
-                                                <div className="p-4 bg-primary-50 rounded-lg border border-primary-200">
-                                                    <div className="text-2xl font-bold text-primary-900">{user.roles?.length || 0}</div>
-                                                    <div className="text-sm text-primary-700">Roles</div>
+                                                <div className="p-4 bg-blue-50/50 rounded-2xl border border-blue-100 shadow-sm flex flex-col items-center">
+                                                    <div className="text-2xl font-black text-blue-700">{user.roles?.length || 0}</div>
+                                                    <div className="text-[10px] font-bold text-blue-500 uppercase tracking-widest">Roles</div>
                                                 </div>
-                                                <div className="p-4 bg-success-50 rounded-lg border border-success-200">
-                                                    <div className="text-2xl font-bold text-success-900">
+                                                <div className="p-4 bg-teal-50/50 rounded-2xl border border-teal-100 shadow-sm flex flex-col items-center">
+                                                    <div className="text-2xl font-black text-teal-700">
                                                         {user.roles?.reduce((acc, role) => acc + (role.permissions?.length || 0), 0) || 0}
                                                     </div>
-                                                    <div className="text-sm text-success-700">Permissions</div>
+                                                    <div className="text-[10px] font-bold text-teal-500 uppercase tracking-widest">Effective Perms</div>
                                                 </div>
-                                                <div className="p-4 bg-secondary rounded-lg border border-secondary-200">
-                                                    <div className="text-2xl font-bold text-secondary-900">{user.claims?.length || 0}</div>
-                                                    <div className="text-sm text-secondary-700">Claims</div>
+                                                <div className="p-4 bg-purple-50/50 rounded-2xl border border-purple-100 shadow-sm flex flex-col items-center">
+                                                    <div className="text-2xl font-black text-purple-700">{user.claims?.length || 0}</div>
+                                                    <div className="text-[10px] font-bold text-purple-500 uppercase tracking-widest">Claims</div>
                                                 </div>
                                             </div>
 
-                                            {/* User Details */}
-                                            <div className="grid grid-cols-2 gap-4">
-                                                <InfoItem label="User ID" value={`#${user.id}`} />
-                                                <InfoItem label="Status" value={user.isActive ? 'Active' : 'Inactive'} />
-                                                <InfoItem label="Username" value={user.username} />
-                                                <InfoItem label="Email" value={user.email} />
-                                                <InfoItem label="Created" value={new Date(user.createdAt).toLocaleString()} />
-                                                <InfoItem label="Last Updated" value={user.updatedAt ? new Date(user.updatedAt).toLocaleString() : 'N/A'} />
+                                            {/* User Details Grid */}
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <InfoItem label="System ID" value={`#${user.id}`} icon={<Hash className="w-4 h-4" />} />
+                                                <InfoItem label="Status" value={user.isActive ? 'Active' : 'Suspended'} icon={<Activity className="w-4 h-4" />} />
+                                                <InfoItem label="Username" value={user.username} icon={<UserIcon className="w-4 h-4" />} />
+                                                <InfoItem label="Email Address" value={user.email} icon={<Mail className="w-4 h-4" />} />
+                                                <InfoItem label="Provisioned On" value={new Date(user.createdAt).toLocaleDateString()} icon={<Calendar className="w-4 h-4" />} />
+                                                <InfoItem label="Last Update" value={user.updatedAt ? new Date(user.updatedAt).toLocaleDateString() : 'Initial'} icon={<Clock className="w-4 h-4" />} />
                                             </div>
 
                                             {/* Quick Role Summary */}
                                             {user.roles && user.roles.length > 0 && (
-                                                <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                                                    <div className="text-sm font-semibold text-gray-700 mb-2">Quick Role Summary</div>
+                                                <div className="p-5 bg-gray-50 rounded-2xl border border-gray-100">
+                                                    <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                                                        <ShieldCheck className="w-3.5 h-3.5" />
+                                                        Active Permissions inherited from
+                                                    </div>
                                                     <div className="flex flex-wrap gap-2">
                                                         {user.roles.map(role => (
                                                             <span
                                                                 key={role.id}
-                                                                className="px-3 py-1 bg-primary-100 text-primary-800 rounded-full text-sm font-medium"
+                                                                className="px-3 py-1.5 bg-white text-primary rounded-xl text-xs font-black border border-gray-200 shadow-sm flex items-center gap-2"
                                                             >
+                                                                <div className="w-1.5 h-1.5 rounded-full bg-primary/40"></div>
                                                                 {role.name}
                                                             </span>
                                                         ))}
@@ -282,59 +328,69 @@ export function UserDetailsDrawer({ userId, isOpen, onClose, onUpdate }: UserDet
                             )}
 
                             {activeTab === 'roles' && (
-                                <div className="space-y-4">
-                                    <h3 className="text-lg font-semibold text-gray-900">Assigned Roles</h3>
+                                <div className="space-y-6 animate-fade-in">
+                                    <div className="flex items-center gap-2">
+                                        <div className="p-2 bg-primary/10 rounded-lg">
+                                            <Shield className="w-5 h-5 text-primary" strokeWidth={2.5} />
+                                        </div>
+                                        <h3 className="text-lg font-black text-gray-900 uppercase tracking-tight">Security Memberships</h3>
+                                    </div>
                                     <div className="space-y-3">
                                         {user.roles?.map(role => (
-                                            <div key={role.id} className="p-4 bg-primary-50 rounded-lg border border-primary-200">
+                                            <div key={role.id} className="p-4 bg-white rounded-2xl border border-gray-100 shadow-sm group hover:border-primary/30 transition-all">
                                                 <div className="flex items-start justify-between">
                                                     <div className="flex-1">
-                                                        <div className="font-semibold text-gray-900">{role.name}</div>
+                                                        <div className="font-black text-gray-900 flex items-center gap-2">
+                                                            {role.name}
+                                                            <span className="px-2 py-0.5 bg-primary/5 text-primary text-[10px] font-black uppercase tracking-wider rounded border border-primary/10">Member</span>
+                                                        </div>
                                                         {role.description && (
-                                                            <div className="text-sm text-gray-600 mt-1">{role.description}</div>
-                                                        )}
-                                                        {role.permissions && role.permissions.length > 0 && (
-                                                            <div className="mt-2 flex items-center gap-2">
-                                                                <svg className="w-4 h-4 text-success-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                                </svg>
-                                                                <span className="text-xs text-gray-600">
-                                                                    {role.permissions.length} permission{role.permissions.length !== 1 ? 's' : ''}
-                                                                </span>
-                                                            </div>
+                                                            <div className="text-sm text-gray-500 mt-1 font-medium">{role.description}</div>
                                                         )}
                                                     </div>
                                                     <button
                                                         onClick={() => handleRemoveRole(role.id)}
-                                                        className="px-3 py-1 bg-error-100 text-error-700 rounded-lg hover:bg-error-200 transition-colors text-sm flex-shrink-0"
+                                                        className="p-2 bg-rose-50 text-rose-600 rounded-xl hover:bg-rose-100 transition-all border border-rose-100 shadow-sm active:scale-90"
+                                                        title="Revoke Role"
                                                     >
-                                                        Remove
+                                                        <Trash2 className="w-4 h-4" strokeWidth={2.5} />
                                                     </button>
                                                 </div>
                                             </div>
                                         ))}
                                         {(!user.roles || user.roles.length === 0) && (
-                                            <p className="text-gray-500 text-sm py-4 text-center">No roles assigned</p>
+                                            <div className="py-12 flex flex-col items-center justify-center bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+                                                <Shield className="w-10 h-10 text-gray-300 mb-2" strokeWidth={1.5} />
+                                                <p className="text-gray-400 text-sm font-bold uppercase tracking-widest">No roles assigned</p>
+                                            </div>
                                         )}
                                     </div>
 
-                                    <div className="pt-4 border-t">
-                                        <h4 className="text-sm font-semibold text-gray-700 mb-3">Add Role</h4>
-                                        <div className="space-y-2">
+                                    <div className="pt-6 border-t border-gray-100">
+                                        <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                                            <Check className="w-3.5 h-3.5" />
+                                            Available Role Assignments
+                                        </h4>
+                                        <div className="grid grid-cols-1 gap-2">
                                             {roles
                                                 .filter(r => !user.roles?.find(ur => ur.id === r.id))
                                                 .map(role => (
                                                     <button
                                                         key={role.id}
                                                         onClick={() => handleAddRole(role.id)}
-                                                        className="w-full text-left p-3 bg-gray-50 rounded-lg hover:bg-primary-50 hover:border-primary-300 border border-gray-200 transition-colors"
+                                                        className="w-full text-left p-4 bg-gray-50 rounded-2xl hover:bg-teal-50 hover:border-teal-200 border border-transparent transition-all group flex items-center justify-between"
                                                     >
-                                                        <div className="font-medium text-gray-900">{role.name}</div>
-                                                        <div className="text-sm text-gray-600">{role.description}</div>
+                                                        <div>
+                                                            <div className="font-black text-gray-900 group-hover:text-teal-700">{role.name}</div>
+                                                            <div className="text-xs text-gray-500 font-medium">{role.description}</div>
+                                                        </div>
+                                                        <div className="p-2 bg-white rounded-lg shadow-sm border border-gray-100 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                            <Plus className="w-4 h-4 text-teal-600" strokeWidth={3} />
+                                                        </div>
                                                     </button>
                                                 ))}
                                             {roles.filter(r => !user.roles?.find(ur => ur.id === r.id)).length === 0 && (
-                                                <p className="text-gray-500 text-sm py-4 text-center">All roles assigned</p>
+                                                <p className="text-gray-400 text-xs py-4 text-center font-bold">All available roles have been assigned.</p>
                                             )}
                                         </div>
                                     </div>
@@ -342,42 +398,41 @@ export function UserDetailsDrawer({ userId, isOpen, onClose, onUpdate }: UserDet
                             )}
 
                             {activeTab === 'permissions' && (
-                                <div className="space-y-4">
-                                    <h3 className="text-lg font-semibold text-gray-900">Effective Permissions</h3>
-                                    <p className="text-sm text-gray-600">Permissions inherited from assigned roles:</p>
+                                <div className="space-y-6 animate-fade-in">
+                                    <div className="flex items-center gap-2">
+                                        <div className="p-2 bg-primary/10 rounded-lg">
+                                            <Key className="w-5 h-5 text-primary" strokeWidth={2.5} />
+                                        </div>
+                                        <h3 className="text-lg font-black text-gray-900 uppercase tracking-tight">Access Control Matrix</h3>
+                                    </div>
+                                    <p className="text-sm text-gray-500 font-medium">Permissions are synchronized from active role memberships:</p>
 
                                     {user.roles && user.roles.length > 0 ? (
                                         <div className="space-y-4">
                                             {user.roles.map(role => (
                                                 role.permissions && role.permissions.length > 0 && (
-                                                    <div key={role.id} className="border border-gray-200 rounded-lg p-4">
-                                                        <div className="flex items-center gap-2 mb-3">
-                                                            <svg className="w-5 h-5 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                                                            </svg>
-                                                            <h4 className="font-semibold text-gray-900">From: {role.name}</h4>
-                                                            <span className="ml-auto px-2 py-1 bg-primary-100 text-primary-700 text-xs rounded-full">
-                                                                {role.permissions.length} permission{role.permissions.length !== 1 ? 's' : ''}
-                                                            </span>
+                                                    <div key={role.id} className="border border-gray-100 rounded-2xl p-4 bg-white shadow-sm overflow-hidden relative">
+                                                        <div className="absolute top-0 right-0 p-1">
+                                                            <Shield className="w-12 h-12 text-gray-50/50" />
                                                         </div>
-                                                        <div className="space-y-2">
+                                                        <div className="flex items-center gap-2 mb-4 relative z-10">
+                                                            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                                                                <Shield className="w-4 h-4 text-primary" strokeWidth={2.5} />
+                                                            </div>
+                                                            <div>
+                                                                <h4 className="font-black text-gray-900 leading-none">{role.name}</h4>
+                                                                <span className="text-[10px] font-bold text-gray-400 tracking-tighter uppercase">{role.permissions.length} nodes assigned</span>
+                                                            </div>
+                                                        </div>
+                                                        <div className="grid grid-cols-1 gap-2 relative z-10">
                                                             {role.permissions.map(perm => (
-                                                                <div key={perm.id} className="flex items-start gap-3 p-3 bg-success-50 rounded-lg border border-success-200">
-                                                                    <svg className="w-5 h-5 text-success-600 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                                                    </svg>
+                                                                <div key={perm.id} className="flex items-center gap-3 p-3 bg-teal-50/50 rounded-xl border border-teal-100/50 transition-all hover:shadow-sm">
+                                                                    <div className="p-1 px-1.5 rounded-lg bg-white border border-teal-100 shadow-sm">
+                                                                        <Check className="w-3.5 h-3.5" strokeWidth={4} />
+                                                                    </div>
                                                                     <div className="flex-1 min-w-0">
-                                                                        <div className="font-medium text-gray-900">{perm.name}</div>
-                                                                        {perm.description && (
-                                                                            <div className="text-sm text-gray-600 mt-0.5">{perm.description}</div>
-                                                                        )}
-                                                                        {perm.groupName && (
-                                                                            <div className="mt-1">
-                                                                                <span className="inline-block px-2 py-0.5 bg-gray-200 text-gray-700 text-xs rounded">
-                                                                                    {perm.groupName}
-                                                                                </span>
-                                                                            </div>
-                                                                        )}
+                                                                        <div className="font-black text-gray-900 text-sm">{perm.name}</div>
+                                                                        <div className="text-[10px] text-teal-600 font-black uppercase tracking-widest">{perm.groupName || 'Uncategorized'}</div>
                                                                     </div>
                                                                 </div>
                                                             ))}
@@ -387,104 +442,124 @@ export function UserDetailsDrawer({ userId, isOpen, onClose, onUpdate }: UserDet
                                             ))}
                                         </div>
                                     ) : (
-                                        <p className="text-gray-500 text-sm py-8 text-center">No permissions (no roles assigned)</p>
+                                        <div className="py-20 flex flex-col items-center justify-center bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+                                            <Key className="w-12 h-12 text-gray-300 mb-3" strokeWidth={1} />
+                                            <p className="text-gray-400 text-sm font-black uppercase tracking-widest">No Effective Permissions</p>
+                                            <p className="text-gray-400 text-xs mt-1">Assign roles to grant access</p>
+                                        </div>
                                     )}
                                 </div>
                             )}
 
                             {activeTab === 'claims' && (
-                                <div className="space-y-4">
-                                    <h3 className="text-lg font-semibold text-gray-900">User Claims</h3>
-                                    <p className="text-sm text-gray-600">
-                                        Claims provide additional key-value attributes for user authorization
+                                <div className="space-y-6 animate-fade-in">
+                                    <div className="flex items-center gap-2">
+                                        <div className="p-2 bg-primary/10 rounded-lg">
+                                            <Tag className="w-5 h-5 text-primary" strokeWidth={2.5} />
+                                        </div>
+                                        <h3 className="text-lg font-black text-gray-900 uppercase tracking-tight">Dynamic Claims</h3>
+                                    </div>
+                                    <p className="text-sm text-gray-500 font-medium">
+                                        Custom user attributes used for extended authorization policies.
                                     </p>
 
                                     {/* Existing Claims */}
-                                    <div className="space-y-2">
+                                    <div className="space-y-3">
                                         {user.claims && user.claims.length > 0 ? (
                                             user.claims.map(claim => (
-                                                <div key={claim.id} className="flex items-center justify-between p-4 bg-secondary-50 rounded-lg border border-secondary-200 hover:border-secondary-300 transition-colors">
-                                                    <div className="flex-1">
-                                                        <div className="flex items-center gap-2 mb-1">
-                                                            <svg className="w-4 h-4 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-                                                            </svg>
-                                                            <span className="font-medium text-gray-900">{claim.claimType}</span>
+                                                <div key={claim.id} className="flex items-center justify-between p-4 bg-white rounded-2xl border border-gray-100 shadow-sm group transition-all hover:border-blue-200">
+                                                    <div className="flex-1 flex items-center gap-4">
+                                                        <div className="p-2 bg-blue-50 rounded-lg text-blue-600 border border-blue-100">
+                                                            <Tag className="w-4 h-4" strokeWidth={2.5} />
                                                         </div>
-                                                        <div className="text-sm text-gray-600 ml-6">{claim.claimValue}</div>
+                                                        <div>
+                                                            <div className="text-[10px] font-black text-blue-500 uppercase tracking-widest mb-0.5">{claim.claimType}</div>
+                                                            <div className="font-black text-gray-900">{claim.claimValue}</div>
+                                                        </div>
                                                     </div>
                                                     <button
                                                         onClick={async () => {
                                                             try {
                                                                 await usersService.removeClaim(user.id, claim.id);
-                                                                toast.success('Claim removed successfully');
+                                                                toast.success('Claim revoked successfully');
                                                                 fetchUserDetails();
                                                                 onUpdate();
                                                             } catch (error: any) {
-                                                                toast.error('Failed to remove claim');
+                                                                toast.error('Sync failed');
                                                             }
                                                         }}
-                                                        className="px-3 py-1 bg-error-100 text-error-700 rounded-lg hover:bg-error-200 transition-colors text-sm flex-shrink-0"
+                                                        className="p-2 bg-rose-50 text-rose-600 rounded-xl hover:bg-rose-100 transition-all border border-rose-100 shadow-sm active:scale-90"
+                                                        title="Revoke Claim"
                                                     >
-                                                        Remove
+                                                        <Trash2 className="w-4 h-4" strokeWidth={2.5} />
                                                     </button>
                                                 </div>
                                             ))
                                         ) : (
-                                            <p className="text-gray-500 text-sm py-4 text-center">No claims assigned</p>
+                                            <div className="py-12 flex flex-col items-center justify-center bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+                                                <Tag className="w-10 h-10 text-gray-300 mb-2" strokeWidth={1.5} />
+                                                <p className="text-gray-400 text-sm font-bold uppercase tracking-widest">No claims defined</p>
+                                            </div>
                                         )}
                                     </div>
 
                                     {/* Add New Claim Form */}
-                                    <div className="pt-4 border-t border-gray-200">
-                                        <h4 className="text-sm font-semibold text-gray-700 mb-3">Add New Claim</h4>
-                                        <div className="grid grid-cols-2 gap-3">
-                                            <div>
-                                                <label className="block text-xs font-medium text-gray-600 mb-1">Claim Type</label>
-                                                <input
-                                                    type="text"
-                                                    id="claim-type"
-                                                    placeholder="e.g., Department"
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-secondary-500 focus:border-secondary-500 outline-none text-sm"
-                                                />
+                                    <div className="pt-8 border-t border-gray-100">
+                                        <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                                            <Plus className="w-3.5 h-3.5" />
+                                            Define New Claim Attribute
+                                        </h4>
+                                        <div className="bg-gray-50 p-5 rounded-2xl border border-gray-100 space-y-4">
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div>
+                                                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Type/Key</label>
+                                                    <input
+                                                        type="text"
+                                                        id="claim-type"
+                                                        placeholder="e.g., Department"
+                                                        className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all font-bold text-sm"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Value</label>
+                                                    <input
+                                                        type="text"
+                                                        id="claim-value"
+                                                        placeholder="e.g., Finance"
+                                                        className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all font-bold text-sm"
+                                                    />
+                                                </div>
                                             </div>
-                                            <div>
-                                                <label className="block text-xs font-medium text-gray-600 mb-1">Claim Value</label>
-                                                <input
-                                                    type="text"
-                                                    id="claim-value"
-                                                    placeholder="e.g., Engineering"
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-secondary-500 focus:border-secondary-500 outline-none text-sm"
-                                                />
-                                            </div>
+                                            <button
+                                                onClick={async () => {
+                                                    const typeInput = document.getElementById('claim-type') as HTMLInputElement;
+                                                    const valueInput = document.getElementById('claim-value') as HTMLInputElement;
+                                                    const claimType = typeInput?.value?.trim();
+                                                    const claimValue = valueInput?.value?.trim();
+
+                                                    if (!claimType || !claimValue) {
+                                                        toast.error('Attribute definition requires both Key and Value');
+                                                        return;
+                                                    }
+
+                                                    try {
+                                                        await usersService.addClaim(user.id, claimType, claimValue);
+                                                        toast.success('Sync complete');
+                                                        if (typeInput) typeInput.value = '';
+                                                        if (valueInput) valueInput.value = '';
+                                                        fetchUserDetails();
+                                                        onUpdate();
+                                                    } catch (error: any) {
+                                                        toast.error('Provisioning failed');
+                                                    }
+                                                }}
+                                                className="w-full py-3 bg-teal-50 text-teal-700 rounded-xl hover:bg-teal-100 transition-all font-black border border-teal-100 shadow-md active:scale-95 flex items-center justify-center gap-2"
+                                                style={{ color: '#0C7C92' }}
+                                            >
+                                                <Plus className="w-5 h-5" strokeWidth={3} />
+                                                Authorize Claim
+                                            </button>
                                         </div>
-                                        <button
-                                            onClick={async () => {
-                                                const typeInput = document.getElementById('claim-type') as HTMLInputElement;
-                                                const valueInput = document.getElementById('claim-value') as HTMLInputElement;
-                                                const claimType = typeInput?.value?.trim();
-                                                const claimValue = valueInput?.value?.trim();
-
-                                                if (!claimType || !claimValue) {
-                                                    toast.error('Both claim type and value are required');
-                                                    return;
-                                                }
-
-                                                try {
-                                                    await usersService.addClaim(user.id, claimType, claimValue);
-                                                    toast.success('Claim added successfully');
-                                                    if (typeInput) typeInput.value = '';
-                                                    if (valueInput) valueInput.value = '';
-                                                    fetchUserDetails();
-                                                    onUpdate();
-                                                } catch (error: any) {
-                                                    toast.error('Failed to add claim');
-                                                }
-                                            }}
-                                            className="mt-3 w-full px-4 py-2 bg-secondary-600 text-white rounded-lg hover:bg-secondary-700 transition-colors text-sm font-medium"
-                                        >
-                                            Add Claim
-                                        </button>
                                     </div>
                                 </div>
                             )}
@@ -496,11 +571,16 @@ export function UserDetailsDrawer({ userId, isOpen, onClose, onUpdate }: UserDet
     );
 }
 
-function InfoItem({ label, value }: { label: string; value: string }) {
+function InfoItem({ label, value, icon }: { label: string; value: string; icon?: React.ReactNode }) {
     return (
-        <div className="p-3 bg-gray-50 rounded-lg">
-            <div className="text-xs text-gray-500 mb-1">{label}</div>
-            <div className="font-semibold text-gray-900">{value}</div>
+        <div className="p-4 bg-gray-50/50 rounded-2xl border border-gray-100 group hover:bg-white hover:border-gray-200 hover:shadow-sm transition-all">
+            <div className="flex items-center gap-2 mb-1.5">
+                <div className="text-gray-400 group-hover:text-primary transition-colors">
+                    {icon && React.cloneElement(icon as any, { size: 14, strokeWidth: 3 })}
+                </div>
+                <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest group-hover:text-gray-500 transition-colors">{label}</div>
+            </div>
+            <div className="font-black text-gray-900 truncate tracking-tight">{value}</div>
         </div>
     );
 }

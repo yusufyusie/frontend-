@@ -66,17 +66,20 @@ export const TenantTableRow = ({ tenant, onDelete }: Props) => {
                         href={`/admin/tms/tenants/${tenant.id}`}
                         variant="light"
                         color="blue"
+                        radius="md"
+                        size="md"
+                        className="border border-blue-100 shadow-sm transition-all active:scale-90 hover:shadow-md"
                     >
-                        <Eye size={16} />
+                        <Eye size={16} strokeWidth={2.5} />
                     </ActionIcon>
                     <Menu position="bottom-end" shadow="md">
                         <Menu.Target>
-                            <ActionIcon variant="subtle" color="gray">
-                                <MoreVertical size={16} />
+                            <ActionIcon variant="subtle" color="gray" size="md" radius="md" className="hover:bg-gray-100">
+                                <MoreVertical size={16} className="text-gray-500" />
                             </ActionIcon>
                         </Menu.Target>
                         <Menu.Dropdown>
-                            <Menu.Item leftSection={<Edit size={14} />}>Edit Profile</Menu.Item>
+                            <Menu.Item leftSection={<Edit size={14} className="text-blue-600" strokeWidth={2.5} />}>Edit Profile</Menu.Item>
                             {tenant.website && (
                                 <Menu.Item
                                     leftSection={<ExternalLink size={14} />}
@@ -90,7 +93,7 @@ export const TenantTableRow = ({ tenant, onDelete }: Props) => {
                             <Menu.Divider />
                             <Menu.Item
                                 color="red"
-                                leftSection={<Trash2 size={14} />}
+                                leftSection={<Trash2 size={14} className="text-rose-500" strokeWidth={2.5} />}
                                 onClick={() => onDelete(tenant.id)}
                             >
                                 Deactivate Account

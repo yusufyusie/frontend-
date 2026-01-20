@@ -92,9 +92,10 @@ export default function BuildingsPage() {
                         setOpened(true);
                         setIsFormValid(false);
                     }}
-                    className="btn btn-primary flex items-center gap-2 w-full sm:w-auto justify-center"
+                    className="px-6 py-2 bg-teal-50 text-teal-700 hover:bg-teal-100 rounded-xl transition-all border border-teal-100 shadow-md active:scale-95 flex items-center gap-2 font-bold w-full sm:w-auto justify-center"
+                    style={{ color: '#0C7C92', borderColor: '#0C7C9220' }}
                 >
-                    <Plus className="w-5 h-5" />
+                    <Plus className="w-5 h-5" strokeWidth={3} />
                     <span>Add New Building</span>
                 </button>
             </div>
@@ -198,23 +199,24 @@ export default function BuildingsPage() {
                                             <div className="flex items-center justify-end gap-1.5">
                                                 <Link
                                                     href={`/admin/tms/buildings/${building.id}`}
-                                                    className="p-2 text-gray-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-all"
+                                                    className="p-2 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg transition-all border border-blue-100 shadow-sm active:scale-90"
                                                     title="View Details"
                                                 >
-                                                    <Eye className="w-4 h-4" />
+                                                    <Eye className="w-4 h-4" strokeWidth={2.5} />
                                                 </Link>
                                                 <button
-                                                    className="p-2 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-all"
+                                                    className="p-2 bg-teal-50 text-teal-700 hover:bg-teal-100 rounded-lg transition-all border border-teal-100/50 shadow-sm active:scale-90"
+                                                    style={{ color: '#0C7C92' }}
                                                     title="Edit Building"
                                                 >
-                                                    <Edit className="w-4 h-4" />
+                                                    <Edit className="w-4 h-4" strokeWidth={2.5} />
                                                 </button>
                                                 <button
                                                     onClick={() => handleDelete(building.id)}
-                                                    className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                                                    className="p-2 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-lg transition-all border border-rose-100 shadow-sm active:scale-90"
                                                     title="Delete Building"
                                                 >
-                                                    <Trash2 className="w-4 h-4" />
+                                                    <Trash2 className="w-4 h-4" strokeWidth={2.5} />
                                                 </button>
                                             </div>
                                         </td>

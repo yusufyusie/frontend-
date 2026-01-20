@@ -264,26 +264,26 @@ export default function MenuManagementPage() {
             header: 'Actions',
             render: (menu: MenuItem) => (
                 <PermissionGate permission="Menu.Create">
-                    <div className="flex gap-1">
+                    <div className="flex gap-1.5">
                         <button
                             onClick={() => {
                                 setSelectedMenu(menu);
                                 setEditModalOpen(true);
                             }}
-                            className="p-2 text-teal-600 hover:bg-teal-50 rounded-lg transition-colors"
+                            className="p-2 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg transition-all border border-blue-100 shadow-sm active:scale-90"
                             title="Edit"
                         >
-                            <Icons.Edit className="w-4 h-4" />
+                            <Icons.Edit className="w-4 h-4" strokeWidth={2.5} />
                         </button>
                         <button
                             onClick={() => {
                                 setSelectedMenu(menu);
                                 setDeleteConfirmOpen(true);
                             }}
-                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                            className="p-2 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-lg transition-all border border-rose-100 shadow-sm active:scale-90"
                             title="Delete"
                         >
-                            <Icons.Trash2 className="w-4 h-4" />
+                            <Icons.Trash2 className="w-4 h-4" strokeWidth={2.5} />
                         </button>
                     </div>
                 </PermissionGate>
@@ -311,16 +311,17 @@ export default function MenuManagementPage() {
                     <div className="flex gap-2">
                         <button
                             onClick={handleExport}
-                            className="btn btn-secondary flex items-center gap-2"
+                            className="px-4 py-2 bg-secondary/5 text-secondary hover:bg-secondary/10 rounded-xl transition-all border border-secondary/10 shadow-sm active:scale-90 flex items-center gap-2 font-bold"
                         >
-                            <Icons.Download className="w-5 h-5" />
+                            <Icons.Download className="w-5 h-5" strokeWidth={2.5} />
                             Export
                         </button>
                         <button
                             onClick={() => setCreateModalOpen(true)}
-                            className="btn btn-primary flex items-center gap-2"
+                            className="px-6 py-2 bg-teal-50 text-teal-700 hover:bg-teal-100 rounded-xl transition-all border border-teal-100 shadow-md active:scale-95 flex items-center gap-2 font-bold"
+                            style={{ color: '#0C7C92', borderColor: '#0C7C9220' }}
                         >
-                            <Icons.Plus className="w-5 h-5" />
+                            <Icons.Plus className="w-5 h-5" strokeWidth={3} />
                             Add Menu Item
                         </button>
                     </div>

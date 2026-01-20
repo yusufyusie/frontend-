@@ -1,6 +1,7 @@
 'use client';
 
 import { PermissionGate } from '@/components/PermissionGate';
+import { Plus } from 'lucide-react';
 
 interface ResourcesPageHeaderProps {
     onCreateClick: () => void;
@@ -16,11 +17,10 @@ export function ResourcesPageHeader({ onCreateClick }: ResourcesPageHeaderProps)
             <PermissionGate permission="Resource.Create">
                 <button
                     onClick={onCreateClick}
-                    className="btn btn-primary flex items-center gap-2"
+                    className="px-6 py-2 bg-teal-50 text-teal-700 hover:bg-teal-100 rounded-xl transition-all border border-teal-100 shadow-md active:scale-95 flex items-center gap-2 font-bold"
+                    style={{ color: '#0C7C92', borderColor: '#0C7C9220' }}
                 >
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                    </svg>
+                    <Plus className="w-5 h-5" strokeWidth={3} />
                     Add Resource
                 </button>
             </PermissionGate>

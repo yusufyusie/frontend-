@@ -56,27 +56,27 @@ export function PermissionCard({
                     </span>
                 </div>
 
-                <div className="flex gap-1 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">
+                <div className="flex gap-2">
                     <button
                         onClick={onEdit}
-                        className="p-1.5 hover:bg-primary/10 text-gray-400 hover:text-primary rounded-lg transition-all"
+                        className="p-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg transition-all border border-blue-100 shadow-sm active:scale-90"
                         title="Edit Rule"
                     >
-                        <Edit className="w-4 h-4" />
+                        <Edit className="w-4 h-4" strokeWidth={2.5} />
                     </button>
                     <button
                         onClick={onViewDetails}
-                        className="p-1.5 hover:bg-secondary/10 text-gray-400 hover:text-secondary rounded-lg transition-all"
+                        className="p-1.5 bg-secondary/5 text-secondary hover:bg-secondary/10 rounded-lg transition-all border border-secondary/10 shadow-sm active:scale-90"
                         title="Inspect Registry"
                     >
-                        <Eye className="w-4 h-4" />
+                        <Eye className="w-4 h-4" strokeWidth={2.5} />
                     </button>
                     <button
                         onClick={onDelete}
-                        className="p-1.5 hover:bg-red-50 text-gray-400 hover:text-red-600 rounded-lg transition-all"
+                        className="p-1.5 bg-rose-50 text-rose-500 hover:bg-rose-100 rounded-lg transition-all border border-rose-100 shadow-sm active:scale-90"
                         title="Withdraw Permission"
                     >
-                        <Trash className="w-4 h-4" />
+                        <Trash className="w-4 h-4" strokeWidth={2.5} />
                     </button>
                 </div>
             </div>

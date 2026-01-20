@@ -183,10 +183,10 @@ export default function AdminUsersPage() {
                                             <div className="flex items-center justify-end gap-1.5">
                                                 <button
                                                     onClick={() => handleViewUser(user.id)}
-                                                    className="p-2 text-gray-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-all"
+                                                    className="p-2 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg transition-all border border-blue-100 shadow-sm active:scale-90"
                                                     title="View Profile"
                                                 >
-                                                    <Eye className="w-4 h-4" />
+                                                    <Eye className="w-4 h-4" strokeWidth={2.5} />
                                                 </button>
                                                 <PermissionGate permission="User.Edit">
                                                     <button
@@ -194,20 +194,21 @@ export default function AdminUsersPage() {
                                                             setSelectedUser(user);
                                                             setAssignRolesModalOpen(true);
                                                         }}
-                                                        className="p-2 text-gray-400 hover:text-secondary hover:bg-secondary/5 rounded-lg transition-all"
+                                                        className="p-2 bg-secondary/5 text-secondary hover:bg-secondary/10 rounded-lg transition-all border border-secondary/10 shadow-sm active:scale-90"
                                                         title="Manage Roles"
                                                     >
-                                                        <Shield className="w-4 h-4" />
+                                                        <Shield className="w-4 h-4" strokeWidth={2.5} />
                                                     </button>
                                                     <button
                                                         onClick={() => {
                                                             setSelectedUser(user);
                                                             setEditModalOpen(true);
                                                         }}
-                                                        className="p-2 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-all"
+                                                        className="p-2 bg-teal-50 text-teal-700 hover:bg-teal-100 rounded-lg transition-all border border-teal-100/50 shadow-sm active:scale-90"
+                                                        style={{ color: '#0C7C92' }}
                                                         title="Edit Details"
                                                     >
-                                                        <Edit className="w-4 h-4" />
+                                                        <Edit className="w-4 h-4" strokeWidth={2.5} />
                                                     </button>
                                                 </PermissionGate>
                                                 <PermissionGate permission="User.Delete">
@@ -216,10 +217,10 @@ export default function AdminUsersPage() {
                                                             setSelectedUser(user);
                                                             setDeleteConfirmOpen(true);
                                                         }}
-                                                        className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                                                        className="p-2 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-lg transition-all border border-rose-100 shadow-sm active:scale-90"
                                                         title="Terminate Account"
                                                     >
-                                                        <Trash className="w-4 h-4" />
+                                                        <Trash className="w-4 h-4" strokeWidth={2.5} />
                                                     </button>
                                                 </PermissionGate>
                                             </div>

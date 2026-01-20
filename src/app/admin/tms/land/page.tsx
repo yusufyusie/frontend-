@@ -35,8 +35,10 @@ export default function LandPage() {
                 items.forEach(item => {
                     if (item.type === LandResourceType.ZONE) zones++;
                     if (item.type === LandResourceType.BLOCK) blocks++;
-                    if (item.type === LandResourceType.PLOT) plots++;
-                    totalArea += Number(item.areaM2 || 0);
+                    if (item.type === LandResourceType.PLOT) {
+                        plots++;
+                        totalArea += Number(item.areaM2 || 0);
+                    }
                     if (item.children) countResources(item.children);
                 });
             };
@@ -129,12 +131,14 @@ export default function LandPage() {
             icon: resource.type === 'ZONE' ? <Map size={16} /> :
                 resource.type === 'BLOCK' ? <Grid3x3 size={16} /> :
                     <MapPin size={16} />,
-            badge: resource.areaM2 ? {
-                text: `${Number(resource.areaM2).toLocaleString()} m²`,
-                color: 'blue'
-            } : undefined,
             children: resource.children ? convertToTreeNodes(resource.children) : undefined,
-            meta: resource
+            meta: {
+                ...resource,
+                occupantName: resource.occupantName,
+                contractAreaM2: resource.contractAreaM2,
+                areaVarianceM2: resource.areaVarianceM2,
+                occupancyStatus: resource.occupancyStatus
+            }
         }));
     };
 
@@ -159,7 +163,8 @@ export default function LandPage() {
                 </div>
                 <button
                     onClick={handleCreateNewZone}
-                    className="btn btn-primary flex items-center gap-2 w-full sm:w-auto justify-center"
+                    className="flex items-center gap-2 w-full sm:w-auto justify-center px-6 py-2.5 rounded-xl border-none font-bold text-white transition-all shadow-md active:scale-95 hover:shadow-lg hover:brightness-110 cursor-pointer"
+                    style={{ backgroundColor: '#0C7C92' }}
                 >
                     <Plus className="w-5 h-5" />
                     <span>Add New Zone</span>

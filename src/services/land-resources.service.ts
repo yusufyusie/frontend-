@@ -12,12 +12,16 @@ export interface LandResource {
     type: LandResourceType;
     code: string;
     nameEn: string;
-    nameAm: string;
     areaM2?: number;
     metadata: any;
     createdAt?: string;
     updatedAt?: string;
     children?: LandResource[];
+    // Calculated professional fields
+    occupantName?: string;
+    contractAreaM2?: number;
+    areaVarianceM2?: number;
+    occupancyStatus?: string;
     _count?: {
         children: number;
         buildings: number;
