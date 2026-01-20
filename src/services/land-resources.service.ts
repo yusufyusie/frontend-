@@ -1,15 +1,16 @@
 import { api } from '../lib/api';
 
-export enum LandResourceType {
+export enum LocationLevel {
     ZONE = 'ZONE',
     BLOCK = 'BLOCK',
     PLOT = 'PLOT',
+    ROOM = 'ROOM',
 }
 
 export interface LandResource {
     id: number;
     parentId?: number | null;
-    type: LandResourceType;
+    type: LocationLevel;
     code: string;
     nameEn: string;
     areaM2?: number;

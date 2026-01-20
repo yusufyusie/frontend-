@@ -3,11 +3,12 @@
 import { useState, useEffect } from 'react';
 import { Button, Group, Stack, Box, Text, Paper, Title, LoadingOverlay } from '@mantine/core';
 import { Plus, RefreshCw, Map, Grid3x3, MapPin, TrendingUp, X as CloseIcon, Save } from 'lucide-react';
-import { landResourcesService, LandResource, LandResourceType } from '@/services/land-resources.service';
+import { landResourcesService, LandResource, LocationLevel } from '@/services/land-resources.service';
 import { LandForm } from '@/components/organisms/tms/LandForm';
 import { AdvancedTreeGrid, TreeNode } from '@/components/organisms/tms/AdvancedTreeGrid';
 import { Modal } from '@/components/Modal';
 import { toast } from '@/components/Toast';
+import { DoorOpen } from 'lucide-react';
 
 export default function LandPage() {
     const [treeData, setTreeData] = useState<LandResource[]>([]);
@@ -19,6 +20,7 @@ export default function LandPage() {
         zones: 0,
         blocks: 0,
         plots: 0,
+        rooms: 0,
         totalArea: 0
     });
 
@@ -30,20 +32,21 @@ export default function LandPage() {
             setTreeData(data);
 
             // Calculate metrics
-            let zones = 0, blocks = 0, plots = 0, totalArea = 0;
+            let zones = 0, blocks = 0, plots = 0, rooms = 0, totalArea = 0;
             const countResources = (items: LandResource[]) => {
                 items.forEach(item => {
-                    if (item.type === LandResourceType.ZONE) zones++;
-                    if (item.type === LandResourceType.BLOCK) blocks++;
-                    if (item.type === LandResourceType.PLOT) {
+                    if (item.type === LocationLevel.ZONE) zones++;
+                    if (item.type === LocationLevel.BLOCK) blocks++;
+                    if (item.type === LocationLevel.PLOT) {
                         plots++;
                         totalArea += Number(item.areaM2 || 0);
                     }
+                    if (item.type === LocationLevel.ROOM) rooms++;
                     if (item.children) countResources(item.children);
                 });
             };
             countResources(data);
-            setMetrics({ zones, blocks, plots, totalArea });
+            setMetrics({ zones, blocks, plots, rooms, totalArea });
         } catch (error) {
             toast.error('Failed to fetch land resource tree');
         } finally {
@@ -69,9 +72,10 @@ export default function LandPage() {
         if (!parent) return;
 
         const nextTypeMap = {
-            [LandResourceType.ZONE]: LandResourceType.BLOCK,
-            [LandResourceType.BLOCK]: LandResourceType.PLOT,
-            [LandResourceType.PLOT]: LandResourceType.PLOT,
+            [LocationLevel.ZONE]: LocationLevel.BLOCK,
+            [LocationLevel.BLOCK]: LocationLevel.PLOT,
+            [LocationLevel.PLOT]: LocationLevel.ROOM,
+            [LocationLevel.ROOM]: LocationLevel.ROOM,
         };
 
         setActiveResource({
@@ -99,7 +103,7 @@ export default function LandPage() {
     };
 
     const handleCreateNewZone = () => {
-        setActiveResource({ type: LandResourceType.ZONE });
+        setActiveResource({ type: LocationLevel.ZONE });
         setOpened(true);
         setIsFormValid(false);
     };
@@ -128,9 +132,10 @@ export default function LandPage() {
         return resources.map(resource => ({
             id: resource.id,
             label: resource.nameEn,
-            icon: resource.type === 'ZONE' ? <Map size={16} /> :
-                resource.type === 'BLOCK' ? <Grid3x3 size={16} /> :
-                    <MapPin size={16} />,
+            icon: resource.type === LocationLevel.ZONE ? <Map size={16} /> :
+                resource.type === LocationLevel.BLOCK ? <Grid3x3 size={16} /> :
+                    resource.type === LocationLevel.PLOT ? <MapPin size={16} /> :
+                        <DoorOpen size={16} />,
             children: resource.children ? convertToTreeNodes(resource.children) : undefined,
             meta: {
                 ...resource,

@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
 import { Stack, TextInput, Group, Select, Button, Box, LoadingOverlay, Title, NumberInput, Paper, Text } from '@mantine/core';
 import { Save, Map, Layers } from 'lucide-react';
-import { LandResource, LandResourceType } from '@/services/land-resources.service';
+import { LandResource, LocationLevel } from '@/services/land-resources.service';
 
 interface Props {
     initialData?: Partial<LandResource>;
     onSubmit: (data: Partial<LandResource>) => Promise<void>;
     isLoading?: boolean;
     parentId?: number | null;
-    defaultType?: LandResourceType;
+    defaultType?: LocationLevel;
     onValidityChange?: (isValid: boolean) => void;
 }
 
@@ -16,7 +16,7 @@ export const LandForm = ({ initialData, onSubmit, isLoading, parentId, defaultTy
     const [formData, setFormData] = useState<Partial<LandResource>>({
         code: '',
         nameEn: '',
-        type: defaultType || LandResourceType.ZONE,
+        type: defaultType || LocationLevel.ZONE,
         parentId: parentId,
         areaM2: undefined,
         metadata: {},
@@ -39,9 +39,10 @@ export const LandForm = ({ initialData, onSubmit, isLoading, parentId, defaultTy
     }, [formData, onValidityChange]);
 
     const landTypes = [
-        { value: LandResourceType.ZONE, label: 'Zone' },
-        { value: LandResourceType.BLOCK, label: 'Block' },
-        { value: LandResourceType.PLOT, label: 'Plot' }
+        { value: LocationLevel.ZONE, label: 'Zone' },
+        { value: LocationLevel.BLOCK, label: 'Block' },
+        { value: LocationLevel.PLOT, label: 'Plot' },
+        { value: LocationLevel.ROOM, label: 'Room' }
     ];
 
     return (
@@ -66,7 +67,7 @@ export const LandForm = ({ initialData, onSubmit, isLoading, parentId, defaultTy
                                 placeholder="Select level"
                                 data={landTypes}
                                 value={formData.type}
-                                onChange={(val) => setFormData({ ...formData, type: val as LandResourceType })}
+                                onChange={(val) => setFormData({ ...formData, type: val as LocationLevel })}
                                 required
                                 disabled={!!defaultType}
                                 radius="xl"
