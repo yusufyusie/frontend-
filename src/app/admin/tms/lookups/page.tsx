@@ -2,6 +2,7 @@
 // Premium Lookups Management Interface with Glassmorphism
 
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Stack, Group, Text, Box, Title, Paper, ActionIcon, Skeleton, Button, Badge } from '@mantine/core';
 import { Map, Layers, Building2, LayoutList, Settings, Info, GitBranch, FileText, Database, Plus, Sparkles, DoorOpen, Coffee, Shield, Wallet, Activity, Leaf, Headset, Server, Radio, Code2, Hammer, Clock, Users, Briefcase, Settings2 } from 'lucide-react';
 import { lookupsService, SystemLookup } from '@/services/lookups.service';
@@ -87,134 +88,157 @@ export default function LookupsPage() {
     if (!mounted) return null;
 
     return (
-        <div className="h-[calc(100vh-120px)] flex flex-col overflow-hidden bg-white/30 backdrop-blur-sm rounded-3xl border border-white/50 shadow-2xl animate-render">
-            {/* Professional Fixed Header */}
-            <Box p="md" className="border-b border-slate-200 bg-white/80 backdrop-blur-md z-20">
-                <Group justify="space-between" align="center">
-                    <Group gap="md">
-                        <Box className="bg-gradient-to-br from-[#0C7C92] to-cyan-600 p-2.5 rounded-xl shadow-lg shadow-cyan-100">
-                            <Database size={24} className="text-white" strokeWidth={2.5} />
-                        </Box>
-                        <div className="animate-fade-in-delayed">
-                            <Group gap="xs">
-                                <Title order={3} className="text-2xl font-black bg-gradient-to-r from-slate-800 to-teal-800 bg-clip-text text-transparent">
-                                    System Lookups
-                                </Title>
-                                <Badge variant="dot" color="teal" size="sm">Active Session</Badge>
-                            </Group>
-                            <Text size="xs" c="dimmed" fw={600}>Master Metadata Management</Text>
-                        </div>
+        <>
+            <div className="h-[calc(100vh-120px)] flex flex-col overflow-hidden bg-white/30 backdrop-blur-sm rounded-3xl border border-white/50 shadow-2xl animate-render">
+                {/* Professional Fixed Header */}
+                <Box p="md" className="border-b border-slate-200 bg-white/80 backdrop-blur-md z-20">
+                    <Group justify="space-between" align="center">
+                        <Group gap="md">
+                            <Box className="bg-gradient-to-br from-[#0C7C92] to-cyan-600 p-2.5 rounded-xl shadow-lg shadow-cyan-100">
+                                <Database size={24} className="text-white" strokeWidth={2.5} />
+                            </Box>
+                            <div className="animate-fade-in-delayed">
+                                <Group gap="xs">
+                                    <Title order={3} className="text-2xl font-black bg-gradient-to-r from-slate-800 to-teal-800 bg-clip-text text-transparent">
+                                        System Lookups
+                                    </Title>
+                                    <Badge variant="dot" color="teal" size="sm">Active Session</Badge>
+                                </Group>
+                                <Text size="xs" c="dimmed" fw={600}>Master Metadata Management</Text>
+                            </div>
+                        </Group>
+                        <Group gap="xs">
+                            <Button
+                                size="compact-md"
+                                radius="xl"
+                                className="bg-gradient-to-r from-[#0C7C92] to-[#0a6c7e] shadow-md hover:shadow-lg transition-all"
+                                leftSection={<Plus size={16} strokeWidth={3} />}
+                                onClick={() => setEditItem({ lookupCategory: category || '', isActive: true, level: 1 })}
+                            >
+                                Add Root
+                            </Button>
+                        </Group>
                     </Group>
-                    <Group gap="xs">
-                        <Button
-                            size="compact-md"
-                            radius="xl"
-                            className="bg-gradient-to-r from-[#0C7C92] to-[#0a6c7e] shadow-md hover:shadow-lg transition-all"
-                            leftSection={<Plus size={16} strokeWidth={3} />}
-                            onClick={() => setEditItem({ lookupCategory: category || '', isActive: true, level: 1 })}
-                        >
-                            Add Root
-                        </Button>
-                    </Group>
-                </Group>
-            </Box>
-
-            <div className="flex flex-1 overflow-hidden">
-                {/* Compact Category Navigation Sidebar */}
-                <Box
-                    className="w-fit min-w-[160px] max-w-[240px] border-r border-slate-200 bg-slate-50/50 overflow-y-auto custom-scrollbar"
-                    p="xs"
-                >
-                    <Text size="xs" fw={800} tt="uppercase" className="text-slate-400 mb-3 px-2 tracking-widest whitespace-nowrap" ml={4}>
-                        Categories
-                    </Text>
-                    <Stack gap={3} className="animate-fade-in-delayed">
-                        {catsLoading ? (
-                            [1, 2, 3, 4, 5, 6, 7, 8].map(i => (
-                                <Skeleton key={i} height={36} radius="md" />
-                            ))
-                        ) : (
-                            categories.map(cat => {
-                                const isActive = category === cat.value;
-                                const Icon = getIcon(cat.icon);
-                                return (
-                                    <button
-                                        key={cat.value}
-                                        onClick={() => setCategory(cat.value)}
-                                        className={`
-                                            flex items-center gap-2.5 w-full p-2 rounded-xl transition-all duration-200 group text-left
-                                            ${isActive
-                                                ? 'bg-[#0C7C92] shadow-md shadow-cyan-100/50 text-white'
-                                                : 'hover:bg-white hover:shadow-sm text-slate-600'
-                                            }
-                                        `}
-                                    >
-                                        <Box className={`${isActive ? 'bg-white/20' : 'bg-slate-100 group-hover:bg-slate-200'} p-1.5 rounded-lg transition-colors flex-shrink-0`}>
-                                            <Icon
-                                                size={16}
-                                                className={isActive ? 'text-white' : `text-${cat.color}-600`}
-                                                strokeWidth={2.5}
-                                            />
-                                        </Box>
-                                        <Text size="sm" fw={isActive ? 800 : 600} className="whitespace-nowrap">
-                                            {cat.label}
-                                        </Text>
-                                    </button>
-                                );
-                            })
-                        )}
-                    </Stack>
                 </Box>
 
-                {/* Content Area with Independent Scroll */}
-                <main className="flex-1 overflow-y-auto bg-white/40 p-6 custom-scrollbar animate-fade-in-delayed">
-                    {activeCategory && (
-                        <Box mb="xl">
-                            <Group justify="space-between" align="center" mb="lg">
-                                <div>
-                                    <Title order={4} fw={800} className="text-slate-800 text-xl flex items-center gap-2">
-                                        {activeCategory.label} hierarchy
-                                        <Badge size="sm" variant="outline" className="border-slate-200 text-slate-500">
-                                            {lookups.length} nodes
-                                        </Badge>
-                                    </Title>
-                                    <Text size="sm" c="dimmed" fw={500}>Viewing classification data for {activeCategory.label}</Text>
-                                </div>
-                            </Group>
-
-                            {loading ? (
-                                <Stack gap="xs">
-                                    {[1, 2, 3].map(i => (
-                                        <Skeleton key={i} height={80} radius="xl" />
-                                    ))}
-                                </Stack>
-                            ) : lookups.length > 0 ? (
-                                <LookupTree
-                                    data={lookups}
-                                    onEdit={setEditItem}
-                                    onDelete={() => { }}
-                                    onAddChild={(node) => setEditItem({ parentId: node.id, lookupCategory: category || undefined, isActive: true })}
-                                />
+                <div className="flex flex-1 overflow-hidden">
+                    {/* Left Sidebar: Categories Navigation */}
+                    <Box
+                        w={260}
+                        p="md"
+                        className="bg-slate-50/50 border-r border-slate-200 overflow-y-auto custom-scrollbar"
+                    >
+                        <Text size="xs" fw={800} tt="uppercase" c="dimmed" mb="md" lts="1px" className="px-2">
+                            Categories
+                        </Text>
+                        <Stack gap={3} className="animate-fade-in-delayed">
+                            {catsLoading ? (
+                                [1, 2, 3, 4, 5, 6, 7, 8].map(i => (
+                                    <Skeleton key={i} height={36} radius="md" />
+                                ))
                             ) : (
-                                <Paper className="border-2 border-dashed border-slate-200 bg-slate-50/50 p-12 text-center" radius="2xl">
-                                    <Database size={48} className="text-slate-200 mx-auto mb-4" />
-                                    <Text fw={700} c="dimmed">No entries found in this category</Text>
-                                    <Button
-                                        variant="light"
-                                        radius="xl"
-                                        mt="md"
-                                        onClick={() => setEditItem({ lookupCategory: category || '', isActive: true, level: 1 })}
-                                    >
-                                        Create Foundation Entry
-                                    </Button>
+                                categories.map(cat => {
+                                    const isActive = category === cat.value;
+                                    const Icon = getIcon(cat.icon);
+                                    return (
+                                        <button
+                                            key={cat.value}
+                                            onClick={() => setCategory(cat.value)}
+                                            className={`
+                                            flex items-center gap-2.5 w-full p-2 rounded-xl transition-all duration-200 group text-left
+                                            ${isActive
+                                                    ? 'bg-[#0C7C92] shadow-md shadow-cyan-100/50 text-white'
+                                                    : 'hover:bg-white hover:shadow-sm text-slate-600'
+                                                }
+                                        `}
+                                        >
+                                            <Box className={`${isActive ? 'bg-white/20' : 'bg-slate-100 group-hover:bg-slate-200'} p-1.5 rounded-lg transition-colors flex-shrink-0`}>
+                                                <Icon
+                                                    size={16}
+                                                    className={isActive ? 'text-white' : getColorClass(cat.color)}
+                                                    strokeWidth={2.5}
+                                                />
+                                            </Box>
+                                            <Text size="sm" fw={isActive ? 800 : 600} className="whitespace-nowrap">
+                                                {cat.label}
+                                            </Text>
+                                        </button>
+                                    );
+                                })
+                            )}
+                        </Stack>
+                    </Box>
+
+                    {/* Main Content: Tree View */}
+                    <Box className="flex-1 bg-white/40 p-6 overflow-y-auto custom-scrollbar animate-fade-in-delayed">
+                        <div className="max-w-6xl mx-auto space-y-6">
+                            {/* Entity Header Banner */}
+                            {activeCategory && (
+                                <Paper p="xl" radius="2rem" className="bg-white shadow-xl shadow-slate-200/50 border border-slate-100/50 overflow-hidden relative group">
+                                    <div className={`absolute top-0 left-0 w-2 h-full bg-${activeCategory.color}-500 shadow-lg shadow-teal-500/20`} />
+                                    <div className="relative z-10 flex items-center justify-between">
+                                        <Group gap="lg">
+                                            <Box className={`bg-${activeCategory.color}-50 p-4 rounded-2xl shadow-inner border border-${activeCategory.color}-100`}>
+                                                {(() => {
+                                                    const BannerIcon = getIcon(activeCategory.icon);
+                                                    return <BannerIcon size={32} className={getColorClass(activeCategory.color)} strokeWidth={2.5} />;
+                                                })()}
+                                            </Box>
+                                            <div>
+                                                <Group gap="xs">
+                                                    <Title order={2} className="text-3xl font-black text-slate-800 tracking-tight">
+                                                        {activeCategory.label}
+                                                    </Title>
+                                                    <Badge variant="light" color={activeCategory.color} size="lg" radius="md">
+                                                        Dynamic
+                                                    </Badge>
+                                                </Group>
+                                                <Text c="dimmed" fw={600}>Manage your {activeCategory.label.toLowerCase()} definitions</Text>
+                                            </div>
+                                        </Group>
+                                    </div>
                                 </Paper>
                             )}
-                        </Box>
-                    )}
-                </main>
-            </div>
 
-            <style jsx global>{`
+                            <Paper p="xl" radius="2rem" className="bg-white shadow-2xl shadow-slate-200/60 border border-slate-100/50">
+                                {loading ? (
+                                    <Stack gap="xs">
+                                        {[1, 2, 3].map(i => (
+                                            <Skeleton key={i} height={80} radius="xl" />
+                                        ))}
+                                    </Stack>
+                                ) : lookups.length > 0 ? (
+                                    <LookupTree
+                                        data={lookups}
+                                        onEdit={(item) => setEditItem(item)}
+                                        onDelete={() => loadData()}
+                                        onAddChild={(node) => setEditItem({
+                                            parentId: node.id,
+                                            lookupCategory: category || '',
+                                            isActive: true,
+                                            level: 2
+                                        })}
+                                    />
+                                ) : (
+                                    <Paper className="border-2 border-dashed border-slate-200 bg-slate-50/50 p-12 text-center" radius="2xl">
+                                        <Database size={48} className="text-slate-200 mx-auto mb-4" />
+                                        <Text fw={700} c="dimmed">No entries found in this category</Text>
+                                        <Button
+                                            variant="light"
+                                            radius="xl"
+                                            mt="md"
+                                            onClick={() => setEditItem({ lookupCategory: category || '', isActive: true, level: 1 })}
+                                        >
+                                            Create Foundation Entry
+                                        </Button>
+                                    </Paper>
+                                )}
+                            </Paper>
+                        </div>
+                    </Box>
+                </div>
+
+                <style jsx global>{`
                 .custom-scrollbar::-webkit-scrollbar {
                     width: 7px;
                     height: 7px;
@@ -236,8 +260,8 @@ export default function LookupsPage() {
                 }
                 
                 @keyframes renderIn {
-                    from { opacity: 0; transform: scale(0.985) translateY(10px); filter: blur(4px); }
-                    to { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
+                    from { opacity: 0; transform: scale(0.98); }
+                    to { opacity: 1; transform: scale(1); }
                 }
                 @keyframes fadeIn {
                     from { opacity: 0; transform: translateY(5px); }
@@ -250,57 +274,61 @@ export default function LookupsPage() {
                     animation: fadeIn 0.6s ease-out 0.3s both;
                 }
             `}</style>
+            </div>
 
-            {/* Modal */}
-            <Modal
-                isOpen={!!editItem}
-                onClose={() => setEditItem(null)}
-                title="Manage Entry"
-                description="System Lookup Configuration"
-                size="lg"
-                footer={
-                    <Group justify="flex-end" gap="md">
-                        <Button
-                            variant="subtle"
-                            color="gray"
-                            onClick={() => setEditItem(null)}
-                            radius="xl"
-                            size="md"
-                            className="hover:bg-gray-200/50 text-gray-700 font-bold"
-                        >
-                            Cancel
-                        </Button>
-                        <Button
-                            variant="filled"
-                            bg="#0C7C92"
-                            onClick={() => {
-                                document.getElementById('lookup-form')?.dispatchEvent(
-                                    new Event('submit', { cancelable: true, bubbles: true })
-                                );
-                            }}
-                            radius="xl"
-                            size="md"
-                            className="shadow-lg shadow-teal-100"
-                        >
-                            Save Entry
-                        </Button>
-                    </Group>
-                }
-            >
-                <LookupForm
-                    initialData={editItem || {}}
-                    onSubmit={async (data) => {
-                        if (editItem?.id) await lookupsService.update(editItem.id, data);
-                        else await lookupsService.create(data);
-                        setEditItem(null);
-                        loadData();
-                        if (category === 'CAT_CONFIG') {
-                            loadCategories();
-                        }
-                    }}
-                    onValidityChange={() => { }}
-                />
-            </Modal>
-        </div>
+            {/* Modal - Rendered via Portal to body to escape any layout constraints/clipping */}
+            {mounted && createPortal(
+                <Modal
+                    isOpen={!!editItem}
+                    onClose={() => setEditItem(null)}
+                    title="Manage Entry"
+                    description="System Lookup Configuration"
+                    size="lg"
+                    footer={
+                        <Group justify="flex-end" gap="md">
+                            <Button
+                                variant="subtle"
+                                color="gray"
+                                onClick={() => setEditItem(null)}
+                                radius="xl"
+                                size="md"
+                                className="hover:bg-gray-200/50 text-gray-700 font-bold"
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                variant="filled"
+                                bg="#0C7C92"
+                                onClick={() => {
+                                    document.getElementById('lookup-form')?.dispatchEvent(
+                                        new Event('submit', { cancelable: true, bubbles: true })
+                                    );
+                                }}
+                                radius="xl"
+                                size="md"
+                                className="shadow-lg shadow-teal-100"
+                            >
+                                Save Entry
+                            </Button>
+                        </Group>
+                    }
+                >
+                    <LookupForm
+                        initialData={editItem || {}}
+                        onSubmit={async (data) => {
+                            if (editItem?.id) await lookupsService.update(editItem.id, data);
+                            else await lookupsService.create(data);
+                            setEditItem(null);
+                            loadData();
+                            if (category === 'CAT_CONFIG') {
+                                loadCategories();
+                            }
+                        }}
+                        onValidityChange={() => { }}
+                    />
+                </Modal>,
+                document.body
+            )}
+        </>
     );
 }
