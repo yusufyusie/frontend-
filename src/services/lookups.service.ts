@@ -25,6 +25,10 @@ class LookupsService {
         return api.get<SystemLookup[]>(this.baseUrl, { params });
     }
 
+    async getCategories() {
+        return api.get<any[]>(`${this.baseUrl}/categories`);
+    }
+
     async getByCategory(category: string) {
         return api.get<SystemLookup[]>(`${this.baseUrl}/category/${category}`);
     }

@@ -73,7 +73,7 @@ export function UserDetailsDrawer({ userId, isOpen, onClose, onUpdate }: UserDet
             const data = await rolesService.getAll();
             setRoles(data);
         } catch (error) {
-            console.error('Failed to load roles');
+            // Error handled silently or via higher-level UI
         }
     };
 

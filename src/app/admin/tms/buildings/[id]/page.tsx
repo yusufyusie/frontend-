@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { Title, Text, Group, Button, Paper, Stack, Grid, Badge, SimpleGrid, Box, LoadingOverlay, Breadcrumbs, Anchor, Divider } from '@mantine/core';
-import { Building2, MapPin, Layers, DoorOpen, Calendar, Info, ArrowLeft } from 'lucide-react';
+import { Building2, MapPin, Layers, LayoutList, Calendar, Info, ArrowLeft } from 'lucide-react';
 import { buildingsService, Building } from '@/services/buildings.service';
 import { FloorManager } from '@/components/organisms/tms/FloorManager';
 import { toast } from '@/components/Toast';
@@ -52,7 +52,7 @@ export default function BuildingDetailPage() {
                             leftSection={<ArrowLeft size={16} />}
                             p={0}
                         />
-                        <Title order={2} fw={800}>{building.nameEn}</Title>
+                        <Title order={2} fw={800}>{building.name}</Title>
                         <Badge size="lg" variant="light" color="blue">{building.code}</Badge>
                     </Group>
                 </Box>
@@ -67,15 +67,15 @@ export default function BuildingDetailPage() {
                                 <Group gap="sm">
                                     <MapPin size={18} className="text-blue-600" />
                                     <Box>
-                                        <Text size="xs" c="dimmed">Plot Location</Text>
-                                        <Text size="sm" fw={600}>{(building as any).plot?.nameEn || 'N/A'}</Text>
+                                        <Text size="xs" c="dimmed">Block Location</Text>
+                                        <Text size="sm" fw={600}>{(building as any).block?.name || 'N/A'}</Text>
                                     </Box>
                                 </Group>
                                 <Group gap="sm">
                                     <Info size={18} className="text-orange-600" />
                                     <Box>
-                                        <Text size="xs" c="dimmed">Building Type</Text>
-                                        <Text size="sm" fw={600}>Office/Retail Space</Text>
+                                        <Text size="xs" c="dimmed">Building Classification</Text>
+                                        <Text size="sm" fw={600}>{(building as any).buildingClass?.name || 'Standard'}</Text>
                                     </Box>
                                 </Group>
                                 <Group gap="sm">
@@ -91,12 +91,12 @@ export default function BuildingDetailPage() {
 
                             <SimpleGrid cols={2}>
                                 <Stack gap={0} align="center">
-                                    <Text size="xl" fw={900}>{building.totalFloors}</Text>
+                                    <Text size="xl" fw={900}>{building.floors || 0}</Text>
                                     <Text size="xs" c="dimmed">Floors</Text>
                                 </Stack>
                                 <Stack gap={0} align="center">
-                                    <Text size="xl" fw={900}>{building.basementFloors}</Text>
-                                    <Text size="xs" c="dimmed">Basements</Text>
+                                    <Text size="xl" fw={900}>{building.plots?.length || 0}</Text>
+                                    <Text size="xs" c="dimmed">Units/Plots</Text>
                                 </Stack>
                             </SimpleGrid>
                         </Paper>
@@ -104,9 +104,9 @@ export default function BuildingDetailPage() {
                         <Paper withBorder p="xl" radius="md" bg="blue.0" style={{ borderColor: '#bfdbfe' }}>
                             <Group gap="sm" mb="xs">
                                 <Building2 size={24} className="text-blue-600" />
-                                <Text fw={700} c="blue.9">Asset Health</Text>
+                                <Text fw={700} c="blue.9">Asset Status</Text>
                             </Group>
-                            <Text size="xs" c="blue.8">This building is currently under <b>Operational</b> status. All units are available for lease management.</Text>
+                            <Text size="xs" c="blue.8">This building is currently <b>{building.isActive ? 'Active' : 'Inactive'}</b>. All plots/units are manageable via the Unit Manager.</Text>
                         </Paper>
                     </Stack>
                 </Grid.Col>

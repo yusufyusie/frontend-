@@ -1,4 +1,4 @@
-import { Map, LayoutGrid, MapPin, DoorOpen } from 'lucide-react';
+import { Map, LayoutGrid, MapPin, LayoutList } from 'lucide-react';
 import { LocationLevel } from '../../../services/land-resources.service';
 
 interface Props {
@@ -15,7 +15,7 @@ export const ResourceIcon = ({ type, size = 18 }: Props) => {
         case LocationLevel.PLOT:
             return <MapPin size={size} className="text-green-600" />;
         case LocationLevel.ROOM:
-            return <DoorOpen size={size} className="text-indigo-600" />;
+            return <LayoutList size={size} className="text-indigo-600" />;
         default:
             return <Map size={size} />;
     }

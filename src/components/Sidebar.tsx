@@ -59,7 +59,6 @@ export function Sidebar({ isOpen = true, isCollapsed = false, onClose }: Sidebar
                 setMenuItems([]);
             }
         } catch (err: any) {
-            console.error('[Sidebar] Error loading menus:', err);
             setError(err.message || 'Failed to load menus');
             setMenuItems([]);
         } finally {

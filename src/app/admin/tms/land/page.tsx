@@ -3,19 +3,21 @@
 import { useState, useEffect } from 'react';
 import { Button, Group, Stack, Box, Text, Paper, Title, LoadingOverlay } from '@mantine/core';
 import { Plus, RefreshCw, Map, Grid3x3, MapPin, TrendingUp, X as CloseIcon, Save } from 'lucide-react';
-import { landResourcesService, LandResource, LocationLevel } from '@/services/land-resources.service';
+import { locationsService } from '@/services/locations.service';
 import { LandForm } from '@/components/organisms/tms/LandForm';
+import { BuildingForm } from '@/components/organisms/tms/BuildingForm';
+import { buildingsService } from '@/services/buildings.service';
 import { AdvancedTreeGrid, TreeNode } from '@/components/organisms/tms/AdvancedTreeGrid';
 import { Modal } from '@/components/Modal';
 import { toast } from '@/components/Toast';
-import { DoorOpen } from 'lucide-react';
+import { LayoutList } from 'lucide-react';
 
 export default function LandPage() {
-    const [treeData, setTreeData] = useState<LandResource[]>([]);
+    const [treeData, setTreeData] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [opened, setOpened] = useState(false);
     const [isFormValid, setIsFormValid] = useState(false);
-    const [activeResource, setActiveResource] = useState<Partial<LandResource> | null>(null);
+    const [activeResource, setActiveResource] = useState<Partial<any> | null>(null);
     const [metrics, setMetrics] = useState({
         zones: 0,
         blocks: 0,
@@ -27,21 +29,25 @@ export default function LandPage() {
     const fetchTree = async () => {
         setIsLoading(true);
         try {
-            const response: any = await landResourcesService.getTree();
+            const response: any = await locationsService.getTree();
             const data = response.data || response;
             setTreeData(data);
 
             // Calculate metrics
-            let zones = 0, blocks = 0, plots = 0, rooms = 0, totalArea = 0;
-            const countResources = (items: LandResource[]) => {
+            let zones = 0, blocks = 0, buildings = 0, plots = 0, rooms = 0, totalArea = 0;
+            const countResources = (items: any[]) => {
                 items.forEach(item => {
-                    if (item.type === LocationLevel.ZONE) zones++;
-                    if (item.type === LocationLevel.BLOCK) blocks++;
-                    if (item.type === LocationLevel.PLOT) {
+                    if (item.type === 'ZONE') zones++;
+                    if (item.type === 'BLOCK') blocks++;
+                    if (item.type === 'BUILDING') buildings++;
+                    if (item.type === 'PLOT') {
                         plots++;
                         totalArea += Number(item.areaM2 || 0);
                     }
-                    if (item.type === LocationLevel.ROOM) rooms++;
+                    if (item.type === 'ROOM') {
+                        rooms++;
+                        if (!plots) totalArea += Number(item.areaM2 || 0);
+                    }
                     if (item.children) countResources(item.children);
                 });
             };
@@ -59,42 +65,43 @@ export default function LandPage() {
     }, []);
 
     const handleEdit = (node: TreeNode) => {
-        const resource = findResourceById(treeData, node.id);
+        const resource = findResourceById(treeData, node.id as any);
         if (resource) {
             setActiveResource(resource);
             setOpened(true);
-            setIsFormValid(true); // Assuming existing data is valid, or let form update it
+            setIsFormValid(true);
         }
     };
 
     const handleAddChild = (node: TreeNode) => {
-        const parent = findResourceById(treeData, node.id);
+        const parent = findResourceById(treeData, node.id as any);
         if (!parent) return;
 
-        const nextTypeMap = {
-            [LocationLevel.ZONE]: LocationLevel.BLOCK,
-            [LocationLevel.BLOCK]: LocationLevel.PLOT,
-            [LocationLevel.PLOT]: LocationLevel.ROOM,
-            [LocationLevel.ROOM]: LocationLevel.ROOM,
+        const nextTypeMap: any = {
+            'ZONE': 'BLOCK',
+            'BLOCK': 'BUILDING',
+            'BUILDING': 'PLOT',
+            'PLOT': 'ROOM',
+            'ROOM': 'ROOM',
         };
 
         setActiveResource({
-            parentId: parent.id,
+            parentId: parent.realId || parent.id,
             type: nextTypeMap[parent.type],
             code: `${parent.code}-`
-        });
+        } as any);
         setOpened(true);
         setIsFormValid(false);
     };
 
     const handleDelete = async (node: TreeNode) => {
-        const resource = findResourceById(treeData, node.id);
+        const resource = findResourceById(treeData, node.id as any);
         if (!resource) return;
 
-        if (confirm(`⚠️ Delete ${resource.nameEn}? This cannot be undone if it has no children.`)) {
+        if (confirm(`⚠️ Delete ${resource.name || resource.nameEn}? This cannot be undone.`)) {
             try {
-                await landResourcesService.delete(resource.id);
-                toast.success('Resource deleted');
+                await locationsService.delete(resource.type, resource.realId);
+                toast.success('Resource deleted successfully');
                 fetchTree();
             } catch (error: any) {
                 toast.error(error.response?.data?.message || 'Delete failed');
@@ -103,23 +110,22 @@ export default function LandPage() {
     };
 
     const handleCreateNewZone = () => {
-        setActiveResource({ type: LocationLevel.ZONE });
+        setActiveResource({ type: 'ZONE' } as any);
         setOpened(true);
         setIsFormValid(false);
     };
 
-    const handleSubmit = async (data: Partial<LandResource>) => {
+    const handleSubmit = async (data: Partial<any>) => {
         setIsLoading(true);
         try {
-            if (data.id) {
-                await landResourcesService.update(data.id, data);
-                toast.success('✅ Resource updated successfully');
+            if (activeResource?.type === 'BUILDING') {
+                await buildingsService.create(data);
             } else {
-                await landResourcesService.create(data);
-                toast.success('✅ Resource created successfully');
+                await locationsService.create(data);
             }
-            setOpened(false);
+            toast.success(`${activeResource?.type} created successfully`);
             fetchTree();
+            setOpened(false);
         } catch (error: any) {
             toast.error(error.response?.data?.message || 'Action failed');
         } finally {
@@ -128,28 +134,31 @@ export default function LandPage() {
     };
 
     // Convert LandResource to TreeNode
-    const convertToTreeNodes = (resources: LandResource[]): TreeNode[] => {
+    const convertToTreeNodes = (resources: any[]): TreeNode[] => {
         return resources.map(resource => ({
             id: resource.id,
-            label: resource.nameEn,
-            icon: resource.type === LocationLevel.ZONE ? <Map size={16} /> :
-                resource.type === LocationLevel.BLOCK ? <Grid3x3 size={16} /> :
-                    resource.type === LocationLevel.PLOT ? <MapPin size={16} /> :
-                        <DoorOpen size={16} />,
+            label: resource.name || resource.nameEn,
+            icon: resource.type === 'ZONE' ? <Map size={16} /> :
+                resource.type === 'BLOCK' ? <Grid3x3 size={16} /> :
+                    resource.type === 'BUILDING' ? <MapPin size={16} className="text-blue-600" /> :
+                        resource.type === 'PLOT' ? <TrendingUp size={16} className="text-teal-600" /> :
+                            <LayoutList size={16} />,
             children: resource.children ? convertToTreeNodes(resource.children) : undefined,
             meta: {
                 ...resource,
-                occupantName: resource.occupantName,
-                contractAreaM2: resource.contractAreaM2,
-                areaVarianceM2: resource.areaVarianceM2,
-                occupancyStatus: resource.occupancyStatus
+                occupantName: resource.occupantName || 'v',
+                contractArea: resource.contractArea,
+                areaVariance: resource.areaVariance,
+                occupancyStatus: resource.roomStatus?.name || (resource.occupantName ? 'Occupied' : 'Vacant'),
+                usageType: resource.type,
+                ownershipType: resource.code
             }
         }));
     };
 
-    const findResourceById = (resources: LandResource[], id: number): LandResource | null => {
+    const findResourceById = (resources: any[], id: string | number): any | null => {
         for (const resource of resources) {
-            if (resource.id === id) return resource;
+            if (resource.id === id || resource.realId === id) return resource;
             if (resource.children) {
                 const found = findResourceById(resource.children, id);
                 if (found) return found;
@@ -208,10 +217,19 @@ export default function LandPage() {
                 <div className="card p-4 hover:shadow-lg transition-shadow">
                     <div className="flex items-center justify-between">
                         <div>
+                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Total Rooms</p>
+                            <p className="text-2xl font-black text-gray-900 mt-1">{metrics.rooms}</p>
+                        </div>
+                        <LayoutList className="w-10 h-10 text-rose-500/20" />
+                    </div>
+                </div>
+                <div className="card p-4 hover:shadow-lg transition-shadow">
+                    <div className="flex items-center justify-between">
+                        <div>
                             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Total Area</p>
                             <p className="text-2xl font-black text-gray-900 mt-1">{metrics.totalArea.toLocaleString()} m²</p>
                         </div>
-                        <TrendingUp className="w-10 h-10 text-warning/20" />
+                        <TrendingUp className="w-10 h-10 text-orange-500/20" />
                     </div>
                 </div>
             </div>
@@ -223,7 +241,7 @@ export default function LandPage() {
                     <div>
                         <p className="text-sm font-bold text-gray-900">Territorial Hierarchy Overview</p>
                         <p className="text-xs text-gray-600 mt-1">
-                            Resources are organized as: <b>Zone</b> (e.g., Commercial) → <b>Block</b> (e.g., B01) → <b>Plot</b> (e.g., P01). Buildings are linked directly to <b>Plots</b>.
+                            Resources are organized as: <b>Zone</b> (e.g., Commercial) → <b>Block</b> (e.g., B01) → <b>Building</b> (e.g., ITS01) → <b>Plot/Unit</b> (e.g., U01).
                         </p>
                     </div>
                 </div>
@@ -292,12 +310,22 @@ export default function LandPage() {
                     </Group>
                 }
             >
-                <LandForm
-                    initialData={activeResource || {}}
-                    onSubmit={handleSubmit}
-                    isLoading={isLoading}
-                    onValidityChange={setIsFormValid}
-                />
+                {activeResource?.type === 'BUILDING' ? (
+                    <BuildingForm
+                        initialData={activeResource || {}}
+                        onSubmit={handleSubmit}
+                        isLoading={isLoading}
+                        blockId={activeResource?.parentId}
+                        onValidityChange={setIsFormValid}
+                    />
+                ) : (
+                    <LandForm
+                        initialData={activeResource || {}}
+                        onSubmit={handleSubmit}
+                        isLoading={isLoading}
+                        onValidityChange={setIsFormValid}
+                    />
+                )}
             </Modal>
         </div>
     );

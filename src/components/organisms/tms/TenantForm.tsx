@@ -175,22 +175,22 @@ export const TenantForm = ({ initialData, onSubmit, isLoading, onValidityChange 
                     <Box pt="xl">
                         <Group grow gap="xl">
                             <Select
-                                label="Business Sector"
+                                label="Core Business Sector"
                                 data={bizCategoryData}
                                 value={formData.businessCategoryId?.toString()}
                                 onChange={(val) => setFormData({ ...formData, businessCategoryId: val ? parseInt(val) : undefined })}
                                 size="md"
                                 styles={inputStyles}
-                                placeholder="Select category"
+                                placeholder="Select industrial sector"
                             />
                             <Select
-                                label="Operational Status"
+                                label="Tenant Account Status"
                                 data={statusData}
                                 value={formData.statusId?.toString()}
                                 onChange={(val) => setFormData({ ...formData, statusId: val ? parseInt(val) : undefined })}
                                 size="md"
                                 styles={inputStyles}
-                                placeholder="Assign status"
+                                placeholder="Assign lifecycle status"
                             />
                         </Group>
                     </Box>

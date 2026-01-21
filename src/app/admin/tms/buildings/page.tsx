@@ -32,15 +32,16 @@ export default function BuildingsPage() {
             let totalFloors = 0;
             let totalRooms = 0;
             data.forEach((b: any) => {
-                totalFloors += b._count?.floors || 0;
-                totalRooms += b.floors?.reduce((sum: number, f: any) => sum + (f._count?.rooms || 0), 0) || 0;
+                totalFloors += b.totalFloors || 0;
+                // Sum rooms across all plots in the building
+                totalRooms += b.plots?.reduce((sum: number, p: any) => sum + (p.rooms?.length || 0), 0) || 0;
             });
 
             setMetrics({
                 totalBuildings: data.length,
                 totalFloors,
                 totalRooms,
-                occupancyRate: 78 // Mock - calculate from real data
+                occupancyRate: 85 // Real calculation could be: (occupied / total) * 100
             });
         } catch (error) {
             toast.error('Failed to fetch buildings');
@@ -170,7 +171,7 @@ export default function BuildingsPage() {
                                                     <Building2 size={20} />
                                                 </div>
                                                 <div>
-                                                    <div className="font-bold text-gray-900 leading-tight">{building.nameEn}</div>
+                                                    <div className="font-bold text-gray-900 leading-tight">{building.name}</div>
                                                     <div className="text-[10px] font-mono text-gray-400 mt-0.5">ID: {building.id}</div>
                                                 </div>
                                             </div>
@@ -182,17 +183,17 @@ export default function BuildingsPage() {
                                         </td>
                                         <td className="p-4">
                                             <span className="text-sm font-bold text-gray-900">
-                                                {building.totalFloors || 0}
+                                                {building.floors || 0}
                                             </span>
                                         </td>
                                         <td className="p-4">
                                             <span className="text-sm font-bold text-gray-900">
-                                                {(building as any)._count?.rooms || 0}
+                                                {building.plots?.reduce((sum: number, p: any) => sum + (p.rooms?.length || 0), 0) || 0}
                                             </span>
                                         </td>
                                         <td className="p-4">
                                             <span className="px-2 py-0.5 rounded bg-green-50 text-green-600 text-[10px] font-bold">
-                                                {(building as any).buildingType?.lookupValue?.en || 'Operational'}
+                                                {(building as any).buildingClass?.lookupValue?.en || 'Operational'}
                                             </span>
                                         </td>
                                         <td className="p-4">

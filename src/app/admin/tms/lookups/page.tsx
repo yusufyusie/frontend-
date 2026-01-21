@@ -1,373 +1,345 @@
 'use client';
+// Premium Lookups Management Interface with Glassmorphism
 
-import { useState, useEffect, useMemo } from 'react';
-import { ActionIcon, Group, Stack, Box, Text, Paper, Title, Tabs, Badge, TextInput, Button } from '@mantine/core';
-import { GitBranch, Database, Settings, Plus, Info, LayoutList, Search, X, Save } from 'lucide-react';
-import { PageHeader } from '@/components/molecules/tms/PageHeader';
+import { useState, useEffect } from 'react';
+import { Stack, Group, Text, Box, Title, Paper, ActionIcon, Skeleton, Button, Badge } from '@mantine/core';
+import { Map, Layers, Building2, LayoutList, Settings, Info, GitBranch, FileText, Database, Plus, Sparkles, DoorOpen, Coffee } from 'lucide-react';
 import { lookupsService, SystemLookup } from '@/services/lookups.service';
 import { LookupTree } from '@/components/organisms/tms/LookupTree';
 import { LookupForm } from '@/components/organisms/tms/LookupForm';
 import { Modal } from '@/components/Modal';
-import { toast } from '@/components/Toast';
 
-const CATEGORIES = [
-    { label: 'Business Sectors', value: 'BUSINESS_CATEGORIES', icon: GitBranch, color: 'teal' },
-    { label: 'Tenant Status', value: 'TENANT_STATUS', icon: Settings, color: 'blue' },
-    { label: 'Building Types', value: 'BUILDING_TYPES', icon: Database, color: 'orange' },
-    { label: 'Const. Status', value: 'CONSTRUCTION_STATUS', icon: Info, color: 'cyan' },
-    { label: 'Zone Types', value: 'ZONE_TYPES', icon: LayoutList, color: 'indigo' },
-    { label: 'Room Status', value: 'ROOM_STATUS', icon: Info, color: 'red' },
-    { label: 'Contract Types', value: 'CONTRACT_TYPES', icon: LayoutList, color: 'violet' },
-];
+const ICON_MAP: Record<string, any> = {
+    Map, Layers, Building2, LayoutList, Settings, Info, GitBranch, FileText, Database, DoorOpen, Coffee
+};
+
+const getIcon = (name: string) => ICON_MAP[name] || Database;
+
+const getColorClass = (color: string) => {
+    const colors: Record<string, string> = {
+        emerald: 'text-emerald-600',
+        blue: 'text-blue-600',
+        violet: 'text-violet-600',
+        pink: 'text-pink-600',
+        amber: 'text-amber-600',
+        cyan: 'text-cyan-600',
+        teal: 'text-teal-600',
+        indigo: 'text-indigo-600',
+        orange: 'text-orange-600',
+    };
+    return colors[color] || 'text-slate-600';
+};
 
 export default function LookupsPage() {
     const [mounted, setMounted] = useState(false);
-    const [selectedCategory, setSelectedCategory] = useState(CATEGORIES[0].value);
+    const [categories, setCategories] = useState<any[]>([]);
+    const [category, setCategory] = useState<string | null>(null);
     const [lookups, setLookups] = useState<SystemLookup[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [modalOpened, setModalOpened] = useState(false);
-    const [editingLookup, setEditingLookup] = useState<Partial<SystemLookup> | null>(null);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [isFormValid, setIsFormValid] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [catsLoading, setCatsLoading] = useState(true);
+    const [editItem, setEditItem] = useState<Partial<SystemLookup> | null>(null);
 
     useEffect(() => {
         setMounted(true);
-        console.log('LOOKUPS PAGE RELOADED - V8 - PREMIUM');
-        fetchLookups();
-    }, [selectedCategory]);
+        loadCategories();
+    }, []);
 
-    const fetchLookups = async () => {
-        setIsLoading(true);
+    useEffect(() => {
+        if (category) {
+            loadData();
+        }
+    }, [category]);
+
+    const loadCategories = async () => {
+        setCatsLoading(true);
         try {
-            // Use getTree instead of getByCategory for proper hierarchical display
-            const res: any = await lookupsService.getTree(selectedCategory);
-            const data = res.data || res;
-            setLookups(Array.isArray(data) ? data : []);
-            console.log(`Fetched ${Array.isArray(data) ? data.length : 0} tree nodes for ${selectedCategory}`);
-        } catch (error) {
-            console.error('Fetch error:', error);
-            toast.error('Failed to load hierarchical lookups');
+            const res: any = await lookupsService.getCategories();
+            const data = res.data || res || [];
+            setCategories(data);
+            if (data.length > 0 && !category) {
+                setCategory(data[0].value);
+            }
+        } catch (e) {
+            console.error(e);
         } finally {
-            setIsLoading(false);
+            setCatsLoading(false);
         }
     };
 
-    const filteredLookups = useMemo(() => {
-        if (!searchTerm) return lookups;
-
-        const filterNodes = (nodes: SystemLookup[]): SystemLookup[] => {
-            return nodes.reduce((acc, node) => {
-                const matches =
-                    (node.lookupValue?.en || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    (node.lookupValue?.am || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    (node.lookupCode || '').toLowerCase().includes(searchTerm.toLowerCase());
-
-                const filteredChildren = node.children ? filterNodes(node.children) : [];
-
-                if (matches || filteredChildren.length > 0) {
-                    acc.push({
-                        ...node,
-                        children: filteredChildren
-                    });
-                }
-                return acc;
-            }, [] as SystemLookup[]);
-        };
-
-        return filterNodes(lookups);
-    }, [lookups, searchTerm]);
-
-
-    const handleCreate = () => {
-        setEditingLookup({
-            lookupCategory: selectedCategory,
-            isActive: true,
-            displayOrder: lookups.length + 1
-        });
-        setIsFormValid(false); // Reset validity
-        setModalOpened(true);
-    };
-
-    const handleEdit = (lookup: SystemLookup) => {
-        setEditingLookup(lookup);
-        setIsFormValid(true); // Assume valid on edit, form will re-validate
-        setModalOpened(true);
-    };
-
-    const handleDelete = async (lookup: SystemLookup) => {
-        if (confirm(`Are you sure you want to delete "${lookup.lookupCode}"?`)) {
-            try {
-                await lookupsService.delete(lookup.id);
-                toast.success('Lookup deleted successfully');
-                fetchLookups();
-            } catch (error) {
-                toast.error('Failed to delete lookup');
-            }
-        }
-    };
-
-    const handleSubmit = async (data: Partial<SystemLookup>) => {
+    const loadData = async () => {
+        if (!category) return;
+        setLoading(true);
         try {
-            if (editingLookup?.id) {
-                await lookupsService.update(editingLookup.id, data);
-                toast.success('Lookup updated successfully');
-            } else {
-                await lookupsService.create(data);
-                toast.success('Lookup created successfully');
-            }
-            fetchLookups();
-            setModalOpened(false);
-        } catch (error) {
-            toast.error('Operation failed');
+            const res: any = await lookupsService.getTree(category);
+            setLookups(res.data || res || []);
+        } catch (e) {
+            console.error(e);
+        } finally {
+            setLoading(false);
         }
     };
+
+    const activeCategory = categories.find(c => c.value === category) || categories[0];
 
     if (!mounted) return null;
 
     return (
-        <Stack gap="xl" p="xl" className="bg-gray-50/30 min-h-screen">
-            <PageHeader
-                title="System Metadata & Lookups"
-                description="Manage global classification trees, business sectors, and system status indicators."
-                breadcrumbs={[
-                    { label: 'Admin', href: '/admin' },
-                    { label: 'System Configuration' },
-                    { label: 'Lookups' }
-                ]}
-                actions={[
-                    {
-                        label: 'New Lookup',
-                        onClick: handleCreate,
-                        icon: Plus,
-                        variant: 'primary',
-                        color: 'tms-teal'
-                    }
-                ]}
-            />
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-teal-50 relative overflow-hidden">
+            {/* Animated Background Pattern */}
+            <div className="absolute inset-0 opacity-[0.03] pointer-events-none">
+                <div className="absolute top-0 -left-4 w-96 h-96 bg-teal-500 rounded-full mix-blend-multiply filter blur-3xl animate-blob"></div>
+                <div className="absolute top-0 -right-4 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-2000"></div>
+                <div className="absolute -bottom-8 left-20 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-4000"></div>
+            </div>
 
-            <Tabs
-                orientation="vertical"
-                value={selectedCategory}
-                onChange={(val) => val && setSelectedCategory(val)}
-                variant="pills"
-                radius="lg"
-                styles={(theme) => ({
-                    root: { display: 'flex', gap: '16px' }, // Further reduced for tighter look
-                    tab: {
-                        padding: '12px 16px',
-                        border: '1px solid transparent',
-                        borderRadius: '12px',
-                        transition: 'all 0.2s ease',
-                        marginBottom: '4px',
-                        '&:hover': {
-                            backgroundColor: '#f1f5f9',
-                            transform: 'translateX(4px)'
-                        },
-                        '&[dataActive]': {
-                            backgroundColor: '#0C7C92', // Brand Teal
-                            color: 'white',
-                            boxShadow: '0 8px 20px rgba(12, 124, 146, 0.15)',
-                            '&:hover': {
-                                backgroundColor: '#6EC9C4', // Hover to Navy
-                            }
-                        }
-                    },
-                    tabsList: {
-                        borderRight: 0,
-                        backgroundColor: 'transparent',
-                        padding: '0',
-                        width: '184px',
-                        minWidth: '184px',
-                        flexShrink: 0
-                    },
-                    panel: {
-                        flex: 1,
-                        backgroundColor: 'white',
-                        padding: '30px',
-                        borderRadius: '24px',
-                        border: '1px solid #edf2f7',
-                        minHeight: '740px',
-                        boxShadow: '0 12px 40px rgba(0,0,0,0.03)',
-                        position: 'relative',
-                        overflow: 'hidden'
-                    }
-                })}
-            >
-                <Tabs.List>
-                    <Box mb="lg" px="md">
-                        <Text size="xs" fw={800} c="dimmed" tt="uppercase" style={{ letterSpacing: '2px' }} mb={4}>
-                            Lookup Domains
-                        </Text>
-                        <Box h={2} w={30} bg="#0C7C92" style={{ borderRadius: '100px' }} />
-                    </Box>
-
-                    {CATEGORIES.map(cat => (
-                        <Tabs.Tab
-                            key={cat.value}
-                            value={cat.value}
-                            leftSection={<cat.icon size={20} />}
-                        >
-                            <Text size="sm" fw={700}>{cat.label}</Text>
-                        </Tabs.Tab>
-                    ))}
-
-                    <Box mt="auto" pt="xl" px="xs">
-                        <Paper bg="tms-mint.0" p="md" radius="lg" style={{ border: '1px dashed #6EC9C499' }}>
-                            <Group justify="space-between">
-                                <Text size="xs" fw={800} c="tms-navy.9">Count</Text>
-                                <Badge color="tms-mint" size="xs" variant="filled">
-                                    {lookups.length}
+            <Stack gap="xl" className="relative z-10 p-8 max-w-[1600px] mx-auto">
+                {/* Premium Header */}
+                <Box>
+                    <Group gap="lg" mb="md">
+                        <div className="relative">
+                            <div className="absolute inset-0 bg-gradient-to-br from-teal-400 to-cyan-600 rounded-2xl blur-lg opacity-60"></div>
+                            <Box
+                                className="relative bg-gradient-to-br from-teal-500 to-cyan-600 rounded-2xl shadow-xl"
+                                p="lg"
+                            >
+                                <Database size={40} className="text-white" strokeWidth={2.5} />
+                            </Box>
+                        </div>
+                        <div>
+                            <Group gap="md" align="center">
+                                <Title
+                                    order={1}
+                                    className="text-5xl font-black bg-gradient-to-r from-slate-800 via-teal-700 to-cyan-700 bg-clip-text text-transparent"
+                                    style={{ letterSpacing: '-1px' }}
+                                >
+                                    System Lookups
+                                </Title>
+                                <Badge
+                                    size="lg"
+                                    variant="light"
+                                    className="bg-gradient-to-r from-teal-50 to-cyan-50 text-teal-700 border border-teal-200"
+                                    leftSection={<Sparkles size={14} />}
+                                >
+                                    Master Data
                                 </Badge>
                             </Group>
-                        </Paper>
-                    </Box>
-                </Tabs.List>
+                            <Text size="lg" c="dimmed" fw={500} mt={4}>
+                                Manage hierarchical metadata and classification systems
+                            </Text>
+                        </div>
+                    </Group>
+                </Box>
 
+                {/* Main Content Grid */}
+                <div className="grid grid-cols-12 gap-6">
+                    {/* Category Navigation Sidebar */}
+                    <div className="col-span-12 lg:col-span-3">
+                        <div className="sticky top-8">
+                            <Paper
+                                className="backdrop-blur-xl bg-white/70 border border-white/60 shadow-2xl"
+                                radius="xl"
+                                p="md"
+                            >
+                                <Text size="xs" fw={800} tt="uppercase" className="text-slate-500 mb-3 tracking-wider">
+                                    Categories
+                                </Text>
+                                <Stack gap="xs">
+                                    {catsLoading ? (
+                                        [1, 2, 3, 4, 5].map(i => (
+                                            <Skeleton key={i} height={50} radius="lg" />
+                                        ))
+                                    ) : (
+                                        categories.map(cat => {
+                                            const isActive = category === cat.value;
+                                            const Icon = getIcon(cat.icon);
+                                            const colorClass = getColorClass(cat.color);
+                                            return (
+                                                <Paper
+                                                    key={cat.value}
+                                                    className={`
+                                                        cursor-pointer transition-all duration-300 border
+                                                        ${isActive
+                                                            ? 'scale-105 shadow-lg bg-gradient-to-r from-[#0C7C92] to-[#0a6c7e] text-white border-transparent'
+                                                            : 'hover:scale-102 hover:shadow-md bg-white/50 hover:bg-white/80 border-slate-200'
+                                                        }
+                                                    `}
+                                                    p="md"
+                                                    radius="lg"
+                                                    onClick={() => setCategory(cat.value)}
+                                                >
+                                                    <Group gap="sm" wrap="nowrap">
+                                                        <Box
+                                                            className={`
+                                                                rounded-lg p-2 transition-all
+                                                                ${isActive ? 'bg-white/20' : 'bg-slate-100'}
+                                                            `}
+                                                        >
+                                                            <Icon
+                                                                size={20}
+                                                                className={isActive ? 'text-white' : `text-${cat.color}-600`}
+                                                                strokeWidth={2.5}
+                                                            />
+                                                        </Box>
+                                                        <Text
+                                                            size="sm"
+                                                            fw={isActive ? 800 : 600}
+                                                            className={isActive ? 'text-white' : 'text-slate-700'}
+                                                        >
+                                                            {cat.label}
+                                                        </Text>
+                                                    </Group>
+                                                </Paper>
+                                            );
+                                        })
+                                    )}
+                                </Stack>
+                            </Paper>
+                        </div>
+                    </div>
 
-                {CATEGORIES.map(cat => (
-                    <Tabs.Panel key={cat.value} value={cat.value}>
-                        <Box
-                            pos="absolute"
-                            top={-50}
-                            right={-50}
-                            w={200}
-                            h={200}
-                            bg="tms-mint.0"
-                            style={{ borderRadius: '100%', opacity: 0.3, zIndex: 0 }}
-                        />
-
-                        <Box pos="relative" style={{ zIndex: 1 }}>
-                            <Group justify="space-between" mb={40} align="flex-start">
-                                <Box>
-                                    <Title order={3} fw={900} c="tms-navy" style={{ letterSpacing: '-0.5px' }}>
-                                        {cat.label}
-                                    </Title>
-                                    <Text size="sm" c="dimmed" mt={4} fw={500}>
-                                        Manage classification values and hierarchical dependencies for {cat.label.toLowerCase()}.
-                                    </Text>
-                                </Box>
-                                <Group gap="md">
-                                    <TextInput
-                                        placeholder="Search lookups..."
-                                        leftSection={<Search size={18} className="text-teal-600" />}
-                                        value={searchTerm}
-                                        onChange={(e) => setSearchTerm(e.currentTarget.value)}
+                    {/* Content Area */}
+                    <div className="col-span-12 lg:col-span-9">
+                        <Paper
+                            className="backdrop-blur-xl bg-white/70 border border-white/60 shadow-2xl min-h-[600px]"
+                            radius="xl"
+                            p="xl"
+                        >
+                            {/* Category Header */}
+                            {activeCategory && (
+                                <Group justify="space-between" mb="xl">
+                                    <Group gap="md">
+                                        <Box className={`bg-gradient-to-br from-[#0C7C92] to-[#0a6c7e] rounded-xl p-3 shadow-lg`}>
+                                            {(() => {
+                                                const Icon = getIcon(activeCategory.icon);
+                                                return <Icon size={28} className="text-white" strokeWidth={2.5} />;
+                                            })()}
+                                        </Box>
+                                        <div>
+                                            <Title order={2} fw={800} className="text-slate-800">
+                                                {activeCategory.label}
+                                            </Title>
+                                            <Text size="sm" c="dimmed" fw={500}>
+                                                {lookups.length} {lookups.length === 1 ? 'entry' : 'entries'} in this category
+                                            </Text>
+                                        </div>
+                                    </Group>
+                                    <Button
                                         size="md"
                                         radius="xl"
-                                        w={300}
-                                        styles={{
-                                            input: {
-                                                backgroundColor: '#f8fafc',
-                                                border: '1px solid #e2e8f0',
-                                                '&:focus': {
-                                                    borderColor: '#0C7C92'
-                                                }
-                                            }
-                                        }}
-                                    />
-                                    <ActionIcon
-                                        variant="filled"
-                                        bg="#0C7C92"
-                                        size="xl"
-                                        onClick={handleCreate}
-                                        className="rounded-xl shadow-lg hover:shadow-xl transition-all active:scale-95"
-                                        title="Create Root Lookup"
+                                        className={`bg-gradient-to-r from-[#0C7C92] to-[#0a6c7e] shadow-lg hover:shadow-xl transition-all hover:scale-105 active:scale-95`}
+                                        leftSection={<Plus size={18} strokeWidth={2.5} />}
+                                        onClick={() => setEditItem({ lookupCategory: category || '', isActive: true, level: 1 })}
                                     >
-                                        <Plus size={24} />
-                                    </ActionIcon>
+                                        Add Root Entry
+                                    </Button>
                                 </Group>
-                            </Group>
+                            )}
 
-                            <Box className="min-h-[400px]">
-                                {isLoading ? (
+                            {/* Content */}
+                            <Box className="transition-all duration-500 ease-in-out">
+                                {loading ? (
                                     <Stack gap="md">
-                                        {[1, 2, 3].map(i => (
-                                            <Paper key={i} h={80} bg="gray.0" radius="md" style={{ opacity: 0.5 }} />
+                                        {[1, 2, 3, 4].map(i => (
+                                            <Paper key={i} withBorder p="lg" radius="lg" className="animate-pulse">
+                                                <Group gap="md">
+                                                    <Skeleton height={40} width={40} radius="md" />
+                                                    <div className="flex-1">
+                                                        <Skeleton height={16} width="40%" mb={8} radius="md" />
+                                                        <Skeleton height={12} width="60%" radius="md" />
+                                                    </div>
+                                                </Group>
+                                            </Paper>
                                         ))}
                                     </Stack>
-                                ) : filteredLookups.length > 0 ? (
-                                    <LookupTree
-                                        data={filteredLookups}
-                                        onEdit={handleEdit}
-                                        onDelete={handleDelete}
-                                        onAddChild={(node) => {
-                                            setEditingLookup({
-                                                lookupCategory: selectedCategory,
-                                                parentId: node.id,
-                                                isActive: true,
-                                                level: (node.level || 1) + 1
-                                            });
-                                            setIsFormValid(false);
-                                            setModalOpened(true);
-                                        }}
-                                    />
-                                ) : (
-                                    <Paper withBorder p={50} radius="xl" bg="gray.0" style={{ borderStyle: 'dashed', textAlign: 'center' }}>
-                                        <Stack align="center" gap="xs">
-                                            <Box p="md" bg="white" style={{ borderRadius: '50%', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
-                                                <Search size={32} className="text-gray-300" />
+                                ) : lookups.length > 0 ? (
+                                    <div className="animate-fade-in">
+                                        <LookupTree
+                                            data={lookups}
+                                            onEdit={setEditItem}
+                                            onDelete={() => { }}
+                                            onAddChild={(node) => setEditItem({ parentId: node.id, lookupCategory: category || undefined, isActive: true })}
+                                        />
+                                    </div>
+                                ) : category && (
+                                    <Paper
+                                        className="border-2 border-dashed border-slate-200 bg-slate-50/50"
+                                        p="xl"
+                                        radius="xl"
+                                    >
+                                        <Stack align="center" gap="md">
+                                            <Box className="bg-slate-100 rounded-full p-6">
+                                                {(() => {
+                                                    const Icon = getIcon(activeCategory?.icon);
+                                                    return <Icon size={48} className="text-slate-400" strokeWidth={1.5} />;
+                                                })()}
                                             </Box>
-                                            <Text fw={700} c="gray.7">No entries found</Text>
-                                            <Text size="sm" c="dimmed" maw={300}>
-                                                We couldn't find any lookup values for this category. Start by creating the first entry.
-                                            </Text>
-                                            <ActionIcon variant="light" color="teal" size="lg" radius="md" mt="sm" onClick={handleCreate}>
-                                                <Plus size={20} />
-                                            </ActionIcon>
+                                            <div className="text-center">
+                                                <Text size="lg" fw={700} c="dimmed" mb={4}>
+                                                    No entries found
+                                                </Text>
+                                                <Text size="sm" c="dimmed">
+                                                    Start building your {activeCategory?.label.toLowerCase()} hierarchy
+                                                </Text>
+                                            </div>
+                                            <Button
+                                                size="lg"
+                                                radius="xl"
+                                                variant="light"
+                                                className="mt-4"
+                                                leftSection={<Plus size={20} />}
+                                                onClick={() => setEditItem({ lookupCategory: category || undefined, isActive: true, level: 1 })}
+                                            >
+                                                Create First Entry
+                                            </Button>
                                         </Stack>
                                     </Paper>
                                 )}
                             </Box>
-                        </Box>
-                    </Tabs.Panel>
-                ))}
-            </Tabs>
+                        </Paper>
+                    </div>
+                </div>
+            </Stack>
 
-            <Modal
-                isOpen={modalOpened}
-                onClose={() => setModalOpened(false)}
-                title={editingLookup?.id ? 'Edit Lookup' : 'New Lookup'}
-                description={selectedCategory.replace('_', ' ')}
-                size="lg"
-                footer={
-                    <Group justify="flex-end" gap="md">
-                        <Button
-                            variant="subtle"
-                            color="gray"
-                            onClick={() => setModalOpened(false)}
-                            size="md"
-                            radius="xl"
-                            leftSection={<X size={18} />}
-                            className="hover:bg-gray-200/50 text-gray-700 font-bold"
-                        >
-                            Cancel
-                        </Button>
-                        <Button
-                            variant="filled"
-                            bg="#0C7C92"
-                            onClick={() => {
-                                document.getElementById('lookup-form')?.dispatchEvent(
-                                    new Event('submit', { cancelable: true, bubbles: true })
-                                );
-                            }}
-                            size="md"
-                            radius="xl"
-                            disabled={!isFormValid}
-                            leftSection={<Save size={18} />}
-                            className={`shadow-lg shadow-teal-100 transition-all ${isFormValid ? 'hover:shadow-xl active:scale-95' : 'opacity-50 cursor-not-allowed'}`}
-                        >
-                            Save Configuration
-                        </Button>
-                    </Group>
-                }
-            >
+            {/* Modal */}
+            <Modal isOpen={!!editItem} onClose={() => setEditItem(null)} title="Manage Entry">
                 <LookupForm
-                    initialData={editingLookup || {}}
-                    onSubmit={handleSubmit}
-                    isLoading={isLoading}
-                    onValidityChange={setIsFormValid}
+                    initialData={editItem || {}}
+                    onSubmit={async (data) => {
+                        if (editItem?.id) await lookupsService.update(editItem.id, data);
+                        else await lookupsService.create(data);
+                        setEditItem(null);
+                        loadData();
+                    }}
+                    onValidityChange={() => { }}
                 />
             </Modal>
-        </Stack>
+
+            <style jsx>{`
+                @keyframes blob {
+                    0%, 100% { transform: translate(0, 0) scale(1); }
+                    33% { transform: translate(30px, -50px) scale(1.1); }
+                    66% { transform: translate(-20px, 20px) scale(0.9); }
+                }
+                .animate-blob {
+                    animation: blob 7s infinite;
+                }
+                .animation-delay-2000 {
+                    animation-delay: 2s;
+                }
+                .animation-delay-4000 {
+                    animation-delay: 4s;
+                }
+                .animate-fade-in {
+                    animation: fadeIn 0.5s ease-in-out;
+                }
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(10px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+                .hover\\:scale-102:hover {
+                    transform: scale(1.02);
+                }
+            `}</style>
+        </div>
     );
 }

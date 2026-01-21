@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { MenuTreeSelector } from './MenuTreeSelector';
 import { menuService, MenuItem } from '@/services/menu.service';
 import { LoadingSpinner } from './LoadingSpinner';
+import { toast } from '@/components/Toast';
 import { Check, X, AlertCircle, CheckCircle, Layers, TrendingUp, ChevronRight } from 'lucide-react';
 
 interface RoleMenuAssignmentProps {
@@ -41,8 +42,8 @@ export function RoleMenuAssignment({ roleId, roleName }: RoleMenuAssignmentProps
             setSelectedMenuIds(assignedIds);
             setInitialMenuIds(assignedIds);
         } catch (err: any) {
-            console.error('Error loading menus:', err);
             setError(err.response?.data?.message || 'Failed to load menus');
+            toast.error('Menu synchronization failed');
         } finally {
             setLoading(false);
         }
@@ -69,8 +70,8 @@ export function RoleMenuAssignment({ roleId, roleName }: RoleMenuAssignmentProps
                 window.location.reload();
             }, 1500);
         } catch (err: any) {
-            console.error('Error assigning menus:', err);
             setError(err.response?.data?.message || 'Failed to assign menus');
+            toast.error('Assignment update failed');
         } finally {
             setSaving(false);
         }

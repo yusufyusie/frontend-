@@ -1,9 +1,11 @@
-import { ActionIcon, Group, Stack, Text, Box, Collapse, Paper, Tooltip, Badge } from '@mantine/core';
+import { ActionIcon, Group, Stack, Text, Box, Paper, Tooltip, Badge, ThemeIcon } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { ChevronRight, ChevronDown, Edit, Plus, Trash2, Hash } from 'lucide-react';
+import { ChevronRight, ChevronDown, Edit, Plus, Trash2, Hash, Database, LucideIcon } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { SystemLookup } from '@/services/lookups.service';
 import { LocalizedText } from '@/components/atoms/tms/LocalizedText';
 import { LookupStatusBadge } from '@/components/atoms/tms/LookupStatusBadge';
+import * as Icons from 'lucide-react';
 
 interface NodeProps {
     node: SystemLookup;
@@ -16,95 +18,121 @@ const LookupNode = ({ node, onEdit, onAddChild, onDelete }: NodeProps) => {
     const [opened, { toggle }] = useDisclosure(true);
     const hasChildren = node.children && node.children.length > 0;
 
+    const Icon = (Icons as any)[node.metadata?.icon] || Hash;
+
     return (
-        <Box mb={8}>
+        <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className="mb-4"
+        >
             <Paper
-                withBorder
+                className={`
+                    backdrop-blur-md transition-all duration-300 group
+                    ${node.isActive ? 'bg-white/80 border-slate-200' : 'bg-slate-50/50 border-slate-100'}
+                    hover:shadow-xl hover:scale-[1.01] border relative overflow-hidden
+                `}
                 p="md"
-                radius="lg"
-                className="hover:shadow-lg transition-all cursor-default border-gray-100"
-                style={{
-                    backgroundColor: 'white',
-                    borderLeft: node.isActive ? '4px solid #0C7C92' : '4px solid #e2e8f0'
-                }}
+                radius="xl"
             >
+                {/* Active Indicator Bar */}
+                {node.isActive && (
+                    <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-[#0C7C92] to-cyan-600" />
+                )}
+
                 <Group justify="space-between" wrap="nowrap">
-                    <Group gap="md" wrap="nowrap">
-                        {hasChildren ? (
-                            <ActionIcon
+                    <Group gap="lg" wrap="nowrap">
+                        <div className="flex items-center gap-3">
+                            {hasChildren && (
+                                <ActionIcon
+                                    variant="subtle"
+                                    color="tms-teal"
+                                    onClick={toggle}
+                                    size="lg"
+                                    radius="xl"
+                                    className="transition-transform group-hover:bg-teal-50"
+                                >
+                                    <motion.div animate={{ rotate: opened ? 90 : 0 }}>
+                                        <ChevronRight size={20} className="text-[#0C7C92]" />
+                                    </motion.div>
+                                </ActionIcon>
+                            )}
+
+                            <ThemeIcon
+                                size={44}
+                                radius="xl"
                                 variant="light"
-                                color="tms-teal"
-                                onClick={toggle}
-                                size="md"
-                                radius="md"
-                                className="shadow-sm"
+                                color={node.metadata?.color || 'blue'}
+                                className="shadow-inner"
                             >
-                                {opened ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
-                            </ActionIcon>
-                        ) : (
-                            <Box w={34} display="flex" style={{ justifyContent: 'center' }}>
-                                <Hash size={14} className="text-gray-300" />
-                            </Box>
-                        )}
+                                <Icon size={22} strokeWidth={2.5} />
+                            </ThemeIcon>
+                        </div>
+
                         <Stack gap={2}>
                             <Group gap="xs">
-                                <LocalizedText value={node.lookupValue as any} />
+                                <Text fw={800} size="lg" className="text-slate-800 tracking-tight">
+                                    <LocalizedText value={node.lookupValue as any} />
+                                </Text>
                                 {node.isSystem && (
-                                    <Badge size="xs" variant="light" color="gray" radius="xs">System</Badge>
+                                    <Badge size="xs" variant="gradient" gradient={{ from: 'slate.5', to: 'slate.7' }} radius="sm">
+                                        System
+                                    </Badge>
                                 )}
                             </Group>
-                            <Group gap={6}>
-                                <Text size="xs" fw={700} className="text-teal-700 bg-teal-50 px-1.5 py-0.5 rounded">
+                            <Group gap={8}>
+                                <Text size="xs" fw={800} className={`px-2 py-0.5 rounded-md uppercase tracking-wider font-mono ${node.isActive ? 'bg-teal-100 text-teal-800' : 'bg-slate-200 text-slate-600'}`}>
                                     {node.lookupCode}
                                 </Text>
                                 {node.metadata?.color && (
-                                    <Box w={8} h={8} style={{ borderRadius: '50%', backgroundColor: node.metadata.color }} />
+                                    <Badge size="xs" variant="dot" color={node.metadata.color}>
+                                        {node.metadata.color}
+                                    </Badge>
                                 )}
                             </Group>
                         </Stack>
                     </Group>
 
-                    <Group gap="xs">
+                    <Group gap="sm" className="opacity-0 group-hover:opacity-100 transition-opacity">
                         <LookupStatusBadge active={node.isActive} />
 
-                        <Tooltip label="Edit Details" withArrow position="top">
+                        <Tooltip label="Edit Details" withArrow transitionProps={{ transition: 'pop' }}>
                             <ActionIcon
-                                variant="light"
-                                color="blue"
+                                variant="filled"
+                                className="bg-[#0C7C92] hover:bg-[#0a6c7e] shadow-md active:scale-90"
                                 onClick={() => onEdit(node)}
-                                size="md"
-                                radius="md"
-                                className="border border-blue-100 shadow-sm transition-all active:scale-90 hover:shadow-md"
+                                size="lg"
+                                radius="xl"
                             >
-                                <Edit size={16} strokeWidth={2.5} />
+                                <Edit size={18} strokeWidth={2.5} />
                             </ActionIcon>
                         </Tooltip>
 
-                        <Tooltip label="Append Child" withArrow position="top">
+                        <Tooltip label="Add Child" withArrow transitionProps={{ transition: 'pop' }}>
                             <ActionIcon
                                 variant="light"
                                 color="teal"
                                 onClick={() => onAddChild(node)}
-                                size="md"
-                                radius="md"
-                                className="border border-teal-100 shadow-sm transition-all active:scale-90 hover:shadow-md"
-                                style={{ color: '#0C7C92' }}
+                                size="lg"
+                                radius="xl"
+                                className="border border-teal-200 bg-white hover:bg-teal-50 active:scale-90"
                             >
-                                <Plus size={16} strokeWidth={2.5} />
+                                <Plus size={18} strokeWidth={3} className="text-teal-600" />
                             </ActionIcon>
                         </Tooltip>
 
                         {!node.isSystem && (
-                            <Tooltip label="Delete Lookup" withArrow position="top">
+                            <Tooltip label="Delete" withArrow transitionProps={{ transition: 'pop' }}>
                                 <ActionIcon
-                                    variant="light"
+                                    variant="subtle"
                                     color="red"
                                     onClick={() => onDelete(node)}
-                                    size="md"
-                                    radius="md"
-                                    className="border border-rose-100 shadow-sm transition-all active:scale-90 hover:shadow-md"
+                                    size="lg"
+                                    radius="xl"
+                                    className="hover:bg-red-50 active:scale-90"
                                 >
-                                    <Trash2 size={16} strokeWidth={2.5} color="#EF4444" />
+                                    <Trash2 size={18} strokeWidth={2.5} />
                                 </ActionIcon>
                             </Tooltip>
                         )}
@@ -112,24 +140,32 @@ const LookupNode = ({ node, onEdit, onAddChild, onDelete }: NodeProps) => {
                 </Group>
             </Paper>
 
-            {hasChildren && (
-                <Collapse in={opened}>
-                    <Box pl={38} mt={8} mb={12} style={{ borderLeft: '2px dashed #e2e8f0', marginLeft: '17px' }}>
-                        <Stack gap={8}>
-                            {node.children?.map((child) => (
-                                <LookupNode
-                                    key={child.id}
-                                    node={child}
-                                    onEdit={onEdit}
-                                    onAddChild={onAddChild}
-                                    onDelete={onDelete}
-                                />
-                            ))}
-                        </Stack>
-                    </Box>
-                </Collapse>
-            )}
-        </Box>
+            <AnimatePresence>
+                {hasChildren && opened && (
+                    <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.3, ease: 'easeInOut' }}
+                        className="overflow-hidden"
+                    >
+                        <Box pl={54} mt={4} className="border-l-2 border-dashed border-slate-200 ml-5">
+                            <Stack gap={0}>
+                                {node.children?.map((child) => (
+                                    <LookupNode
+                                        key={child.id}
+                                        node={child}
+                                        onEdit={onEdit}
+                                        onAddChild={onAddChild}
+                                        onDelete={onDelete}
+                                    />
+                                ))}
+                            </Stack>
+                        </Box>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </motion.div>
     );
 };
 

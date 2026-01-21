@@ -2,18 +2,35 @@ import { api } from '../lib/api';
 
 export interface Building {
     id: number;
-    plotId: number;
+    blockId: number;
     code: string;
-    nameEn: string;
-    nameAm?: string;
-    buildingTypeId?: number;
-    constructionStatusId?: number;
-    totalFloors: number;
-    basementFloors: number;
+    name: string;
+    description?: string;
+    floors: number;
+    hasElevator: boolean;
+    hasParking: boolean;
+    yearBuilt?: number;
+    buildingClassId?: number;
+    isActive: boolean;
     metadata: any;
     createdAt?: string;
     updatedAt?: string;
-    floors?: Floor[];
+    plots?: Plot[];
+}
+
+export interface Plot {
+    id: number;
+    buildingId: number;
+    code: string;
+    name: string;
+    area: number;
+    floorNumber?: number;
+    isActive: boolean;
+    metadata: any;
+    createdAt?: string;
+    updatedAt?: string;
+    rooms?: Room[];
+    building?: Building;
 }
 
 export interface Floor {
@@ -26,19 +43,22 @@ export interface Floor {
     createdAt?: string;
     updatedAt?: string;
     rooms?: Room[];
-    _count?: { rooms: number };
+    building?: Building;
 }
 
 export interface Room {
     id: number;
-    floorId: number;
+    plotId: number;
     code: string;
-    nameEn: string;
-    nameAm?: string;
-    areaM2: number;
-    statusId?: number;
+    area: number;
+    roomTypeId?: number;
+    roomStatusId?: number;
+    isActive: boolean;
+    metadata: any;
     createdAt?: string;
     updatedAt?: string;
+    roomType?: any;
+    roomStatus?: any;
 }
 
 class BuildingsService {
@@ -73,13 +93,26 @@ class BuildingsService {
         return api.delete(`${this.baseUrl}/floors/${floorId}`);
     }
 
-    // Rooms
-    async addRoom(floorId: number, data: any) {
-        return api.post<Room>(`${this.baseUrl}/floors/${floorId}/rooms`, data);
+    // Plots (Units)
+    async addPlot(buildingId: number, data: any) {
+        return api.post<Plot>(`${this.baseUrl}/${buildingId}/plots`, data);
     }
 
-    async getRooms(floorId: number) {
-        return api.get<Room[]>(`${this.baseUrl}/floors/${floorId}/rooms`);
+    async getPlots(buildingId: number) {
+        return api.get<Plot[]>(`${this.baseUrl}/${buildingId}/plots`);
+    }
+
+    async deletePlot(plotId: number) {
+        return api.delete(`${this.baseUrl}/plots/${plotId}`);
+    }
+
+    // Rooms (under Plots)
+    async addRoom(plotId: number, data: any) {
+        return api.post<Room>(`${this.baseUrl}/plots/${plotId}/rooms`, data);
+    }
+
+    async getRooms(plotId: number) {
+        return api.get<Room[]>(`${this.baseUrl}/plots/${plotId}/rooms`);
     }
 
     async deleteRoom(roomId: number) {

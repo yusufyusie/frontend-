@@ -169,7 +169,6 @@ export function AssignPermissionsModal({
       };
       loadTemplates();
       setExpandedGroups(new Set());
-      console.log("AssignPermissionsModal: Layout refreshed");
     }
   }, [isOpen]);
 
@@ -332,7 +331,6 @@ export function AssignPermissionsModal({
           </div>
         );
       case "custom":
-      case "custom":
         return (
           <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
             <div className="relative group">
@@ -487,7 +485,6 @@ export function AssignPermissionsModal({
       footer={modalFooter}
     >
       <div className="flex flex-col h-full">
-        {/* Modern Tab Navigation (Mantine-inspired) */}
         {/* Modern Tab Navigation (Mantine-inspired) */}
         <div className="flex items-center gap-8 border-b border-gray-200 mb-0 px-1 pt-4 flex-none bg-white z-10 sticky top-0">
           {[

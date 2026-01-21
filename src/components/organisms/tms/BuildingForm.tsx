@@ -1,43 +1,46 @@
 import { useState, useEffect } from 'react';
 import { Stack, TextInput, Group, Select, Button, Box, LoadingOverlay, Title, NumberInput, Paper, Text } from '@mantine/core';
 import { Save, Building2, Layers } from 'lucide-react';
-import { Building } from '@/services/buildings.service';
+import { buildingsService, Building } from '@/services/buildings.service';
 import { lookupsService, SystemLookup } from '@/services/lookups.service';
+import { locationsService, LocationOption } from '@/services/locations.service';
 
 interface Props {
     initialData?: Partial<Building>;
     onSubmit: (data: Partial<Building>) => Promise<void>;
     isLoading?: boolean;
-    plotId?: number;
+    blockId?: number;
     onValidityChange?: (isValid: boolean) => void;
 }
 
-export const BuildingForm = ({ initialData, onSubmit, isLoading, plotId, onValidityChange }: Props) => {
+export const BuildingForm = ({ initialData, onSubmit, isLoading, blockId, onValidityChange }: Props) => {
     const [formData, setFormData] = useState<Partial<Building>>({
         code: '',
-        nameEn: '',
-        totalFloors: 1,
-        basementFloors: 0,
-        buildingTypeId: undefined,
-        constructionStatusId: undefined,
-        plotId: plotId,
+        name: '',
+        floors: 1,
+        hasElevator: false,
+        hasParking: false,
+        buildingClassId: undefined,
+        blockId: blockId,
+        isActive: true,
         ...initialData
     });
 
-    const [buildingTypes, setBuildingTypes] = useState<SystemLookup[]>([]);
-    const [statusTypes, setStatusTypes] = useState<SystemLookup[]>([]);
+    const [classTypes, setClassTypes] = useState<SystemLookup[]>([]);
+    const [blocks, setBlocks] = useState<LocationOption[]>([]);
 
     useEffect(() => {
-        lookupsService.getByCategory('BUILDING_TYPES').then(res => setBuildingTypes((res as any).data || res));
-        lookupsService.getByCategory('CONSTRUCTION_STATUS').then(res => setStatusTypes((res as any).data || res));
+        lookupsService.getByCategory('BUILDING_CLASS').then(res => setClassTypes((res as any).data || res));
+        locationsService.getBlocks().then(res => setBlocks((res as any).data || res));
     }, []);
 
     // Validation Effect
     useEffect(() => {
         const isValid = Boolean(
             formData.code &&
-            formData.nameEn &&
-            (formData.totalFloors || 0) >= 1
+            formData.name &&
+            formData.blockId &&
+            (formData.floors || 0) >= 1
         );
         onValidityChange?.(isValid);
     }, [formData, onValidityChange]);
@@ -77,8 +80,19 @@ export const BuildingForm = ({ initialData, onSubmit, isLoading, plotId, onValid
                             <TextInput
                                 label="Building Public Name"
                                 placeholder="e.g. Skyline Tower"
-                                value={formData.nameEn}
-                                onChange={(e) => setFormData({ ...formData, nameEn: e.currentTarget.value })}
+                                value={formData.name}
+                                onChange={(e) => setFormData({ ...formData, name: e.currentTarget.value })}
+                                required
+                                radius="xl"
+                                size="md"
+                                styles={{ label: { fontWeight: 700, color: '#16284F' } }}
+                            />
+                            <Select
+                                label="Assigned Block"
+                                placeholder="Select block"
+                                data={blocks.map(b => ({ value: b.id.toString(), label: `${b.code} - ${b.name}` }))}
+                                value={formData.blockId?.toString()}
+                                onChange={(val) => setFormData({ ...formData, blockId: val ? parseInt(val) : undefined })}
                                 required
                                 radius="xl"
                                 size="md"
@@ -103,18 +117,9 @@ export const BuildingForm = ({ initialData, onSubmit, isLoading, plotId, onValid
                                 <NumberInput
                                     label="Above Ground Floors"
                                     min={1}
-                                    value={formData.totalFloors}
-                                    onChange={(val) => setFormData({ ...formData, totalFloors: Number(val) || 1 })}
+                                    value={formData.floors}
+                                    onChange={(val) => setFormData({ ...formData, floors: Number(val) || 1 })}
                                     required
-                                    radius="xl"
-                                    size="md"
-                                    styles={{ label: { fontWeight: 700, color: '#16284F' } }}
-                                />
-                                <NumberInput
-                                    label="Basement Levels"
-                                    min={0}
-                                    value={formData.basementFloors}
-                                    onChange={(val) => setFormData({ ...formData, basementFloors: Number(val) || 0 })}
                                     radius="xl"
                                     size="md"
                                     styles={{ label: { fontWeight: 700, color: '#16284F' } }}
@@ -123,26 +128,35 @@ export const BuildingForm = ({ initialData, onSubmit, isLoading, plotId, onValid
 
                             <Group grow>
                                 <Select
-                                    label="Architectural Type"
-                                    placeholder="Select type"
-                                    data={buildingTypes.map(t => ({ value: t.id.toString(), label: t.lookupValue.en }))}
-                                    value={formData.buildingTypeId?.toString()}
-                                    onChange={(val) => setFormData({ ...formData, buildingTypeId: val ? parseInt(val) : undefined })}
+                                    label="Has Elevator"
+                                    data={[{ value: 'true', label: 'Yes' }, { value: 'false', label: 'No' }]}
+                                    value={formData.hasElevator?.toString()}
+                                    onChange={(val) => setFormData({ ...formData, hasElevator: val === 'true' })}
                                     radius="xl"
                                     size="md"
                                     styles={{ label: { fontWeight: 700, color: '#16284F' } }}
                                 />
                                 <Select
-                                    label="Development Status"
-                                    placeholder="Select status"
-                                    data={statusTypes.map(s => ({ value: s.id.toString(), label: s.lookupValue.en }))}
-                                    value={formData.constructionStatusId?.toString()}
-                                    onChange={(val) => setFormData({ ...formData, constructionStatusId: val ? parseInt(val) : undefined })}
+                                    label="Has Parking"
+                                    data={[{ value: 'true', label: 'Yes' }, { value: 'false', label: 'No' }]}
+                                    value={formData.hasParking?.toString()}
+                                    onChange={(val) => setFormData({ ...formData, hasParking: val === 'true' })}
                                     radius="xl"
                                     size="md"
                                     styles={{ label: { fontWeight: 700, color: '#16284F' } }}
                                 />
                             </Group>
+
+                            <Select
+                                label="Building Grade / Class"
+                                placeholder="Select class"
+                                data={classTypes.map(c => ({ value: c.id.toString(), label: c.lookupValue.en }))}
+                                value={formData.buildingClassId?.toString()}
+                                onChange={(val) => setFormData({ ...formData, buildingClassId: val ? parseInt(val) : undefined })}
+                                radius="xl"
+                                size="md"
+                                styles={{ label: { fontWeight: 700, color: '#16284F' } }}
+                            />
                         </Stack>
                     </Paper>
                 </Stack>

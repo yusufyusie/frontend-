@@ -43,7 +43,6 @@ export default function AdminDashboard() {
                 loading: false
             });
         } catch (error) {
-            console.error('Failed to load stats:', error);
             setStats(prev => ({ ...prev, loading: false }));
         }
     };

@@ -6,8 +6,8 @@ export interface Lease {
     landResourceId?: number;
     roomId?: number;
     contractNumber: string;
-    contractAreaM2: number;
-    actualAreaM2: number;
+    contractArea: number;
+    actualArea: number;
     startDate: string;
     endDate?: string;
     statusId?: number;

@@ -2,7 +2,7 @@
 
 import { useState, useMemo, ReactNode } from 'react';
 import { ChevronRight, ChevronDown, Plus, Edit, Trash2, Search as SearchIcon } from 'lucide-react';
-import { Badge } from '@mantine/core';
+import { Badge, Text } from '@mantine/core';
 
 export interface TreeNode {
     id: number;
@@ -97,7 +97,23 @@ export function AdvancedTreeGrid({
                         ) : <div className="w-6" />}
 
                         <div className="text-primary/70">{node.icon}</div>
-                        <span className="font-bold text-gray-800 truncate">{node.label}</span>
+                        <div className="flex flex-col min-w-0">
+                            <span className="font-bold text-gray-800 truncate">{node.label}</span>
+                            {(meta.usageType || meta.ownershipType) && (
+                                <div className="flex gap-2 mt-0.5">
+                                    {meta.usageType && (
+                                        <Text size="10px" c="dimmed" fw={700} className="bg-gray-100 px-1.5 rounded uppercase tracking-tighter">
+                                            {meta.usageType}
+                                        </Text>
+                                    )}
+                                    {meta.ownershipType && (
+                                        <Text size="10px" c="dimmed" fw={700} className="bg-blue-50 text-blue-600 px-1.5 rounded uppercase tracking-tighter">
+                                            {meta.ownershipType}
+                                        </Text>
+                                    )}
+                                </div>
+                            )}
+                        </div>
                     </div>
 
                     {/* Occupant Column */}

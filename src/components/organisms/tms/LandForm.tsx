@@ -1,27 +1,37 @@
 import { useState, useEffect } from 'react';
 import { Stack, TextInput, Group, Select, Button, Box, LoadingOverlay, Title, NumberInput, Paper, Text } from '@mantine/core';
 import { Save, Map, Layers } from 'lucide-react';
-import { LandResource, LocationLevel } from '@/services/land-resources.service';
+import { lookupsService, SystemLookup } from '@/services/lookups.service';
 
 interface Props {
-    initialData?: Partial<LandResource>;
-    onSubmit: (data: Partial<LandResource>) => Promise<void>;
+    initialData?: Partial<any>;
+    onSubmit: (data: Partial<any>) => Promise<void>;
     isLoading?: boolean;
-    parentId?: number | null;
-    defaultType?: LocationLevel;
+    parentId?: number | null | string;
+    defaultType?: string;
     onValidityChange?: (isValid: boolean) => void;
 }
 
 export const LandForm = ({ initialData, onSubmit, isLoading, parentId, defaultType, onValidityChange }: Props) => {
-    const [formData, setFormData] = useState<Partial<LandResource>>({
+    const [formData, setFormData] = useState<Partial<any>>({
         code: '',
-        nameEn: '',
-        type: defaultType || LocationLevel.ZONE,
+        name: '',
+        type: defaultType || 'ZONE',
         parentId: parentId,
-        areaM2: undefined,
-        metadata: {},
+        description: '',
+        isActive: true,
         ...initialData
     });
+
+    const [usageTypes, setUsageTypes] = useState<SystemLookup[]>([]);
+    const [ownershipTypes, setOwnershipTypes] = useState<SystemLookup[]>([]);
+    const [resourceStatuses, setResourceStatuses] = useState<SystemLookup[]>([]);
+
+    useEffect(() => {
+        lookupsService.getByCategory('LAND_USAGE').then(res => setUsageTypes((res as any).data || res));
+        lookupsService.getByCategory('LAND_OWNERSHIP').then(res => setOwnershipTypes((res as any).data || res));
+        lookupsService.getByCategory('CONSTRUCTION_STATUS').then(res => setResourceStatuses((res as any).data || res));
+    }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -33,16 +43,14 @@ export const LandForm = ({ initialData, onSubmit, isLoading, parentId, defaultTy
         const isValid = Boolean(
             formData.type &&
             formData.code &&
-            formData.nameEn
+            formData.name
         );
         onValidityChange?.(isValid);
     }, [formData, onValidityChange]);
 
     const landTypes = [
-        { value: LocationLevel.ZONE, label: 'Zone' },
-        { value: LocationLevel.BLOCK, label: 'Block' },
-        { value: LocationLevel.PLOT, label: 'Plot' },
-        { value: LocationLevel.ROOM, label: 'Room' }
+        { value: 'ZONE', label: 'Zone' },
+        { value: 'BLOCK', label: 'Block' }
     ];
 
     return (
@@ -56,18 +64,18 @@ export const LandForm = ({ initialData, onSubmit, isLoading, parentId, defaultTy
                                 <Map size={24} className="text-white" />
                             </Box>
                             <div>
-                                <Title order={4} fw={800} lts="-0.5px" c="#16284F" style={{ display: 'inline-block', marginRight: '0.75rem' }}>Resource Identification</Title>
-                                <Text span size="xs" c="dimmed" fw={700} tt="uppercase" lts="1px">Basic Territory Info</Text>
+                                <Title order={4} fw={800} lts="-0.5px" c="#16284F" style={{ display: 'inline-block', marginRight: '0.75rem' }}>Hierarchy Identification</Title>
+                                <Text span size="xs" c="dimmed" fw={700} tt="uppercase" lts="1px">Territorial Management</Text>
                             </div>
                         </Group>
 
                         <Stack gap="lg">
                             <Select
-                                label="Resource Level"
+                                label="Hierarchy Level"
                                 placeholder="Select level"
                                 data={landTypes}
                                 value={formData.type}
-                                onChange={(val) => setFormData({ ...formData, type: val as LocationLevel })}
+                                onChange={(val) => setFormData({ ...formData, type: val })}
                                 required
                                 disabled={!!defaultType}
                                 radius="xl"
@@ -85,6 +93,16 @@ export const LandForm = ({ initialData, onSubmit, isLoading, parentId, defaultTy
                                 size="md"
                                 styles={{ label: { fontWeight: 700, color: '#16284F' } }}
                             />
+                            <TextInput
+                                label="Display Name"
+                                placeholder="e.g. Commercial Zone"
+                                value={formData.name}
+                                onChange={(e) => setFormData({ ...formData, name: e.currentTarget.value })}
+                                required
+                                radius="xl"
+                                size="md"
+                                styles={{ label: { fontWeight: 700, color: '#16284F' } }}
+                            />
                         </Stack>
                     </Paper>
 
@@ -94,27 +112,17 @@ export const LandForm = ({ initialData, onSubmit, isLoading, parentId, defaultTy
                                 <Layers size={24} className="text-white" />
                             </Box>
                             <div>
-                                <Title order={4} fw={800} lts="-0.5px" c="#16284F" style={{ display: 'inline-block', marginRight: '0.75rem' }}>Resource Details</Title>
-                                <Text span size="xs" c="dimmed" fw={700} tt="uppercase" lts="1px">Localization & Magnitude</Text>
+                                <Title order={4} fw={800} lts="-0.5px" c="#16284F" style={{ display: 'inline-block', marginRight: '0.75rem' }}>Additional Info</Title>
+                                <Text span size="xs" c="dimmed" fw={700} tt="uppercase" lts="1px">Description & Scope</Text>
                             </div>
                         </Group>
 
                         <Stack gap="lg">
                             <TextInput
-                                label="Resource Name"
-                                value={formData.nameEn}
-                                onChange={(e) => setFormData({ ...formData, nameEn: e.currentTarget.value })}
-                                required
-                                radius="xl"
-                                size="md"
-                                styles={{ label: { fontWeight: 700, color: '#16284F' } }}
-                            />
-                            <NumberInput
-                                label="Total Area (m²)"
-                                placeholder="Area in square meters"
-                                min={0}
-                                value={formData.areaM2}
-                                onChange={(val) => setFormData({ ...formData, areaM2: Number(val) || undefined })}
+                                label="Description"
+                                placeholder="Optional details..."
+                                value={formData.description}
+                                onChange={(e) => setFormData({ ...formData, description: e.currentTarget.value })}
                                 radius="xl"
                                 size="md"
                                 styles={{ label: { fontWeight: 700, color: '#16284F' } }}

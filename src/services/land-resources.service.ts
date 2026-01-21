@@ -3,26 +3,55 @@ import { api } from '../lib/api';
 export enum LocationLevel {
     ZONE = 'ZONE',
     BLOCK = 'BLOCK',
+    BUILDING = 'BUILDING',
     PLOT = 'PLOT',
     ROOM = 'ROOM',
 }
 
 export interface LandResource {
-    id: number;
-    parentId?: number | null;
-    type: LocationLevel;
+    id: number | string;
+    realId?: number;
+    parentId?: number | null | string;
+    type: string;
     code: string;
+    name: string;
     nameEn: string;
-    areaM2?: number;
+    nameAm?: string;
+
+    // Professional ITPC Attributes
+    occupantName?: string;
+    companyRegNumber?: string;
+    contractArea?: number;
+    areaVariance?: number;
+    previousOccupantName?: string;
+
+    // Common Metadata Lookups
+    usageTypeId?: number | null;
+    ownershipTypeId?: number | null;
+    statusId?: number | null;
+
+    // Building Specifics
+    floors?: number;
+    hasElevator?: boolean;
+    hasParking?: boolean;
+    yearBuilt?: number;
+
+    // Plot/Room Specifics
+    floorNumber?: number;
+    area?: number;
+    rentRate?: number;
+    capacity?: number;
+
     metadata: any;
     createdAt?: string;
     updatedAt?: string;
     children?: LandResource[];
-    // Calculated professional fields
-    occupantName?: string;
-    contractAreaM2?: number;
-    areaVarianceM2?: number;
-    occupancyStatus?: string;
+
+    // Relations/Joins
+    usageType?: any;
+    ownershipType?: any;
+    status?: any;
+
     _count?: {
         children: number;
         buildings: number;
