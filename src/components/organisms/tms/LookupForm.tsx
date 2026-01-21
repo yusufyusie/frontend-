@@ -140,6 +140,78 @@ export const LookupForm = ({ initialData, onSubmit, isLoading, category, parentI
                         />
                     </Paper>
 
+                    {formData.lookupCategory === 'CAT_CONFIG' && (
+                        <Paper withBorder p="sm" radius="lg" className="border-cyan-100 bg-cyan-50/20">
+                            <Group gap="sm" mb="sm">
+                                <Box p={6} bg="#0C7C92" className="rounded-lg shadow-md shadow-teal-100">
+                                    <Globe size={14} className="text-white" />
+                                </Box>
+                                <div>
+                                    <Title order={6} fw={800} className="text-slate-800 leading-tight text-sm">Visual Configuration</Title>
+                                    <Text size="10px" c="dimmed" fw={700} tt="uppercase" lts="0.5px">Appearance & Branding</Text>
+                                </div>
+                            </Group>
+
+                            <Group grow gap="sm">
+                                <Select
+                                    label="Navigation Icon"
+                                    placeholder="Select icon"
+                                    data={[
+                                        { value: 'Map', label: 'Map / Zone' },
+                                        { value: 'Layers', label: 'Layers / Block' },
+                                        { value: 'Building2', label: 'Building' },
+                                        { value: 'LayoutList', label: 'Layout / Plot' },
+                                        { value: 'DoorOpen', label: 'Door / Room' },
+                                        { value: 'Settings', label: 'Settings' },
+                                        { value: 'Info', label: 'Info' },
+                                        { value: 'GitBranch', label: 'Sectors' },
+                                        { value: 'Coffee', label: 'Status' },
+                                        { value: 'FileText', label: 'Contract' },
+                                        { value: 'Sparkles', label: 'Effect' },
+                                        { value: 'Database', label: 'Data' },
+                                        { value: 'Users', label: 'People' },
+                                        { value: 'Hammer', label: 'Tools' },
+                                        { value: 'Clock', label: 'Time' },
+                                        { value: 'Shield', label: 'Security' },
+                                    ]}
+                                    value={(formData.metadata as any)?.icon || 'Database'}
+                                    onChange={(val) => setFormData(prev => ({
+                                        ...prev,
+                                        metadata: { ...(prev.metadata as object || {}), icon: val }
+                                    }))}
+                                    radius="md"
+                                    size="sm"
+                                    styles={{ label: { fontWeight: 700, fontSize: '12px' } }}
+                                />
+                                <Select
+                                    label="Theme Color"
+                                    placeholder="Select color"
+                                    data={[
+                                        { value: 'teal', label: 'Teal' },
+                                        { value: 'blue', label: 'Blue' },
+                                        { value: 'violet', label: 'Violet' },
+                                        { value: 'pink', label: 'Pink' },
+                                        { value: 'amber', label: 'Amber' },
+                                        { value: 'cyan', label: 'Cyan' },
+                                        { value: 'indigo', label: 'Indigo' },
+                                        { value: 'orange', label: 'Orange' },
+                                        { value: 'emerald', label: 'Emerald' },
+                                        { value: 'slate', label: 'Slate' },
+                                        { value: 'red', label: 'Red' },
+                                    ]}
+                                    value={(formData.metadata as any)?.color || 'blue'}
+                                    onChange={(val) => setFormData(prev => ({
+                                        ...prev,
+                                        metadata: { ...(prev.metadata as object || {}), color: val }
+                                    }))}
+                                    radius="md"
+                                    size="sm"
+                                    styles={{ label: { fontWeight: 700, fontSize: '12px' } }}
+                                />
+                            </Group>
+                        </Paper>
+                    )}
+
                     <Paper withBorder p="sm" radius="lg" className="border-slate-100 bg-slate-50/30">
                         <Group gap="sm" mb="sm">
                             <Box p={6} bg="#0C7C92" className="rounded-lg shadow-md shadow-teal-100">

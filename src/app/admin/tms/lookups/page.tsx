@@ -3,14 +3,15 @@
 
 import { useState, useEffect } from 'react';
 import { Stack, Group, Text, Box, Title, Paper, ActionIcon, Skeleton, Button, Badge } from '@mantine/core';
-import { Map, Layers, Building2, LayoutList, Settings, Info, GitBranch, FileText, Database, Plus, Sparkles, DoorOpen, Coffee } from 'lucide-react';
+import { Map, Layers, Building2, LayoutList, Settings, Info, GitBranch, FileText, Database, Plus, Sparkles, DoorOpen, Coffee, Shield, Wallet, Activity, Leaf, Headset, Server, Radio, Code2, Hammer, Clock, Users, Briefcase, Settings2 } from 'lucide-react';
 import { lookupsService, SystemLookup } from '@/services/lookups.service';
 import { LookupTree } from '@/components/organisms/tms/LookupTree';
 import { LookupForm } from '@/components/organisms/tms/LookupForm';
 import { Modal } from '@/components/Modal';
 
 const ICON_MAP: Record<string, any> = {
-    Map, Layers, Building2, LayoutList, Settings, Info, GitBranch, FileText, Database, DoorOpen, Coffee
+    Map, Layers, Building2, LayoutList, Settings, Info, GitBranch, FileText, Database, DoorOpen, Coffee,
+    Shield, Wallet, Activity, Leaf, Headset, Server, Radio, Code2, Hammer, Clock, Users, Briefcase, Settings2
 };
 
 const getIcon = (name: string) => ICON_MAP[name] || Database;
@@ -26,6 +27,8 @@ const getColorClass = (color: string) => {
         teal: 'text-teal-600',
         indigo: 'text-indigo-600',
         orange: 'text-orange-600',
+        slate: 'text-slate-600',
+        red: 'text-red-600',
     };
     return colors[color] || 'text-slate-600';
 };
@@ -291,6 +294,9 @@ export default function LookupsPage() {
                         else await lookupsService.create(data);
                         setEditItem(null);
                         loadData();
+                        if (category === 'CAT_CONFIG') {
+                            loadCategories();
+                        }
                     }}
                     onValidityChange={() => { }}
                 />
