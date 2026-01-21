@@ -72,9 +72,9 @@ const LookupNode = ({ node, onEdit, onAddChild, onDelete }: NodeProps) => {
 
                         <Stack gap={2}>
                             <Group gap="xs">
-                                <Text fw={800} size="lg" className="text-slate-800 tracking-tight">
+                                <Box fw={800} className="text-slate-800 tracking-tight" style={{ fontSize: 'var(--mantine-font-size-lg)' }}>
                                     <LocalizedText value={node.lookupValue as any} />
-                                </Text>
+                                </Box>
                                 {node.isSystem && (
                                     <Badge size="xs" variant="gradient" gradient={{ from: 'slate.5', to: 'slate.7' }} radius="sm">
                                         System
