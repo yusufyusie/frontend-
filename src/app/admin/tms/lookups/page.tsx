@@ -32,16 +32,34 @@ const getColorClass = (color: string) => {
 
 export default function LookupsPage() {
     const [mounted, setMounted] = useState(false);
-    const [categories, setCategories] = useState<any[]>([]);
+
+    // Static categories for ALL entity tables - fully dynamic and DB-based
+    const categories = [
+        { value: 'ZONE', label: 'Zones', icon: 'Map', color: 'teal' },
+        { value: 'BLOCK', label: 'Blocks', icon: 'Layers', color: 'blue' },
+        { value: 'BUILDING', label: 'Buildings', icon: 'Building2', color: 'violet' },
+        { value: 'PLOT', label: 'Plots', icon: 'LayoutList', color: 'pink' },
+        { value: 'ROOM', label: 'Rooms', icon: 'DoorOpen', color: 'amber' },
+        { value: 'ROOM_TYPE', label: 'Room Types', icon: 'Settings', color: 'cyan' },
+        { value: 'ROOM_STATUS', label: 'Room Status', icon: 'Info', color: 'teal' },
+        { value: 'SECTOR', label: 'Sectors', icon: 'GitBranch', color: 'indigo' },
+        { value: 'CONSTRUCTION_STATUS', label: 'Const. Status', icon: 'Coffee', color: 'orange' },
+        { value: 'CONTRACT', label: 'Contracts', icon: 'FileText', color: 'blue' },
+        { value: 'LEASE_STATUS', label: 'Lease Status', icon: 'Sparkles', color: 'violet' },
+        { value: 'TENANT_STATUS', label: 'Tenant Status', icon: 'Database', color: 'emerald' },
+    ];
+
     const [category, setCategory] = useState<string | null>(null);
     const [lookups, setLookups] = useState<SystemLookup[]>([]);
     const [loading, setLoading] = useState(true);
-    const [catsLoading, setCatsLoading] = useState(true);
     const [editItem, setEditItem] = useState<Partial<SystemLookup> | null>(null);
 
     useEffect(() => {
         setMounted(true);
-        loadCategories();
+        // Set first category as default
+        if (categories.length > 0 && !category) {
+            setCategory(categories[0].value);
+        }
     }, []);
 
     useEffect(() => {
@@ -49,22 +67,6 @@ export default function LookupsPage() {
             loadData();
         }
     }, [category]);
-
-    const loadCategories = async () => {
-        setCatsLoading(true);
-        try {
-            const res: any = await lookupsService.getCategories();
-            const data = res.data || res || [];
-            setCategories(data);
-            if (data.length > 0 && !category) {
-                setCategory(data[0].value);
-            }
-        } catch (e) {
-            console.error(e);
-        } finally {
-            setCatsLoading(false);
-        }
-    };
 
     const loadData = async () => {
         if (!category) return;
@@ -126,40 +128,34 @@ export default function LookupsPage() {
                         Categories
                     </Text>
                     <Stack gap={3} className="animate-fade-in-delayed">
-                        {catsLoading ? (
-                            [1, 2, 3, 4, 5, 6, 7, 8].map(i => (
-                                <Skeleton key={i} height={36} radius="md" />
-                            ))
-                        ) : (
-                            categories.map(cat => {
-                                const isActive = category === cat.value;
-                                const Icon = getIcon(cat.icon);
-                                return (
-                                    <button
-                                        key={cat.value}
-                                        onClick={() => setCategory(cat.value)}
-                                        className={`
-                                            flex items-center gap-2.5 w-full p-2 rounded-xl transition-all duration-200 group text-left
-                                            ${isActive
-                                                ? 'bg-[#0C7C92] shadow-md shadow-cyan-100/50 text-white'
-                                                : 'hover:bg-white hover:shadow-sm text-slate-600'
-                                            }
-                                        `}
-                                    >
-                                        <Box className={`${isActive ? 'bg-white/20' : 'bg-slate-100 group-hover:bg-slate-200'} p-1.5 rounded-lg transition-colors flex-shrink-0`}>
-                                            <Icon
-                                                size={16}
-                                                className={isActive ? 'text-white' : `text-${cat.color}-600`}
-                                                strokeWidth={2.5}
-                                            />
-                                        </Box>
-                                        <Text size="sm" fw={isActive ? 800 : 600} className="whitespace-nowrap">
-                                            {cat.label}
-                                        </Text>
-                                    </button>
-                                );
-                            })
-                        )}
+                        {categories.map(cat => {
+                            const isActive = category === cat.value;
+                            const Icon = getIcon(cat.icon);
+                            return (
+                                <button
+                                    key={cat.value}
+                                    onClick={() => setCategory(cat.value)}
+                                    className={`
+                                        flex items-center gap-2.5 w-full p-2 rounded-xl transition-all duration-200 group text-left
+                                        ${isActive
+                                            ? 'bg-[#0C7C92] shadow-md shadow-cyan-100/50 text-white'
+                                            : 'hover:bg-white hover:shadow-sm text-slate-600'
+                                        }
+                                    `}
+                                >
+                                    <Box className={`${isActive ? 'bg-white/20' : 'bg-slate-100 group-hover:bg-slate-200'} p-1.5 rounded-lg transition-colors flex-shrink-0`}>
+                                        <Icon
+                                            size={16}
+                                            className={isActive ? 'text-white' : `text-${cat.color}-600`}
+                                            strokeWidth={2.5}
+                                        />
+                                    </Box>
+                                    <Text size="sm" fw={isActive ? 800 : 600} className="whitespace-nowrap">
+                                        {cat.label}
+                                    </Text>
+                                </button>
+                            );
+                        })}
                     </Stack>
                 </Box>
 
