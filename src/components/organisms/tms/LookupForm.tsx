@@ -59,22 +59,22 @@ export const LookupForm = ({ initialData, onSubmit, isLoading, category, parentI
     };
 
     return (
-        <Box pos="relative" p="xs">
+        <Box pos="relative">
             <LoadingOverlay visible={isLoading} overlayProps={{ blur: 1, radius: 'md' }} />
             <form id="lookup-form" onSubmit={handleSubmit}>
-                <Stack gap="md">
-                    <Paper withBorder p="md" radius="lg" className="border-slate-100 bg-slate-50/30">
-                        <Group gap="sm" mb="md">
-                            <Box p={8} bg="#0C7C92" className="rounded-lg shadow-md shadow-teal-100">
-                                <Tag size={16} className="text-white" />
+                <Stack gap="sm">
+                    <Paper withBorder p="sm" radius="lg" className="border-slate-100 bg-slate-50/30">
+                        <Group gap="sm" mb="sm">
+                            <Box p={6} bg="#0C7C92" className="rounded-lg shadow-md shadow-teal-100">
+                                <Tag size={14} className="text-white" />
                             </Box>
                             <div>
-                                <Title order={5} fw={800} className="text-slate-800 leading-tight">Classification Data</Title>
-                                <Text size="xs" c="dimmed" fw={700} tt="uppercase" lts="0.5px">Identification & Domain</Text>
+                                <Title order={6} fw={800} className="text-slate-800 leading-tight text-sm">Classification Data</Title>
+                                <Text size="10px" c="dimmed" fw={700} tt="uppercase" lts="0.5px">Identification & Domain</Text>
                             </div>
                         </Group>
 
-                        <Stack gap="md">
+                        <Stack gap="sm">
                             <Select
                                 label="Category Domain"
                                 placeholder="Select category"
@@ -108,14 +108,14 @@ export const LookupForm = ({ initialData, onSubmit, isLoading, category, parentI
                         </Stack>
                     </Paper>
 
-                    <Paper withBorder p="md" radius="lg" className="border-slate-100 bg-slate-50/30">
-                        <Group gap="sm" mb="md">
-                            <Box p={8} bg="#0C7C92" className="rounded-lg shadow-md shadow-teal-100">
-                                <Globe size={16} className="text-white" />
+                    <Paper withBorder p="sm" radius="lg" className="border-slate-100 bg-slate-50/30">
+                        <Group gap="sm" mb="sm">
+                            <Box p={6} bg="#0C7C92" className="rounded-lg shadow-md shadow-teal-100">
+                                <Globe size={14} className="text-white" />
                             </Box>
                             <div>
-                                <Title order={5} fw={800} className="text-slate-800 leading-tight">Internationalization</Title>
-                                <Text size="xs" c="dimmed" fw={700} tt="uppercase" lts="0.5px">Display Name</Text>
+                                <Title order={6} fw={800} className="text-slate-800 leading-tight text-sm">Internationalization</Title>
+                                <Text size="10px" c="dimmed" fw={700} tt="uppercase" lts="0.5px">Display Name</Text>
                             </div>
                         </Group>
 
@@ -140,18 +140,18 @@ export const LookupForm = ({ initialData, onSubmit, isLoading, category, parentI
                         />
                     </Paper>
 
-                    <Paper withBorder p="md" radius="lg" className="border-slate-100 bg-slate-50/30">
-                        <Group gap="sm" mb="md">
-                            <Box p={8} bg="#0C7C92" className="rounded-lg shadow-md shadow-teal-100">
-                                <Layers size={16} className="text-white" />
+                    <Paper withBorder p="sm" radius="lg" className="border-slate-100 bg-slate-50/30">
+                        <Group gap="sm" mb="sm">
+                            <Box p={6} bg="#0C7C92" className="rounded-lg shadow-md shadow-teal-100">
+                                <Layers size={14} className="text-white" />
                             </Box>
                             <div>
-                                <Title order={5} fw={800} className="text-slate-800 leading-tight">Hierarchy & Logic</Title>
-                                <Text size="xs" c="dimmed" fw={700} tt="uppercase" lts="0.5px">Access & Ordering</Text>
+                                <Title order={6} fw={800} className="text-slate-800 leading-tight text-sm">Hierarchy & Logic</Title>
+                                <Text size="10px" c="dimmed" fw={700} tt="uppercase" lts="0.5px">Access & Ordering</Text>
                             </div>
                         </Group>
 
-                        <Stack gap="md">
+                        <Stack gap="sm">
                             <Group grow>
                                 <NumberInput
                                     label="Hierarchy Level"
@@ -175,7 +175,7 @@ export const LookupForm = ({ initialData, onSubmit, isLoading, category, parentI
                                 />
                             </Group>
 
-                            <Divider variant="dashed" />
+                            <Divider variant="dashed" my={4} />
 
                             <Group gap="lg" justify="center">
                                 <Checkbox

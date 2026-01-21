@@ -249,7 +249,41 @@ export default function LookupsPage() {
             `}</style>
 
             {/* Modal */}
-            <Modal isOpen={!!editItem} onClose={() => setEditItem(null)} title="Manage Entry">
+            <Modal
+                isOpen={!!editItem}
+                onClose={() => setEditItem(null)}
+                title="Manage Entry"
+                description="System Lookup Configuration"
+                size="lg"
+                footer={
+                    <Group justify="flex-end" gap="md">
+                        <Button
+                            variant="subtle"
+                            color="gray"
+                            onClick={() => setEditItem(null)}
+                            radius="xl"
+                            size="md"
+                            className="hover:bg-gray-200/50 text-gray-700 font-bold"
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            variant="filled"
+                            bg="#0C7C92"
+                            onClick={() => {
+                                document.getElementById('lookup-form')?.dispatchEvent(
+                                    new Event('submit', { cancelable: true, bubbles: true })
+                                );
+                            }}
+                            radius="xl"
+                            size="md"
+                            className="shadow-lg shadow-teal-100"
+                        >
+                            Save Entry
+                        </Button>
+                    </Group>
+                }
+            >
                 <LookupForm
                     initialData={editItem || {}}
                     onSubmit={async (data) => {
