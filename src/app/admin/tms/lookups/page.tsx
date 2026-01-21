@@ -172,29 +172,29 @@ export default function LookupsPage() {
                     {/* Main Content: Tree View */}
                     <Box className="flex-1 bg-white/40 p-6 overflow-y-auto custom-scrollbar animate-fade-in-delayed">
                         <div className="max-w-6xl mx-auto space-y-6">
-                            {/* Entity Header Banner */}
+                            {/* Entity Header Banner - Compact Horizontal Layout */}
                             {activeCategory && (
-                                <Paper p="xl" radius="2rem" className="bg-white shadow-xl shadow-slate-200/50 border border-slate-100/50 overflow-hidden relative group">
-                                    <div className={`absolute top-0 left-0 w-2 h-full bg-${activeCategory.color}-500 shadow-lg shadow-teal-500/20`} />
-                                    <div className="relative z-10 flex items-center justify-between">
-                                        <Group gap="lg">
-                                            <Box className={`bg-${activeCategory.color}-50 p-4 rounded-2xl shadow-inner border border-${activeCategory.color}-100`}>
+                                <Paper p="sm" radius="2rem" className="bg-white shadow-xl shadow-slate-200/40 border border-slate-100/50 overflow-hidden relative group">
+                                    <div className={`absolute top-0 left-0 w-1.5 h-full bg-${activeCategory.color}-500 shadow-lg shadow-teal-500/20`} />
+                                    <div className="relative z-10">
+                                        <Group gap="md" px="xs" wrap="nowrap">
+                                            <Box className={`bg-${activeCategory.color}-50 p-2 rounded-xl shadow-inner border border-${activeCategory.color}-100 flex-shrink-0`}>
                                                 {(() => {
                                                     const BannerIcon = getIcon(activeCategory.icon);
-                                                    return <BannerIcon size={32} className={getColorClass(activeCategory.color)} strokeWidth={2.5} />;
+                                                    return <BannerIcon size={20} className={getColorClass(activeCategory.color)} strokeWidth={2.5} />;
                                                 })()}
                                             </Box>
-                                            <div>
-                                                <Group gap="xs">
-                                                    <Title order={2} className="text-3xl font-black text-slate-800 tracking-tight">
-                                                        {activeCategory.label}
-                                                    </Title>
-                                                    <Badge variant="light" color={activeCategory.color} size="lg" radius="md">
-                                                        Dynamic
-                                                    </Badge>
-                                                </Group>
-                                                <Text c="dimmed" fw={600}>Manage your {activeCategory.label.toLowerCase()} definitions</Text>
-                                            </div>
+                                            <Group gap="sm" wrap="nowrap" align="center">
+                                                <Title order={4} className="font-black text-slate-800 tracking-tight whitespace-nowrap">
+                                                    {activeCategory.label}
+                                                </Title>
+                                                <Badge variant="light" color={activeCategory.color} size="sm" radius="md">
+                                                    Dynamic
+                                                </Badge>
+                                                <Text c="dimmed" fw={600} size="xs" className="hidden border-l border-slate-200 pl-3 sm:block">
+                                                    Manage your {activeCategory.label.toLowerCase()} definitions and hierarchy
+                                                </Text>
+                                            </Group>
                                         </Group>
                                     </div>
                                 </Paper>
@@ -237,6 +237,48 @@ export default function LookupsPage() {
                         </div>
                     </Box>
                 </div>
+
+                {/* Professional Card Footer - Refined Spacing */}
+                <Box px="lg" pb="md" pt="xs" className="z-20">
+                    <Paper p="md" radius="xl" className="border border-slate-200/60 bg-white/80 backdrop-blur-md shadow-sm">
+                        <Group justify="space-between" px="md">
+                            <Group gap="xl">
+                                <Group gap={8}>
+                                    <div className="relative flex h-2 w-2">
+                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75"></span>
+                                        <span className="relative inline-flex rounded-full h-2 w-2 bg-teal-500"></span>
+                                    </div>
+                                    <Text size="xs" fw={800} className="text-slate-500 uppercase tracking-[0.15em] text-[9px]">
+                                        System Operational
+                                    </Text>
+                                </Group>
+
+                                <Group gap="xs">
+                                    <Box className="bg-slate-100/80 px-3 py-1 rounded-lg border border-slate-200/50">
+                                        <Text size="xs" fw={800} className="text-[#0C7C92] font-mono text-[10px] tracking-tight">
+                                            TOTAL NODES: {lookups.length}
+                                        </Text>
+                                    </Box>
+                                    <Text size="xs" fw={700} c="dimmed" className="italic text-[10px] opacity-70">
+                                        Updated {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                    </Text>
+                                </Group>
+                            </Group>
+
+                            <Group gap="md">
+                                <Text size="xs" fw={800} className="text-slate-400 tracking-[-0.02em] text-[11px] hidden md:block">
+                                    TMS <span className="text-slate-200 ml-1 mr-1">|</span> LOOKUPS ENGINE <span className="text-slate-300">v2.1</span>
+                                </Text>
+                                <Box className="bg-white/50 px-3 py-1 rounded-full border border-slate-200 shadow-sm flex items-center gap-2">
+                                    <Sparkles size={10} className="text-cyan-500" fill="currentColor" />
+                                    <Text size="xs" fw={900} variant="gradient" gradient={{ from: 'slate.700', to: 'slate.900' }} className="text-[9px] uppercase tracking-wider">
+                                        Premium Access
+                                    </Text>
+                                </Box>
+                            </Group>
+                        </Group>
+                    </Paper>
+                </Box>
 
                 <style jsx global>{`
                 .custom-scrollbar::-webkit-scrollbar {
