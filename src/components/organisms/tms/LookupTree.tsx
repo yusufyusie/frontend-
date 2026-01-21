@@ -22,117 +22,113 @@ const LookupNode = ({ node, onEdit, onAddChild, onDelete }: NodeProps) => {
 
     return (
         <motion.div
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: 5 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-            className="mb-4"
+            transition={{ duration: 0.2 }}
+            className="mb-2"
         >
             <Paper
                 className={`
-                    backdrop-blur-md transition-all duration-300 group
-                    ${node.isActive ? 'bg-white/80 border-slate-200' : 'bg-slate-50/50 border-slate-100'}
-                    hover:shadow-xl hover:scale-[1.01] border relative overflow-hidden
+                    backdrop-blur-md transition-all duration-200 group
+                    ${node.isActive ? 'bg-white/95 border-slate-200' : 'bg-slate-50/70 border-slate-100'}
+                    hover:shadow-lg hover:border-cyan-200 border relative overflow-hidden
                 `}
-                p="md"
-                radius="xl"
+                p="xs"
+                radius="lg"
             >
                 {/* Active Indicator Bar */}
                 {node.isActive && (
-                    <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-[#0C7C92] to-cyan-600" />
+                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-cyan-600 opacity-60" />
                 )}
 
                 <Group justify="space-between" wrap="nowrap">
-                    <Group gap="lg" wrap="nowrap">
-                        <div className="flex items-center gap-3">
+                    <Group gap="md" wrap="nowrap">
+                        <div className="flex items-center gap-1">
                             {hasChildren && (
                                 <ActionIcon
                                     variant="subtle"
-                                    color="tms-teal"
+                                    color="gray"
                                     onClick={toggle}
-                                    size="lg"
-                                    radius="xl"
-                                    className="transition-transform group-hover:bg-teal-50"
+                                    size="sm"
+                                    radius="sm"
+                                    className="transition-transform"
                                 >
                                     <motion.div animate={{ rotate: opened ? 90 : 0 }}>
-                                        <ChevronRight size={20} className="text-[#0C7C92]" />
+                                        <ChevronRight size={14} className="text-slate-400" />
                                     </motion.div>
                                 </ActionIcon>
                             )}
 
                             <ThemeIcon
-                                size={44}
-                                radius="xl"
+                                size={32}
+                                radius="md"
                                 variant="light"
                                 color={node.metadata?.color || 'blue'}
-                                className="shadow-inner"
+                                className="shadow-sm"
                             >
-                                <Icon size={22} strokeWidth={2.5} />
+                                <Icon size={16} strokeWidth={2.5} />
                             </ThemeIcon>
                         </div>
 
-                        <Stack gap={2}>
-                            <Group gap="xs">
-                                <Box fw={800} className="text-slate-800 tracking-tight" style={{ fontSize: 'var(--mantine-font-size-lg)' }}>
+                        <Stack gap={0}>
+                            <Group gap="xs" align="center">
+                                <Box fw={800} className="text-slate-800 tracking-tight leading-tight" style={{ fontSize: '14px' }}>
                                     <LocalizedText value={node.lookupValue as any} />
                                 </Box>
                                 {node.isSystem && (
-                                    <Badge size="xs" variant="gradient" gradient={{ from: 'slate.5', to: 'slate.7' }} radius="sm">
-                                        System
+                                    <Badge size="xs" variant="light" color="slate" radius="xs" style={{ fontSize: '9px', height: '14px' }}>
+                                        SYSTEM
                                     </Badge>
                                 )}
                             </Group>
-                            <Group gap={8}>
-                                <Text size="xs" fw={800} className={`px-2 py-0.5 rounded-md uppercase tracking-wider font-mono ${node.isActive ? 'bg-teal-100 text-teal-800' : 'bg-slate-200 text-slate-600'}`}>
+                            <Group gap={6} align="center">
+                                <Text size="xs" fw={800} className={`px-1 rounded-sm uppercase tracking-wider font-mono text-[9px] ${node.isActive ? 'bg-cyan-50 text-[#0C7C92]' : 'bg-slate-100 text-slate-500'}`}>
                                     {node.lookupCode}
                                 </Text>
-                                {node.metadata?.color && (
-                                    <Badge size="xs" variant="dot" color={node.metadata.color}>
-                                        {node.metadata.color}
-                                    </Badge>
+                                {hasChildren && (
+                                    <Text size="xs" c="dimmed" fw={600} style={{ fontSize: '10px' }}>
+                                        • {node.children?.length} children
+                                    </Text>
                                 )}
                             </Group>
                         </Stack>
                     </Group>
 
-                    <Group gap="sm" className="opacity-0 group-hover:opacity-100 transition-opacity">
-                        <LookupStatusBadge active={node.isActive} />
-
-                        <Tooltip label="Edit Details" withArrow transitionProps={{ transition: 'pop' }}>
+                    <Group gap={4} className="opacity-40 group-hover:opacity-100 transition-opacity">
+                        <Tooltip label="Edit" withArrow position="top">
                             <ActionIcon
-                                variant="filled"
-                                className="bg-[#0C7C92] hover:bg-[#0a6c7e] shadow-md active:scale-90"
+                                variant="subtle"
+                                color="blue"
                                 onClick={() => onEdit(node)}
-                                size="lg"
-                                radius="xl"
+                                size="sm"
+                                radius="md"
                             >
-                                <Edit size={18} strokeWidth={2.5} />
+                                <Edit size={14} strokeWidth={2.5} />
                             </ActionIcon>
                         </Tooltip>
 
-                        <Tooltip label="Add Child" withArrow transitionProps={{ transition: 'pop' }}>
+                        <Tooltip label="Add Child" withArrow position="top">
                             <ActionIcon
-                                variant="light"
+                                variant="subtle"
                                 color="teal"
                                 onClick={() => onAddChild(node)}
-                                size="lg"
-                                radius="xl"
-                                className="border border-teal-200 bg-white hover:bg-teal-50 active:scale-90"
+                                size="sm"
+                                radius="md"
                             >
-                                <Plus size={18} strokeWidth={3} className="text-teal-600" />
+                                <Plus size={14} strokeWidth={3} />
                             </ActionIcon>
                         </Tooltip>
 
                         {!node.isSystem && (
-                            <Tooltip label="Delete" withArrow transitionProps={{ transition: 'pop' }}>
+                            <Tooltip label="Delete" withArrow position="top">
                                 <ActionIcon
                                     variant="subtle"
                                     color="red"
                                     onClick={() => onDelete(node)}
-                                    size="lg"
-                                    radius="xl"
-                                    className="hover:bg-red-50 active:scale-90"
+                                    size="sm"
+                                    radius="md"
                                 >
-                                    <Trash2 size={18} strokeWidth={2.5} />
+                                    <Trash2 size={14} strokeWidth={2.5} />
                                 </ActionIcon>
                             </Tooltip>
                         )}
