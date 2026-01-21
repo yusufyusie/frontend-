@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Button, Group, Stack, Box, Text, Paper, Title, LoadingOverlay } from '@mantine/core';
-import { Plus, RefreshCw, Map, Grid3x3, MapPin, TrendingUp, X as CloseIcon, Save } from 'lucide-react';
+import { Plus, RefreshCw, Map, Grid3x3, MapPin, TrendingUp, X as CloseIcon, Save, Search as SearchIcon } from 'lucide-react';
 import { locationsService } from '@/services/locations.service';
 import { LandForm } from '@/components/organisms/tms/LandForm';
 import { BuildingForm } from '@/components/organisms/tms/BuildingForm';
@@ -18,6 +18,7 @@ export default function LandPage() {
     const [opened, setOpened] = useState(false);
     const [isFormValid, setIsFormValid] = useState(false);
     const [activeResource, setActiveResource] = useState<Partial<any> | null>(null);
+    const [searchTerm, setSearchTerm] = useState('');
     const [metrics, setMetrics] = useState({
         zones: 0,
         blocks: 0,
@@ -186,7 +187,7 @@ export default function LandPage() {
             </div>
 
             {/* Metrics Dashboard */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-5 gap-4">
                 <div className="card p-4 hover:shadow-lg transition-shadow">
                     <div className="flex items-center justify-between">
                         <div>
@@ -234,15 +235,27 @@ export default function LandPage() {
                 </div>
             </div>
 
-            {/* Info Banner */}
+            {/* Info Banner with Integrated Search */}
             <div className="card p-4 bg-gradient-to-r from-blue-50 to-blue-100/50 border-l-4 border-primary">
-                <div className="flex items-center gap-3">
-                    <Map size={20} className="text-primary flex-shrink-0" />
-                    <div>
-                        <p className="text-sm font-bold text-gray-900">Territorial Hierarchy Overview</p>
-                        <p className="text-xs text-gray-600 mt-1">
-                            Resources are organized as: <b>Zone</b> (e.g., Commercial) → <b>Block</b> (e.g., B01) → <b>Building</b> (e.g., ITS01) → <b>Plot/Unit</b> (e.g., U01).
-                        </p>
+                <div className="flex items-center gap-3 justify-between">
+                    <div className="flex items-center gap-3">
+                        <Map size={20} className="text-primary flex-shrink-0" />
+                        <div>
+                            <p className="text-sm font-bold text-gray-900">Territorial Hierarchy Overview</p>
+                            <p className="text-xs text-gray-600 mt-1">
+                                Resources are organized as: <b>Zone</b> (e.g., Commercial) → <b>Block</b> (e.g., B01) → <b>Building</b> (e.g., ITS01) → <b>Plot/Unit</b> (e.g., U01).
+                            </p>
+                        </div>
+                    </div>
+                    <div className="relative w-80 flex-shrink-0">
+                        <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                        <input
+                            type="text"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            placeholder="Search by Name or Occupant..."
+                            className="w-full pl-9 pr-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all text-xs font-medium"
+                        />
                     </div>
                 </div>
             </div>
@@ -261,6 +274,8 @@ export default function LandPage() {
                         onAddChild={handleAddChild}
                         searchable={true}
                         initialExpandLevel={1}
+                        searchTerm={searchTerm}
+                        onSearchChange={setSearchTerm}
                     />
                 ) : (
                     <div className="text-center py-12">

@@ -20,6 +20,8 @@ interface AdvancedTreeGridProps {
     onAddChild?: (node: TreeNode) => void;
     searchable?: boolean;
     initialExpandLevel?: number;
+    searchTerm?: string;
+    onSearchChange?: (value: string) => void;
 }
 
 export function AdvancedTreeGrid({
@@ -28,9 +30,12 @@ export function AdvancedTreeGrid({
     onDelete,
     onAddChild,
     searchable = true,
-    initialExpandLevel = 1
+    initialExpandLevel = 1,
+    searchTerm: externalSearchTerm,
+    onSearchChange
 }: AdvancedTreeGridProps) {
-    const [searchTerm, setSearchTerm] = useState('');
+    const [internalSearchTerm, setInternalSearchTerm] = useState('');
+    const searchTerm = externalSearchTerm !== undefined ? externalSearchTerm : internalSearchTerm;
     const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set());
 
     // Auto-expand initial levels
@@ -196,21 +201,6 @@ export function AdvancedTreeGrid({
 
     return (
         <div className="border border-gray-100 rounded-xl overflow-hidden bg-white shadow-sm">
-            {/* Toolbar */}
-            <div className="p-4 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center">
-                {searchable && (
-                    <div className="relative w-80">
-                        <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                        <input
-                            type="text"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            placeholder="Search by Name or Occupant..."
-                            className="w-full pl-9 pr-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all text-xs"
-                        />
-                    </div>
-                )}
-            </div>
 
             {/* Scrollable Container */}
             <div className="overflow-x-auto custom-scrollbar">
