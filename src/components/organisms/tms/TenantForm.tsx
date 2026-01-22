@@ -13,7 +13,7 @@ interface Props {
 
 export const TenantForm = ({ initialData, onSubmit, isLoading, onValidityChange }: Props) => {
     const [formData, setFormData] = useState<Partial<Tenant>>({
-        nameEn: '',
+        name: '',
         companyRegNumber: '',
         tinNumber: '',
         businessCategoryId: undefined,
@@ -45,12 +45,12 @@ export const TenantForm = ({ initialData, onSubmit, isLoading, onValidityChange 
     );
 
     useEffect(() => {
-        const isValid = Boolean(formData.nameEn && formData.companyRegNumber);
+        const isValid = Boolean(formData.name && formData.companyRegNumber);
         if (isValid !== lastValidity.current) {
             lastValidity.current = isValid;
             onValidityChange?.(isValid);
         }
-    }, [formData.nameEn, formData.companyRegNumber, onValidityChange]);
+    }, [formData.name, formData.companyRegNumber, onValidityChange]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -99,8 +99,8 @@ export const TenantForm = ({ initialData, onSubmit, isLoading, onValidityChange 
                             <TextInput
                                 label="Official Company Name"
                                 placeholder="Enter legal entity name"
-                                value={formData.nameEn}
-                                onChange={(e) => setFormData({ ...formData, nameEn: e.currentTarget.value })}
+                                value={formData.name}
+                                onChange={(e) => setFormData({ ...formData, name: e.currentTarget.value })}
                                 required
                                 size="md"
                                 styles={inputStyles}

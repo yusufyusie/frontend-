@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Plus, RefreshCw, Building2, Layers, Home, Eye, Edit, Trash2, X, Save } from 'lucide-react';
-import { Button, Group } from '@mantine/core';
+import { Button, Group, Paper } from '@mantine/core';
 import { buildingsService, Building } from '@/services/buildings.service';
 import { BuildingForm } from '@/components/organisms/tms/BuildingForm';
 import { Modal } from '@/components/Modal';
@@ -25,25 +25,27 @@ export default function BuildingsPage() {
         setIsLoading(true);
         try {
             const response: any = await buildingsService.getAll();
-            const data = response.data || response;
+            const data = Array.isArray(response.data) ? response.data :
+                Array.isArray(response) ? response : [];
             setBuildings(data);
 
             // Calculate metrics
             let totalFloors = 0;
             let totalRooms = 0;
             data.forEach((b: any) => {
-                totalFloors += b.totalFloors || 0;
-                // Sum rooms across all plots in the building
-                totalRooms += b.plots?.reduce((sum: number, p: any) => sum + (p.rooms?.length || 0), 0) || 0;
+                totalFloors += b.floors || b._count?.floorDetails || 0;
+                // Sum rooms across all floors if available
+                totalRooms += b.floorDetails?.reduce((sum: number, f: any) => sum + (f._count?.rooms || f.rooms?.length || 0), 0) || 0;
             });
 
             setMetrics({
                 totalBuildings: data.length,
                 totalFloors,
                 totalRooms,
-                occupancyRate: 85 // Real calculation could be: (occupied / total) * 100
+                occupancyRate: 85
             });
         } catch (error) {
+            console.error('Fetch error:', error);
             toast.error('Failed to fetch buildings');
         } finally {
             setIsLoading(false);
@@ -88,22 +90,23 @@ export default function BuildingsPage() {
                     <h1 className="text-3xl md:text-4xl font-bold text-primary">Building Catalog</h1>
                     <p className="text-gray-500 mt-1">Physical infrastructure management and floor planning</p>
                 </div>
-                <button
+                <Button
                     onClick={() => {
                         setOpened(true);
                         setIsFormValid(false);
                     }}
-                    className="px-6 py-2 bg-teal-50 text-teal-700 hover:bg-teal-100 rounded-xl transition-all border border-teal-100 shadow-md active:scale-95 flex items-center gap-2 font-bold w-full sm:w-auto justify-center"
-                    style={{ color: '#0C7C92', borderColor: '#0C7C9220' }}
+                    size="md"
+                    radius="xl"
+                    className="bg-gradient-to-r from-[#0C7C92] to-[#0a6c7e] shadow-lg shadow-teal-100/50 transition-all hover:scale-105 active:scale-95 px-8"
+                    leftSection={<Plus className="w-5 h-5" strokeWidth={3} />}
                 >
-                    <Plus className="w-5 h-5" strokeWidth={3} />
-                    <span>Add New Building</span>
-                </button>
+                    Add New Building
+                </Button>
             </div>
 
             {/* Metrics Dashboard */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="card p-4 hover:shadow-lg transition-shadow">
+                <Paper withBorder p="md" radius="2rem" className="hover:shadow-lg transition-all border-slate-100">
                     <div className="flex items-center justify-between">
                         <div>
                             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Total Buildings</p>
@@ -111,8 +114,8 @@ export default function BuildingsPage() {
                         </div>
                         <Building2 className="w-10 h-10 text-primary/20" />
                     </div>
-                </div>
-                <div className="card p-4 hover:shadow-lg transition-shadow">
+                </Paper>
+                <Paper withBorder p="md" radius="2rem" className="hover:shadow-lg transition-all border-slate-100">
                     <div className="flex items-center justify-between">
                         <div>
                             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Total Floors</p>
@@ -120,17 +123,17 @@ export default function BuildingsPage() {
                         </div>
                         <Layers className="w-10 h-10 text-cyan-500/20" />
                     </div>
-                </div>
-                <div className="card p-4 hover:shadow-lg transition-shadow">
+                </Paper>
+                <Paper withBorder p="md" radius="2rem" className="hover:shadow-lg transition-all border-slate-100">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Total Rooms</p>
+                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Total Space</p>
                             <p className="text-2xl font-black text-gray-900 mt-1">{metrics.totalRooms}</p>
                         </div>
                         <Home className="w-10 h-10 text-success/20" />
                     </div>
-                </div>
-                <div className="card p-4 hover:shadow-lg transition-shadow">
+                </Paper>
+                <Paper withBorder p="md" radius="2rem" className="hover:shadow-lg transition-all border-slate-100">
                     <div className="flex items-center justify-between">
                         <div>
                             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Occupancy Rate</p>
@@ -138,11 +141,11 @@ export default function BuildingsPage() {
                         </div>
                         <Home className="w-10 h-10 text-warning/20" />
                     </div>
-                </div>
+                </Paper>
             </div>
 
             {/* Buildings Table */}
-            <div className="card p-0 overflow-hidden shadow-sm">
+            <div className="card p-0 overflow-hidden shadow-sm border border-slate-100 rounded-3xl">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left">
                         <thead>
@@ -150,7 +153,7 @@ export default function BuildingsPage() {
                                 <th className="p-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Building Info</th>
                                 <th className="p-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Code</th>
                                 <th className="p-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Floors</th>
-                                <th className="p-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Rooms</th>
+                                <th className="p-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Capacity</th>
                                 <th className="p-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Type</th>
                                 <th className="p-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-right">Actions</th>
                             </tr>
@@ -172,7 +175,7 @@ export default function BuildingsPage() {
                                                 </div>
                                                 <div>
                                                     <div className="font-bold text-gray-900 leading-tight">{building.name}</div>
-                                                    <div className="text-[10px] font-mono text-gray-400 mt-0.5">ID: {building.id}</div>
+                                                    <div className="text-[10px] font-mono text-gray-400 mt-0.5">PLATFORM ID: {building.id}</div>
                                                 </div>
                                             </div>
                                         </td>
@@ -183,17 +186,17 @@ export default function BuildingsPage() {
                                         </td>
                                         <td className="p-4">
                                             <span className="text-sm font-bold text-gray-900">
-                                                {building.floors || 0}
+                                                {building.floors || (building as any)._count?.floorDetails || 0}
                                             </span>
                                         </td>
                                         <td className="p-4">
                                             <span className="text-sm font-bold text-gray-900">
-                                                {building.plots?.reduce((sum: number, p: any) => sum + (p.rooms?.length || 0), 0) || 0}
+                                                {(building as any).floorDetails?.reduce((sum: number, f: any) => sum + (f._count?.rooms || 0), 0) || 'N/A'}
                                             </span>
                                         </td>
                                         <td className="p-4">
-                                            <span className="px-2 py-0.5 rounded bg-green-50 text-green-600 text-[10px] font-bold">
-                                                {(building as any).buildingClass?.lookupValue?.en || 'Operational'}
+                                            <span className="px-2 py-0.5 rounded-lg bg-teal-50 text-teal-700 text-[10px] font-bold border border-teal-100">
+                                                {(building as any).buildingClass?.lookupValue?.en || 'Standard'}
                                             </span>
                                         </td>
                                         <td className="p-4">

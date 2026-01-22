@@ -51,12 +51,23 @@ export const LookupForm = ({ initialData, onSubmit, isLoading, category, parentI
     });
 
     const [categories, setCategories] = useState<any[]>([]);
+    const [constructionStatuses, setConstructionStatuses] = useState<any[]>([]);
 
     useEffect(() => {
         lookupsService.getCategories().then(res => {
             const data = (res as any).data || res;
             if (Array.isArray(data)) {
                 setCategories(data);
+            }
+        });
+
+        lookupsService.getByCategory('CONSTRUCTION_STATUS').then(res => {
+            const data = (res as any).data || res;
+            if (Array.isArray(data)) {
+                setConstructionStatuses(data.map((d: any) => ({
+                    value: d.id.toString(),
+                    label: d.lookupValue.en
+                })));
             }
         });
     }, []);
@@ -83,7 +94,8 @@ export const LookupForm = ({ initialData, onSubmit, isLoading, category, parentI
             <LoadingOverlay visible={isLoading} overlayProps={{ blur: 1, radius: 'md' }} />
             <form id="lookup-form" onSubmit={handleSubmit}>
                 <Stack gap="sm">
-                    <Paper withBorder p="md" radius="2rem" className="border-slate-100 bg-white/50 backdrop-blur-sm shadow-sm">
+                    {/* Core Definition Section */}
+                    <Paper withBorder p="md" radius="2rem" className="border-slate-100 bg-white shadow-sm">
                         <Group gap="md" mb="md">
                             <Box p={10} bg="linear-gradient(135deg, #0C7C92 0%, #065e6e 100%)" className="rounded-2xl shadow-lg shadow-teal-100/50">
                                 <Layout size={20} className="text-white" />
@@ -94,10 +106,9 @@ export const LookupForm = ({ initialData, onSubmit, isLoading, category, parentI
                             </div>
                         </Group>
 
-                        <Stack gap="xl">
+                        <Stack gap="md">
                             <Select
                                 label="Category Domain"
-                                description="The logical grouping for this lookup entry"
                                 placeholder="Select category..."
                                 data={categories}
                                 value={formData.lookupCategory}
@@ -107,54 +118,7 @@ export const LookupForm = ({ initialData, onSubmit, isLoading, category, parentI
                                 disabled={!!category}
                                 radius="xl"
                                 size="md"
-                                checkIconPosition="right"
-                                maxDropdownHeight={320}
-                                comboboxProps={{
-                                    withinPortal: true,
-                                    transitionProps: { transition: 'pop', duration: 250 },
-                                    shadow: 'xl',
-                                    radius: 'xl'
-                                }}
-                                styles={{
-                                    label: { fontWeight: 800, marginBottom: 4, color: '#1e293b' },
-                                    input: {
-                                        borderRadius: '1.25rem',
-                                        backgroundColor: '#fff',
-                                        border: '1.5px solid #eef2f6',
-                                        transition: 'all 0.2s ease'
-                                    },
-                                    dropdown: {
-                                        borderRadius: '1.5rem',
-                                        border: '1px solid #f1f5f9',
-                                        padding: '8px',
-                                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                                        backdropFilter: 'blur(10px)',
-                                        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
-                                    },
-                                    option: {
-                                        borderRadius: '1rem',
-                                        fontWeight: 600,
-                                        fontSize: '13px',
-                                        padding: '10px 14px',
-                                        margin: '2px 0',
-                                        transition: 'all 0.2s ease'
-                                    }
-                                }}
-                                renderOption={(item: any) => {
-                                    const CategoryIcon = getIcon(item.option.metadata?.icon);
-                                    const color = getColorClass(item.option.metadata?.color);
-                                    return (
-                                        <Group gap="sm" wrap="nowrap">
-                                            <Box p={6} style={{ backgroundColor: `${color}15`, borderRadius: '8px' }}>
-                                                <CategoryIcon size={14} style={{ color }} />
-                                            </Box>
-                                            <div style={{ flex: 1 }}>
-                                                <Text size="sm" fw={700} c="slate.8">{item.option.label}</Text>
-                                                <Text size="10px" c="dimmed" fw={600} tt="uppercase">{item.option.value}</Text>
-                                            </div>
-                                        </Group>
-                                    );
-                                }}
+                                styles={{ label: { fontWeight: 800, color: '#1e293b' } }}
                             />
 
                             <Group grow gap="md">
@@ -166,16 +130,7 @@ export const LookupForm = ({ initialData, onSubmit, isLoading, category, parentI
                                     required
                                     radius="xl"
                                     size="md"
-                                    styles={{
-                                        label: { fontWeight: 800, marginBottom: 4, color: '#1e293b' },
-                                        input: {
-                                            borderRadius: '1.25rem',
-                                            fontWeight: 900,
-                                            letterSpacing: '0.5px',
-                                            backgroundColor: '#f8fafc',
-                                            border: '1.5px solid #eef2f6'
-                                        }
-                                    }}
+                                    styles={{ label: { fontWeight: 800, color: '#1e293b' } }}
                                 />
 
                                 <TextInput
@@ -186,28 +141,124 @@ export const LookupForm = ({ initialData, onSubmit, isLoading, category, parentI
                                         const value = e.currentTarget.value;
                                         setFormData(prev => ({
                                             ...prev,
-                                            lookupValue: {
-                                                en: value,
-                                                am: value
-                                            }
+                                            lookupValue: { en: value, am: value }
                                         }));
                                     }}
                                     required
                                     radius="xl"
                                     size="md"
-                                    styles={{
-                                        label: { fontWeight: 800, marginBottom: 4, color: '#1e293b' },
-                                        input: {
-                                            borderRadius: '1.25rem',
-                                            backgroundColor: '#fff',
-                                            border: '1.5px solid #eef2f6'
-                                        }
-                                    }}
+                                    styles={{ label: { fontWeight: 800, color: '#1e293b' } }}
                                 />
                             </Group>
                         </Stack>
                     </Paper>
 
+                    {/* Floor Specific Section */}
+                    {formData.lookupCategory === 'FLOOR' && (
+                        <Paper withBorder p="md" radius="2rem" className="border-cyan-100 bg-cyan-50/20 backdrop-blur-sm shadow-sm">
+                            <Group gap="md" mb="md">
+                                <Box p={10} bg="linear-gradient(135deg, #0C7C92 0%, #15AABF 100%)" className="rounded-2xl shadow-lg shadow-cyan-100">
+                                    <Hash size={20} className="text-white" />
+                                </Box>
+                                <div>
+                                    <Title order={4} fw={900} className="text-slate-800 tracking-tight leading-none mb-1">Floor Details</Title>
+                                    <Text size="11px" c="dimmed" fw={700} tt="uppercase" lts="1px">Engineering & Capacity</Text>
+                                </div>
+                            </Group>
+
+                            <Stack gap="md">
+                                <Group grow gap="md">
+                                    <NumberInput
+                                        label="Floor Number"
+                                        placeholder="0 for Ground, 1, 2..."
+                                        value={formData.metadata?.floorNumber}
+                                        onChange={(val) => setFormData(prev => ({
+                                            ...prev,
+                                            metadata: { ...prev.metadata, floorNumber: Number(val) }
+                                        }))}
+                                        required
+                                        radius="xl"
+                                        size="md"
+                                        styles={{ label: { fontWeight: 800, color: '#1e293b' } }}
+                                    />
+                                    <Select
+                                        label="Construction Status"
+                                        placeholder="Select status..."
+                                        data={constructionStatuses}
+                                        value={formData.metadata?.constructionStatusId?.toString()}
+                                        onChange={(val) => setFormData(prev => ({
+                                            ...prev,
+                                            metadata: { ...prev.metadata, constructionStatusId: val ? parseInt(val) : undefined }
+                                        }))}
+                                        radius="xl"
+                                        size="md"
+                                        styles={{ label: { fontWeight: 800, color: '#1e293b' } }}
+                                    />
+                                </Group>
+                                <Group grow gap="md">
+                                    <NumberInput
+                                        label="Total Constructed Area (m²)"
+                                        placeholder="Gross area"
+                                        value={formData.metadata?.totalArea}
+                                        onChange={(val) => setFormData(prev => ({
+                                            ...prev,
+                                            metadata: { ...prev.metadata, totalArea: Number(val) }
+                                        }))}
+                                        decimalScale={2}
+                                        radius="xl"
+                                        size="md"
+                                        styles={{ label: { fontWeight: 800, color: '#1e293b' } }}
+                                    />
+                                    <NumberInput
+                                        label="Rentable Area (m²)"
+                                        placeholder="Leasable area"
+                                        value={formData.metadata?.rentableArea}
+                                        onChange={(val) => setFormData(prev => ({
+                                            ...prev,
+                                            metadata: { ...prev.metadata, rentableArea: Number(val) }
+                                        }))}
+                                        decimalScale={2}
+                                        radius="xl"
+                                        size="md"
+                                        error={formData.metadata?.rentableArea > formData.metadata?.totalArea ? 'Cannot exceed total area' : null}
+                                        styles={{ label: { fontWeight: 800, color: '#1e293b' } }}
+                                    />
+                                </Group>
+                            </Stack>
+                        </Paper>
+                    )}
+
+                    {/* Plot Specific Section */}
+                    {formData.lookupCategory === 'PLOT' && (
+                        <Paper withBorder p="md" radius="2rem" className="border-pink-100 bg-pink-50/20 backdrop-blur-sm shadow-sm">
+                            <Group gap="md" mb="md">
+                                <Box p={10} bg="linear-gradient(135deg, #db2777 0%, #be185d 100%)" className="rounded-2xl shadow-lg shadow-pink-100">
+                                    <LayoutList size={20} className="text-white" />
+                                </Box>
+                                <div>
+                                    <Title order={4} fw={900} className="text-slate-800 tracking-tight leading-none mb-1">Land Reference</Title>
+                                    <Text size="11px" c="dimmed" fw={700} tt="uppercase" lts="1px">Spatial Dimensions</Text>
+                                </div>
+                            </Group>
+
+                            <NumberInput
+                                label="Plot Area (m²)"
+                                placeholder="Total land area"
+                                value={formData.metadata?.area}
+                                onChange={(val) => setFormData(prev => ({
+                                    ...prev,
+                                    metadata: { ...prev.metadata, area: Number(val) }
+                                }))}
+                                decimalScale={2}
+                                required
+                                radius="xl"
+                                size="md"
+                                styles={{ label: { fontWeight: 800, color: '#1e293b' } }}
+                            />
+                        </Paper>
+                    )}
+
+                    {/* Visual Config for CAT_CONFIG */}
                     {formData.lookupCategory === 'CAT_CONFIG' && (
                         <Paper withBorder p="md" radius="2rem" className="border-cyan-100 bg-cyan-50/20 backdrop-blur-sm shadow-sm">
                             <Group gap="md" mb="md">
@@ -223,68 +274,34 @@ export const LookupForm = ({ initialData, onSubmit, isLoading, category, parentI
                             <Group grow gap="md">
                                 <Select
                                     label="Navigation Icon"
-                                    placeholder="Select icon"
-                                    data={[
-                                        'Map', 'Layers', 'Building2', 'LayoutList', 'DoorOpen', 'Settings', 'Info', 'GitBranch', 'Coffee', 'FileText', 'Sparkles', 'Database', 'Users', 'Hammer', 'Clock', 'Shield'
-                                    ]}
+                                    data={['Map', 'Layers', 'Building2', 'LayoutList', 'DoorOpen', 'Settings', 'Info', 'GitBranch', 'Coffee', 'FileText', 'Sparkles', 'Database', 'Users', 'Hammer', 'Clock', 'Shield']}
                                     value={(formData.metadata as any)?.icon || 'Database'}
                                     onChange={(val) => setFormData(prev => ({
                                         ...prev,
-                                        metadata: { ...(prev.metadata as object || {}), icon: val }
+                                        metadata: { ...prev.metadata, icon: val }
                                     }))}
                                     radius="xl"
                                     size="md"
                                     searchable
-                                    maxDropdownHeight={250}
-                                    comboboxProps={{ withinPortal: true, transitionProps: { transition: 'pop', duration: 250 }, radius: 'xl', shadow: 'xl' }}
-                                    styles={{
-                                        label: { fontWeight: 800, marginBottom: 4, color: '#1e293b' },
-                                        input: { borderRadius: '1.25rem', border: '1.5px solid #c8ebf1', backgroundColor: '#fff' },
-                                        dropdown: { borderRadius: '1.5rem', padding: '8px' },
-                                        option: { borderRadius: '1rem', fontWeight: 600 }
-                                    }}
-                                    renderOption={(item: any) => {
-                                        const IconComp = getIcon(item.option.value);
-                                        return (
-                                            <Group gap="sm">
-                                                <IconComp size={14} />
-                                                <Text size="sm" fw={600}>{item.option.value}</Text>
-                                            </Group>
-                                        );
-                                    }}
+                                    styles={{ label: { fontWeight: 800, color: '#1e293b' } }}
                                 />
                                 <Select
                                     label="Theme Color"
-                                    placeholder="Select color"
-                                    data={[
-                                        'teal', 'blue', 'violet', 'pink', 'amber', 'cyan', 'indigo', 'orange', 'emerald', 'slate', 'red'
-                                    ]}
+                                    data={['teal', 'blue', 'violet', 'pink', 'amber', 'cyan', 'indigo', 'orange', 'emerald', 'slate', 'red']}
                                     value={(formData.metadata as any)?.color || 'blue'}
                                     onChange={(val) => setFormData(prev => ({
                                         ...prev,
-                                        metadata: { ...(prev.metadata as object || {}), color: val }
+                                        metadata: { ...prev.metadata, color: val }
                                     }))}
                                     radius="xl"
                                     size="md"
-                                    maxDropdownHeight={250}
-                                    comboboxProps={{ withinPortal: true, transitionProps: { transition: 'pop', duration: 250 }, radius: 'xl', shadow: 'xl' }}
-                                    styles={{
-                                        label: { fontWeight: 800, marginBottom: 4, color: '#1e293b' },
-                                        input: { borderRadius: '1.25rem', border: '1.5px solid #c8ebf1', backgroundColor: '#fff' },
-                                        dropdown: { borderRadius: '1.5rem', padding: '8px' },
-                                        option: { borderRadius: '1rem', fontWeight: 600 }
-                                    }}
-                                    renderOption={(item: any) => (
-                                        <Group gap="sm">
-                                            <Box w={12} h={12} style={{ borderRadius: '50%', backgroundColor: getColorClass(item.option.value) }} />
-                                            <Text size="sm" fw={600} tt="capitalize">{item.option.value}</Text>
-                                        </Group>
-                                    )}
+                                    styles={{ label: { fontWeight: 800, color: '#1e293b' } }}
                                 />
                             </Group>
                         </Paper>
                     )}
 
+                    {/* Hierarchy & Logic Section */}
                     <Paper withBorder p="md" radius="2rem" className="border-slate-100 bg-slate-50/50">
                         <Group gap="md" mb="md">
                             <Box p={10} bg="linear-gradient(135deg, #0C7C92 0%, #475569 100%)" className="rounded-2xl shadow-lg shadow-slate-200">
@@ -328,16 +345,12 @@ export const LookupForm = ({ initialData, onSubmit, isLoading, category, parentI
                                     checked={formData.isActive}
                                     onChange={(e) => setFormData(prev => ({ ...prev, isActive: e.currentTarget.checked }))}
                                     color="#0C7C92"
-                                    radius="sm"
-                                    styles={{ label: { cursor: 'pointer', paddingLeft: 12 } }}
                                 />
                                 <Checkbox
                                     label={<Text size="sm" fw={800} className="text-slate-700">System Protected</Text>}
                                     checked={formData.isSystem}
                                     onChange={(e) => setFormData(prev => ({ ...prev, isSystem: e.currentTarget.checked }))}
                                     color="#0C7C92"
-                                    radius="sm"
-                                    styles={{ label: { cursor: 'pointer', paddingLeft: 12 } }}
                                 />
                             </Group>
                         </Stack>
@@ -346,71 +359,7 @@ export const LookupForm = ({ initialData, onSubmit, isLoading, category, parentI
             </form>
 
             <style jsx global>{`
-                /* Force Scrollbar visibility and branding */
-                .mantine-Select-dropdown,
-                .mantine-Combobox-dropdown,
-                .mantine-ScrollArea-viewport {
-                    scrollbar-width: auto !important;
-                    scrollbar-color: #0C7C9266 transparent !important;
-                }
-
-                .mantine-Select-dropdown::-webkit-scrollbar,
-                .mantine-Combobox-dropdown::-webkit-scrollbar,
-                .mantine-ScrollArea-scrollbar {
-                    width: 8px !important;
-                    display: block !important;
-                    opacity: 1 !important;
-                    visibility: visible !important;
-                }
-
-                .mantine-Select-dropdown::-webkit-scrollbar-track,
-                .mantine-Combobox-dropdown::-webkit-scrollbar-track,
-                .mantine-ScrollArea-scrollbar {
-                    background: #f8fafc !important;
-                    border-radius: 10px !important;
-                }
-
-                .mantine-Select-dropdown::-webkit-scrollbar-thumb,
-                .mantine-Combobox-dropdown::-webkit-scrollbar-thumb,
-                .mantine-ScrollArea-thumb {
-                    background-color: #0C7C92 !important;
-                    border-radius: 20px !important;
-                    border: 2px solid #f8fafc !important;
-                    display: block !important;
-                    opacity: 1 !important;
-                    visibility: visible !important;
-                    min-height: 40px !important;
-                }
-
-                .mantine-ScrollArea-thumb {
-                    background-color: #0C7C9266 !important;
-                }
-
-                .mantine-ScrollArea-thumb:hover {
-                    background-color: #0C7C92 !important;
-                }
-
-                /* Ensure dropdown list has minimum spacing */
-                .mantine-Select-options {
-                    padding: 8px !important;
-                }
-
-                /* Branded Selected State */
-                .mantine-Select-option[data-selected],
-                .mantine-Combobox-option[data-selected] {
-                    background-color: #0C7C92 !important;
-                    color: white !important;
-                }
-
-                .mantine-Select-option[data-selected] *,
-                .mantine-Combobox-option[data-selected] * {
-                    color: white !important;
-                }
-
-                /* Branded Focus State */
-                .mantine-Select-input:focus,
-                .mantine-TextInput-input:focus,
-                .mantine-NumberInput-input:focus {
+                .mantine-Select-input:focus, .mantine-TextInput-input:focus, .mantine-NumberInput-input:focus {
                     border-color: #0C7C92 !important;
                     box-shadow: 0 0 0 4px rgba(12, 124, 146, 0.05) !important;
                 }

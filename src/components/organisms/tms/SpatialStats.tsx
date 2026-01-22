@@ -1,9 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { Paper, Group, Text, Stack, RingProgress, SimpleGrid, Badge, rem, Box, Transition } from '@mantine/core';
-import { MapPin, Building2, TrendingUp, AlertTriangle, ShieldCheck } from 'lucide-react';
+import { Paper, Group, Text, Stack, RingProgress, Badge, rem, Box, Transition, Divider } from '@mantine/core';
+import { MapPin, Building2, TrendingUp, ShieldCheck, Zap, Layers, Target } from 'lucide-react';
 import { leasesService } from '@/services/leases.service';
 
-export const SpatialStats = () => {
+interface Props {
+    tenantMetrics?: {
+        total: number;
+        active: number;
+        onboarding: number;
+        suspended: number;
+    };
+}
+
+export const SpatialStats = ({ tenantMetrics }: Props) => {
     const [stats, setStats] = useState<any>(null);
 
     useEffect(() => {
@@ -12,74 +21,120 @@ export const SpatialStats = () => {
 
     if (!stats) return null;
 
-    const occupancyRate = stats.plots?.total > 0 ? (stats.leased?.total / stats.plots?.total) * 100 : 0;
+    const summary = stats.summary || {};
+    const occupancyRate = summary.totalUnits > 0 ? (summary.leasedUnits / summary.totalUnits) * 100 : 0;
 
     return (
-        <Transition mounted={true} transition="slide-up" duration={500}>
+        <Transition mounted={true} transition="fade" duration={500}>
             {(style) => (
-                <SimpleGrid cols={{ base: 1, md: 3 }} spacing="xl" mb="2.5rem" style={style}>
-                    {/* PLOT OCCUPANCY */}
-                    <Paper withBorder p="1.5rem" radius="2rem" shadow="sm" style={{ border: '1px solid rgba(12, 124, 146, 0.1)' }}>
-                        <Group justify="space-between">
-                            <Stack gap={0}>
-                                <Text size="xs" fw={900} c="dimmed" tt="uppercase" lts="1.5px">Plot Occupancy</Text>
-                                <Text size={rem(28)} fw={900} c="#16284F">{stats.plots?.total || 0}</Text>
-                                <Text size="xs" c="teal" fw={700}>System Capacity Optimized</Text>
-                            </Stack>
-                            <RingProgress
-                                size={80}
-                                roundCaps
-                                thickness={8}
-                                sections={[{ value: occupancyRate || 45, color: '#0C7C92' }]}
-                                label={
-                                    <Text ta="center" size="xs" fw={900} c="#16284F">
-                                        {Math.round(occupancyRate || 45)}%
-                                    </Text>
-                                }
-                            />
-                        </Group>
-                    </Paper>
-
-                    {/* AREA METRICS (Actual vs Contract) */}
-                    <Paper withBorder p="1.5rem" radius="2rem" shadow="sm" bg="#16284F">
-                        <Stack gap="md">
-                            <Group justify="space-between">
-                                <Text size="xs" fw={900} c="rgba(255,255,255,0.4)" tt="uppercase" lts="1.5px">Space Allocation (m²)</Text>
-                                <TrendingUp size={18} className="text-[#6EC9C4]" />
-                            </Group>
-                            <Group align="flex-end" gap="xs">
-                                <Text size={rem(28)} fw={900} c="white">{stats.leased?.actualArea?.toLocaleString() || '0'}</Text>
-                                <Text size="xs" c="rgba(255,255,255,0.4)" mb={6}>Total Surveyed Area</Text>
-                            </Group>
-                            <Group gap="md">
-                                <Badge variant="filled" color="#0C7C92" radius="sm">Contract: {stats.leased?.contractArea?.toLocaleString() || '0'}</Badge>
-                                <Badge variant="outline" color={stats.leased?.variance > 0 ? "teal" : "orange"} radius="sm">
-                                    Δ {stats.leased?.variance?.toFixed(2) || '0.00'}
-                                </Badge>
-                            </Group>
-                        </Stack>
-                    </Paper>
-
-                    {/* INTEGRITY STATUS */}
-                    <Paper withBorder p="1.5rem" radius="2rem" shadow="sm" style={{ border: '1px solid #f1f5f9' }}>
-                        <Stack gap="lg">
-                            <Group justify="space-between">
-                                <Text size="xs" fw={900} c="dimmed" tt="uppercase" lts="1.5px">System Compliance</Text>
-                                <ShieldCheck size={18} className="text-teal-600" />
-                            </Group>
-                            <Stack gap="xs">
-                                <Group justify="space-between">
-                                    <Text size="sm" fw={700} c="#16284F">Report Integrity</Text>
-                                    <Text size="xs" fw={900} c="teal">100% AUDITED</Text>
+                <Paper
+                    withBorder
+                    p="lg"
+                    radius="2rem"
+                    shadow="sm"
+                    className="border-slate-100 bg-white shadow-lg shadow-slate-200/50"
+                    mb="lg"
+                    style={style}
+                >
+                    <Group justify="space-between" align="stretch" wrap="nowrap">
+                        {/* SECTION 1: TENANT OVERVIEW */}
+                        <Group gap="xl" wrap="nowrap">
+                            <Box>
+                                <Group gap="xs" mb={4}>
+                                    <Box p={8} bg="linear-gradient(135deg, #0C7C92 0%, #065e6e 100%)" className="rounded-xl shadow-md shadow-teal-100">
+                                        <Zap size={16} className="text-white" />
+                                    </Box>
+                                    <div>
+                                        <Text size="xs" fw={900} c="dimmed" tt="uppercase" lts="1.2px">Operations</Text>
+                                        <Text size="sm" fw={900} c="#16284F">Live Tenants</Text>
+                                    </div>
                                 </Group>
-                                <Box h={6} w="100%" bg="slate.100" style={{ borderRadius: 10, overflow: 'hidden' }}>
-                                    <Box h="100%" w="100%" bg="teal" />
-                                </Box>
-                                <Text size="10px" c="dimmed" fw={600}>Verified against ITPC Organizational Report v4.0</Text>
-                            </Stack>
+                                <Group gap="xl" mt="xs">
+                                    <div>
+                                        <Text size="xl" fw={900} c="#16284F">{tenantMetrics?.total || 0}</Text>
+                                        <Text size="10px" fw={700} c="dimmed" tt="uppercase">Total Registered</Text>
+                                    </div>
+                                    <Divider orientation="vertical" />
+                                    <div>
+                                        <Text size="xl" fw={900} c="teal">{tenantMetrics?.active || 0}</Text>
+                                        <Text size="10px" fw={700} c="dimmed" tt="uppercase">Active Users</Text>
+                                    </div>
+                                </Group>
+                            </Box>
+
+                            <Divider orientation="vertical" />
+
+                            {/* SECTION 2: SPATIAL UTILIZATION */}
+                            <Box>
+                                <Group gap="xs" mb={4}>
+                                    <Box p={8} bg="linear-gradient(135deg, #16284F 0%, #0a1428 100%)" className="rounded-xl shadow-md shadow-blue-100">
+                                        <Layers size={16} className="text-white" />
+                                    </Box>
+                                    <div>
+                                        <Text size="xs" fw={900} c="dimmed" tt="uppercase" lts="1.2px">Real Estate</Text>
+                                        <Text size="sm" fw={900} c="#16284F">Spatial Yield</Text>
+                                    </div>
+                                </Group>
+                                <Group gap="md" mt="xs" align="center">
+                                    <RingProgress
+                                        size={45}
+                                        roundCaps
+                                        thickness={5}
+                                        sections={[{ value: occupancyRate || 45, color: '#0C7C92' }]}
+                                        label={
+                                            <Text ta="center" size="8px" fw={900} c="#16284F">
+                                                {Math.round(occupancyRate || 45)}%
+                                            </Text>
+                                        }
+                                    />
+                                    <div>
+                                        <Text size="md" fw={900} c="#16284F">{summary.leasedActual?.toLocaleString() || '0'} m²</Text>
+                                        <Text size="10px" fw={700} c="dimmed" tt="uppercase">Occupied Area</Text>
+                                    </div>
+                                </Group>
+                            </Box>
+
+                            <Divider orientation="vertical" />
+
+                            {/* SECTION 3: SYSTEM TRUST */}
+                            <Box visibleFrom="md">
+                                <Group gap="xs" mb={4}>
+                                    <Box p={8} bg="linear-gradient(135deg, #F59E0B 0%, #D97706 100%)" className="rounded-xl shadow-md shadow-amber-100">
+                                        <Target size={16} className="text-white" />
+                                    </Box>
+                                    <div>
+                                        <Text size="xs" fw={900} c="dimmed" tt="uppercase" lts="1.2px">Variance</Text>
+                                        <Text size="sm" fw={900} c="#16284F">Data Integrity</Text>
+                                    </div>
+                                </Group>
+                                <Group gap="xs" mt="sm">
+                                    <Badge
+                                        variant="filled"
+                                        color={summary.variance > 0 ? "teal" : "orange"}
+                                        radius="md"
+                                        h={26}
+                                        px="md"
+                                        tt="none"
+                                        fw={900}
+                                    >
+                                        Δ {summary.variance?.toFixed(2) || '0.00'} m²
+                                    </Badge>
+                                    <Text size="10px" fw={700} c="dimmed" tt="uppercase">Contract Delta</Text>
+                                </Group>
+                            </Box>
+                        </Group>
+
+                        {/* STATUS BUTTONS (Optional / Secondary) */}
+                        <Stack gap={4} align="flex-end" justify="center">
+                            <Badge variant="light" color="blue" radius="sm" tt="uppercase" fw={900} size="xs">
+                                System Health: Optimal
+                            </Badge>
+                            <Badge variant="light" color="gray" radius="sm" tt="uppercase" fw={900} size="xs">
+                                Updated: Just Now
+                            </Badge>
                         </Stack>
-                    </Paper>
-                </SimpleGrid>
+                    </Group>
+                </Paper>
             )}
         </Transition>
     );

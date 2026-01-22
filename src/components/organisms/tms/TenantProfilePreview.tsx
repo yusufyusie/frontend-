@@ -95,7 +95,7 @@ export const TenantProfilePreview = ({ data, bizCategoryLabel, statusLabel }: Te
                 <Stack gap="xl">
                     <Box>
                         <Text size={rem(32)} fw={900} c="#16284F" lts="-1.5px" style={{ lineHeight: 1.1 }}>
-                            {data.nameEn || 'Corporate Identity'}
+                            {data.name || 'Corporate Identity'}
                         </Text>
                         <Group gap="xs" mt={8}>
                             <Badge color="blue" variant="dot" size="sm" fw={700}>Registered Entity</Badge>

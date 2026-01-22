@@ -98,48 +98,8 @@ export default function TenantDirectoryPage() {
                 </button>
             </div>
 
-            {/* Metrics Dashboard */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="card p-4 hover:shadow-lg transition-shadow">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Total Tenants</p>
-                            <p className="text-2xl font-black text-gray-900 mt-1">{metrics.total}</p>
-                        </div>
-                        <Users className="w-10 h-10 text-primary/20" />
-                    </div>
-                </div>
-                <div className="card p-4 hover:shadow-lg transition-shadow">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Active</p>
-                            <p className="text-2xl font-black text-success mt-1">{metrics.active}</p>
-                        </div>
-                        <Building2 className="w-10 h-10 text-success/20" />
-                    </div>
-                </div>
-                <div className="card p-4 hover:shadow-lg transition-shadow">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Onboarding</p>
-                            <p className="text-2xl font-black text-warning mt-1">{metrics.onboarding}</p>
-                        </div>
-                        <FileText className="w-10 h-10 text-warning/20" />
-                    </div>
-                </div>
-                <div className="card p-4 hover:shadow-lg transition-shadow">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Suspended</p>
-                            <p className="text-2xl font-black text-error mt-1">{metrics.suspended}</p>
-                        </div>
-                        <TrendingUp className="w-10 h-10 text-error/20" />
-                    </div>
-                </div>
-            </div>
-
-            {/* Manager's Spatial Overview (Phase 3) */}
-            <SpatialStats />
+            {/* Compact Intelligence Header - Replaces individual metric cards and large stats */}
+            <SpatialStats tenantMetrics={metrics} />
 
             {/* Search Filter */}
             <div className="card p-0 overflow-hidden">
@@ -203,10 +163,10 @@ export default function TenantDirectoryPage() {
                                         <td className="p-4">
                                             <div className="flex items-center gap-3">
                                                 <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-bold text-sm border border-primary/20">
-                                                    {tenant.nameEn.substring(0, 2).toUpperCase()}
+                                                    {tenant.name.substring(0, 2).toUpperCase()}
                                                 </div>
                                                 <div>
-                                                    <div className="font-bold text-gray-900 leading-tight">{tenant.nameEn}</div>
+                                                    <div className="font-bold text-gray-900 leading-tight">{tenant.name}</div>
                                                     <div className="text-[10px] font-mono text-gray-400 mt-0.5">REG: {tenant.companyRegNumber}</div>
                                                 </div>
                                             </div>

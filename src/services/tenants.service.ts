@@ -13,8 +13,7 @@ export interface TenantContact {
 
 export interface Tenant {
     id: number;
-    nameEn: string;
-    nameAm?: string;
+    name: string;
     companyRegNumber: string;
     tinNumber?: string;
     businessCategoryId?: number;

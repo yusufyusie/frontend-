@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Stack, Group, Text, Paper, Select, NumberInput, TextInput, Divider, SimpleGrid, rem, Box, Badge, ActionIcon, ScrollArea } from '@mantine/core';
 import { MapPin, Building2, Calendar, FileText, CheckCircle2, Search, Info } from 'lucide-react';
-import { landResourcesService } from '@/services/land-resources.service';
+import { locationsService } from '@/services/locations.service';
 import { buildingsService } from '@/services/buildings.service';
 import { DateInput } from '@mantine/dates';
 
@@ -38,15 +38,14 @@ export const SpatialStep = ({ data, onChange, onValidityChange }: Props) => {
 
     useEffect(() => {
         // Fetch Root level resources
-        landResourcesService.getAll({ type: 'ZONE' }).then(res => setAvailableZones((res as any).data || res));
-        buildingsService.getAll().then(res => setAvailableBuildings((res as any).data || res));
+        locationsService.getZones().then(res => setAvailableZones(res));
     }, []);
 
     // Fetch blocks when zone changes
     useEffect(() => {
         if (selectedZoneId) {
-            landResourcesService.getAll({ type: 'BLOCK', parentId: selectedZoneId }).then(res => {
-                setAvailableBlocks((res as any).data || res);
+            locationsService.getBlocks(parseInt(selectedZoneId)).then(res => {
+                setAvailableBlocks(res);
                 setSelectedBlockId(null);
                 setAvailablePlots([]);
             });
@@ -56,16 +55,29 @@ export const SpatialStep = ({ data, onChange, onValidityChange }: Props) => {
         }
     }, [selectedZoneId]);
 
-    // Fetch plots when block changes
+    // Fetch plots or buildings when block changes
     useEffect(() => {
         if (selectedBlockId) {
-            landResourcesService.getAll({ type: 'PLOT', parentId: selectedBlockId }).then(res => {
-                setAvailablePlots((res as any).data || res);
+            locationsService.getPlots(parseInt(selectedBlockId)).then(res => {
+                setAvailablePlots(res);
+                setAvailableBuildings([]);
+                setSelectedBuildingId(null);
             });
         } else {
             setAvailablePlots([]);
         }
     }, [selectedBlockId]);
+
+    // Fetch buildings when plot changes (if building space is selected)
+    useEffect(() => {
+        if (data.resourceType === 'ROOM' && data.landResourceId) {
+            locationsService.getBuildings(data.landResourceId).then(res => {
+                setAvailableBuildings(res);
+                setSelectedBuildingId(null);
+                setAvailableFloors([]);
+            });
+        }
+    }, [data.resourceType, data.landResourceId]);
 
     // Fetch floors when building changes
     useEffect(() => {
@@ -91,13 +103,13 @@ export const SpatialStep = ({ data, onChange, onValidityChange }: Props) => {
         }
     }, [selectedFloorId]);
 
-    const zoneOptions = useMemo(() => availableZones.map(z => ({ value: z.id.toString(), label: z.nameEn })), [availableZones]);
-    const blockOptions = useMemo(() => availableBlocks.map(b => ({ value: b.id.toString(), label: b.nameEn })), [availableBlocks]);
-    const plotOptions = useMemo(() => availablePlots.map(p => ({ value: p.id.toString(), label: `${p.code} (${p.areaM2} m²)` })), [availablePlots]);
+    const zoneOptions = useMemo(() => availableZones.map(z => ({ value: z.id.toString(), label: z.name })), [availableZones]);
+    const blockOptions = useMemo(() => availableBlocks.map(b => ({ value: b.id.toString(), label: b.name })), [availableBlocks]);
+    const plotOptions = useMemo(() => availablePlots.map(p => ({ value: p.id.toString(), label: `${p.code} (${p.area} m²)` })), [availablePlots]);
 
-    const buildingOptions = useMemo(() => availableBuildings.map(b => ({ value: b.id.toString(), label: b.nameEn })), [availableBuildings]);
-    const floorOptions = useMemo(() => availableFloors.map(f => ({ value: f.id.toString(), label: f.nameEn })), [availableFloors]);
-    const roomOptions = useMemo(() => availableRooms.map(r => ({ value: r.id.toString(), label: `${r.code} (${r.areaM2} m²)` })), [availableRooms]);
+    const buildingOptions = useMemo(() => availableBuildings.map(b => ({ value: b.id.toString(), label: b.name })), [availableBuildings]);
+    const floorOptions = useMemo(() => availableFloors.map(f => ({ value: f.id.toString(), label: f.name })), [availableFloors]);
+    const roomOptions = useMemo(() => availableRooms.map(r => ({ value: r.id.toString(), label: `${r.code} (${r.area} m²)` })), [availableRooms]);
 
     useEffect(() => {
         const isValid = Boolean(data.contractNumber && data.startDate && (data.landResourceId || data.roomId));

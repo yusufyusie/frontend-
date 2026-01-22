@@ -7,6 +7,8 @@ export interface LocationOption {
     code: string;
     name: string;
     description?: string;
+    area?: number;
+    floorNumber?: number;
     isActive?: boolean;
     children?: any[];
 }
@@ -53,28 +55,28 @@ class LocationsService {
     }
 
     /**
-     * Get buildings, optionally filtered by block
+     * Get buildings, optionally filtered by plot
      */
-    async getBuildings(blockId?: number): Promise<LocationOption[]> {
-        const params = blockId ? { blockId } : {};
+    async getBuildings(plotId?: number): Promise<LocationOption[]> {
+        const params = plotId ? { plotId } : {};
         const response = await api.get(`${this.baseUrl}/buildings`, { params });
         return response.data;
     }
 
     /**
-     * Get plots/units, optionally filtered by building
+     * Get plots/units, optionally filtered by block
      */
-    async getPlots(buildingId?: number): Promise<LocationOption[]> {
-        const params = buildingId ? { buildingId } : {};
+    async getPlots(blockId?: number): Promise<LocationOption[]> {
+        const params = blockId ? { blockId } : {};
         const response = await api.get(`${this.baseUrl}/plots`, { params });
         return response.data;
     }
 
     /**
-     * Get rooms, optionally filtered by plot
+     * Get rooms, optionally filtered by floor
      */
-    async getRooms(plotId?: number): Promise<LocationOption[]> {
-        const params = plotId ? { plotId } : {};
+    async getRooms(floorId?: number): Promise<LocationOption[]> {
+        const params = floorId ? { floorId } : {};
         const response = await api.get(`${this.baseUrl}/rooms`, { params });
         return response.data;
     }

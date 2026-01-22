@@ -191,7 +191,7 @@ export const TenantOnboardingWizard = ({
                                 <div className="grid grid-cols-2 gap-8">
                                     <Box>
                                         <Text size="xs" c="dimmed" fw={800} tt="uppercase" lts="1px">Company Name</Text>
-                                        <Text size="md" fw={700} c="#16284F">{tenantData.nameEn || 'N/A'}</Text>
+                                        <Text size="md" fw={700} c="#16284F">{tenantData.name || 'N/A'}</Text>
                                     </Box>
                                     <Box>
                                         <Text size="xs" c="dimmed" fw={800} tt="uppercase" lts="1px">Registration</Text>
@@ -209,7 +209,7 @@ export const TenantOnboardingWizard = ({
                             </Stack>
                         </Paper>
 
-                        {!tenantData.nameEn && (
+                        {!tenantData.name && (
                             <Paper p="md" radius="xl" bg="red.0" className="border border-red-200">
                                 <Group gap="sm">
                                     <AlertCircle size={20} className="text-red-600" />
