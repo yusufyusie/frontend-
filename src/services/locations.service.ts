@@ -1,5 +1,14 @@
 import { api } from '@/lib/api';
 
+export enum LocationLevel {
+    ZONE = 'ZONE',
+    BLOCK = 'BLOCK',
+    PLOT = 'PLOT',
+    BUILDING = 'BUILDING',
+    FLOOR = 'FLOOR',
+    ROOM = 'ROOM'
+}
+
 export interface LocationOption {
     id: number;
     realId?: number;
@@ -55,10 +64,9 @@ class LocationsService {
     }
 
     /**
-     * Get buildings, optionally filtered by plot
+     * Get buildings, optionally filtered by plot or search query
      */
-    async getBuildings(plotId?: number): Promise<LocationOption[]> {
-        const params = plotId ? { plotId } : {};
+    async getBuildings(params?: { plotId?: number; search?: string }): Promise<LocationOption[]> {
         const response = await api.get(`${this.baseUrl}/buildings`, { params });
         return response.data;
     }

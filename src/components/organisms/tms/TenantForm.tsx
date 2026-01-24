@@ -61,22 +61,21 @@ export const TenantForm = ({ initialData, onSubmit, isLoading, onValidityChange 
         label: {
             fontWeight: 800,
             color: '#16284F',
-            fontSize: rem(13),
-            marginBottom: rem(8),
+            fontSize: rem(11),
+            marginBottom: rem(4),
             textTransform: 'uppercase' as const,
-            letterSpacing: rem(1)
+            letterSpacing: rem(0.5)
         },
         input: {
-            borderRadius: rem(16),
-            height: rem(56),
-            fontSize: rem(15),
+            borderRadius: rem(12),
+            height: rem(44),
+            fontSize: rem(14),
             border: '2px solid #f1f5f9',
             backgroundColor: '#f8fafc',
             transition: 'all 0.2s ease',
             '&:focus': {
                 borderColor: '#0C7C92',
-                backgroundColor: '#fff',
-                boxShadow: '0 8px 16px -4px rgba(12, 124, 146, 0.1)'
+                backgroundColor: '#fff'
             }
         }
     };
@@ -85,17 +84,17 @@ export const TenantForm = ({ initialData, onSubmit, isLoading, onValidityChange 
         <Box pos="relative">
             <LoadingOverlay visible={isLoading} overlayProps={{ blur: 2 }} />
             <form id="tenant-form" onSubmit={handleSubmit}>
-                <Stack gap="2.5rem">
-                    {/* LEAGAL IDENTITY */}
-                    <Box>
-                        <Group gap="sm" mb="xl">
-                            <Box p={8} bg="blue.0" style={{ borderRadius: '50%' }}>
-                                <Sparkles size={18} className="text-blue-600" />
+                <Stack gap="1.5rem">
+                    {/* LEGAL IDENTITY */}
+                    <Paper withBorder p="md" radius="2rem" className="border-slate-100 bg-white shadow-sm">
+                        <Group gap="xs" mb="lg">
+                            <Box p={6} bg="blue.0" style={{ borderRadius: '50%' }}>
+                                <Sparkles size={14} className="text-blue-600" />
                             </Box>
-                            <Text size="sm" fw={900} c="#16284F" tt="uppercase" lts="2px">Legal Identity</Text>
+                            <Text size="xs" fw={900} c="#16284F" tt="uppercase" lts="1.5px">Legal Identity</Text>
                         </Group>
 
-                        <Stack gap="xl">
+                        <Stack gap="lg">
                             <TextInput
                                 label="Official Company Name"
                                 placeholder="Enter legal entity name"
@@ -127,10 +126,10 @@ export const TenantForm = ({ initialData, onSubmit, isLoading, onValidityChange 
                                 />
                             </Group>
                         </Stack>
-                    </Box>
+                    </Paper>
 
                     {/* COMMUNICATIONS */}
-                    <Box pt="xl">
+                    <Paper withBorder p="md" radius="2rem" className="border-slate-50 bg-[#F8FAFC]/50 backdrop-blur-xl">
                         <Group gap="sm" mb="xl">
                             <Box p={8} bg="teal.0" style={{ borderRadius: '50%' }}>
                                 <Globe size={18} className="text-teal-600" />
@@ -169,10 +168,10 @@ export const TenantForm = ({ initialData, onSubmit, isLoading, onValidityChange 
                                 styles={inputStyles}
                             />
                         </Stack>
-                    </Box>
+                    </Paper>
 
                     {/* CLASSIFICATION */}
-                    <Box pt="xl">
+                    <Paper withBorder p="md" radius="2rem" className="border-slate-100 bg-white">
                         <Group grow gap="xl">
                             <Select
                                 label="Core Business Sector"
@@ -193,7 +192,7 @@ export const TenantForm = ({ initialData, onSubmit, isLoading, onValidityChange 
                                 placeholder="Assign lifecycle status"
                             />
                         </Group>
-                    </Box>
+                    </Paper>
                 </Stack>
             </form>
         </Box>

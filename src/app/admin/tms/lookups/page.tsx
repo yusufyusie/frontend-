@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Stack, Group, Text, Box, Title, Paper, ActionIcon, Skeleton, Button, Badge } from '@mantine/core';
-import { Map, Layers, Building2, LayoutList, Settings, Info, GitBranch, FileText, Database, Plus, Sparkles, DoorOpen, Coffee, Shield, Wallet, Activity, Leaf, Headset, Server, Radio, Code2, Hammer, Clock, Users, Briefcase, Settings2 } from 'lucide-react';
+import { Map, Layers, Building2, LayoutList, Settings, Info, GitBranch, FileText, Database, Plus, Sparkles, DoorOpen, Coffee, Shield, Wallet, Activity, Leaf, Headset, Server, Radio, Code2, Hammer, Clock, Users, Briefcase, Settings2, Save, X } from 'lucide-react';
 import { lookupsService, SystemLookup } from '@/services/lookups.service';
 import { LookupTree } from '@/components/organisms/tms/LookupTree';
 import { LookupForm } from '@/components/organisms/tms/LookupForm';
@@ -42,6 +42,7 @@ export default function LookupsPage() {
     const [loading, setLoading] = useState(true);
     const [catsLoading, setCatsLoading] = useState(true);
     const [editItem, setEditItem] = useState<Partial<SystemLookup> | null>(null);
+    const [isFormValid, setIsFormValid] = useState(false);
 
     useEffect(() => {
         setMounted(true);
@@ -332,6 +333,7 @@ export default function LookupsPage() {
                                 variant="subtle"
                                 color="gray"
                                 onClick={() => setEditItem(null)}
+                                leftSection={<X size={18} />}
                                 radius="xl"
                                 size="md"
                                 className="hover:bg-gray-200/50 text-gray-700 font-bold"
@@ -346,9 +348,11 @@ export default function LookupsPage() {
                                         new Event('submit', { cancelable: true, bubbles: true })
                                     );
                                 }}
+                                disabled={!isFormValid}
+                                leftSection={<Save size={18} />}
                                 radius="xl"
                                 size="md"
-                                className="shadow-lg shadow-teal-100"
+                                className={`shadow-lg shadow-teal-100 ${!isFormValid ? 'opacity-50 cursor-not-allowed' : ''}`}
                             >
                                 Save Entry
                             </Button>
@@ -358,15 +362,24 @@ export default function LookupsPage() {
                     <LookupForm
                         initialData={editItem || {}}
                         onSubmit={async (data) => {
-                            if (editItem?.id) await lookupsService.update(editItem.id, data);
-                            else await lookupsService.create(data);
+                            // Sanitize data: Remove fields not allowed by Create/UpdateLookupDto
+                            const { id, children, createdAt, updatedAt, ...sanitizedData } = data as any;
+
+                            // Ensure parentId is either a number or undefined (not null) for strict DTOs
+                            if (sanitizedData.parentId === null) {
+                                delete sanitizedData.parentId;
+                            }
+
+                            if (editItem?.id) await lookupsService.update(editItem.id, sanitizedData);
+                            else await lookupsService.create(sanitizedData);
+
                             setEditItem(null);
                             loadData();
                             if (category === 'CAT_CONFIG') {
                                 loadCategories();
                             }
                         }}
-                        onValidityChange={() => { }}
+                        onValidityChange={setIsFormValid}
                     />
                 </Modal>,
                 document.body

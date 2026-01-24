@@ -72,22 +72,22 @@ const LookupNode = ({ node, onEdit, onAddChild, onDelete }: NodeProps) => {
 
                         <Stack gap={0}>
                             <Group gap="xs" align="center">
-                                <Box fw={800} className="text-slate-800 tracking-tight leading-tight" style={{ fontSize: '14px' }}>
+                                <Box fw={900} className="text-[#16284F] tracking-tight leading-tight" style={{ fontSize: '15px' }}>
                                     <LocalizedText value={node.lookupValue as any} />
                                 </Box>
                                 {node.isSystem && (
-                                    <Badge size="xs" variant="light" color="slate" radius="xs" style={{ fontSize: '9px', height: '14px' }}>
-                                        SYSTEM
+                                    <Badge size="xs" variant="filled" color="slate" radius="sm" style={{ fontSize: '8px', height: '14px', fontWeight: 900 }}>
+                                        CORE
                                     </Badge>
                                 )}
                             </Group>
-                            <Group gap={6} align="center">
-                                <Text size="xs" fw={800} className={`px-1 rounded-sm uppercase tracking-wider font-mono text-[9px] ${node.isActive ? 'bg-cyan-50 text-[#0C7C92]' : 'bg-slate-100 text-slate-500'}`}>
+                            <Group gap={8} align="center">
+                                <Text size="xs" fw={900} className={`px-2 py-0.5 rounded-md uppercase tracking-[0.1em] font-mono text-[9px] ${node.isActive ? 'bg-cyan-100 text-[#0C7C92]' : 'bg-slate-100 text-slate-500'}`}>
                                     {node.lookupCode}
                                 </Text>
                                 {hasChildren && (
-                                    <Text size="xs" c="dimmed" fw={600} style={{ fontSize: '10px' }}>
-                                        • {node.children?.length} children
+                                    <Text size="xs" c="dimmed" fw={800} tt="uppercase" className="tracking-widest" style={{ fontSize: '9px' }}>
+                                        • {node.children?.length} Nodes
                                     </Text>
                                 )}
                             </Group>
@@ -145,8 +145,10 @@ const LookupNode = ({ node, onEdit, onAddChild, onDelete }: NodeProps) => {
                         transition={{ duration: 0.3, ease: 'easeInOut' }}
                         className="overflow-hidden"
                     >
-                        <Box pl={54} mt={4} className="border-l-2 border-dashed border-slate-200 ml-5">
-                            <Stack gap={0}>
+                        <Box pl={50} mt={6} className="relative">
+                            {/* Systemic Hierarchy Line */}
+                            <div className="absolute left-[25px] top-0 bottom-8 border-l-2 border-slate-200/50" />
+                            <Stack gap={8} py={2}>
                                 {node.children?.map((child) => (
                                     <LookupNode
                                         key={child.id}

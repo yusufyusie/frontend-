@@ -1,5 +1,5 @@
 import { Map, LayoutGrid, MapPin, LayoutList } from 'lucide-react';
-import { LocationLevel } from '../../../services/land-resources.service';
+import { LocationLevel } from '@/services/locations.service';
 
 interface Props {
     type: LocationLevel;

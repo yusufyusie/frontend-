@@ -14,6 +14,7 @@ interface ModalProps {
     footer?: ReactNode;
     variant?: 'default' | 'success' | 'warning' | 'danger';
     mode?: 'modal' | 'drawer';
+    icon?: ReactNode;
 }
 
 /**
@@ -29,7 +30,8 @@ export function Modal({
     size = 'md',
     footer,
     variant = 'default',
-    mode = 'modal'
+    mode = 'modal',
+    icon
 }: ModalProps) {
     const modalRef = useRef<HTMLDivElement>(null);
     const previousFocus = useRef<HTMLElement | null>(null);
@@ -65,13 +67,13 @@ export function Modal({
     if (!isOpen) return null;
 
     const sizeClasses = {
-        sm: 'max-w-md',
-        md: 'max-w-xl',
-        lg: 'max-w-2xl',
-        xl: 'max-w-4xl',
-        '2xl': 'max-w-5xl',
-        '3xl': 'max-w-6xl',
-        '4xl': 'max-w-7xl',
+        sm: 'max-w-lg',
+        md: 'max-w-3xl',
+        lg: 'max-w-5xl',
+        xl: 'max-w-7xl',
+        '2xl': 'max-w-[1400px]',
+        '3xl': 'max-w-[1600px]',
+        '4xl': 'max-w-[1800px]',
         full: 'w-full'
     };
 
@@ -104,55 +106,58 @@ export function Modal({
                 aria-hidden="true"
             />
 
-            <div className={`flex min-h-full ${mode === 'modal' ? 'items-center justify-center p-4' : ''}`}>
+            <div className={`flex min-h-full ${mode === 'modal' ? 'items-center justify-center p-4 sm:pl-[15%]' : ''}`}>
                 <div
                     ref={modalRef}
                     className={`relative w-full ${size == 'full' && mode !== 'drawer' ? 'max-w-7xl' : sizeClasses[size]} transform bg-white shadow-2xl transition-all duration-300 flex flex-col overflow-hidden
                         ${mode === 'modal'
-                            ? 'rounded-[2.5rem] animate-in fade-in zoom-in-95 max-h-[92vh]'
-                            : 'fixed inset-y-0 right-0 h-full rounded-l-[2.5rem] animate-in slide-in-from-right shadow-2xl'
+                            ? 'rounded-[2rem] animate-in fade-in zoom-in-95 max-h-[90dvh] h-auto'
+                            : 'fixed inset-y-0 right-0 h-[100dvh] w-full sm:w-[500px] md:w-[600px] lg:w-[700px] xl:w-[800px] rounded-l-[1.5rem] sm:rounded-l-[2.5rem] animate-in slide-in-from-right shadow-2xl'
                         }`}
                     onClick={(e) => e.stopPropagation()}
                     tabIndex={-1}
                 >
-                    {/* Header: White, Professional, Branded Icon */}
-                    <div className="px-6 py-5 flex-shrink-0 bg-white border-b border-gray-100 z-30">
+                    {/* Header: Fixed Height, Persistent */}
+                    <div className="px-6 py-5 flex-shrink-0 bg-white border-b border-gray-100 z-50">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-4">
-                                <div className={`p-2 rounded-xl ${iconBg[variant]}`}>
-                                    <StatusIcon />
+                                <div className={`p-2 rounded-xl ${iconBg[variant]} shadow-sm`}>
+                                    {icon || <StatusIcon />}
                                 </div>
-                                <div className="flex flex-col sm:flex-row sm:items-baseline sm:gap-3">
-                                    <h3 id="modal-title" className="text-xl font-extrabold text-[#0C7C92] tracking-tight">
+                                <div className="flex items-center gap-3">
+                                    <h3 id="modal-title" className="text-xl font-black text-[#16284F] tracking-tighter leading-none whitespace-nowrap">
                                         {title}
                                     </h3>
                                     {description && (
-                                        <Text size="sm" fw={600} c="dimmed" className="hidden sm:block">
-                                            {description}
-                                        </Text>
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-1.5 h-1.5 rounded-full bg-slate-200" />
+                                            <Text size="11px" fw={800} c="dimmed" tt="uppercase" lts="1px" className="opacity-80 whitespace-nowrap">
+                                                {description}
+                                            </Text>
+                                        </div>
                                     )}
                                 </div>
                             </div>
                             <button
                                 onClick={onClose}
-                                className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-all duration-200 active:scale-95"
+                                className="p-2 text-slate-300 hover:text-teal-600 hover:bg-teal-50 rounded-lg transition-all duration-200 active:scale-95"
                                 aria-label="Close modal"
                             >
-                                <X size={24} />
+                                <X size={22} strokeWidth={3} />
                             </button>
                         </div>
                     </div>
 
-                    {/* Scrollable Body: Soft Background for Card Contrast */}
-                    <div className="flex-1 overflow-y-auto scrollbar-custom bg-gray-100/80 p-6">
+                    {/* Scrollable Body: Confined between Header & Footer */}
+                    <div className="flex-1 overflow-y-auto scrollbar-custom bg-[#F8FAFC]/50 p-4 sm:p-6 md:p-8 custom-scrollbar min-h-0">
                         <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
                             {children}
                         </div>
                     </div>
 
-                    {/* Footer: Persistent, Aligned Right, Premium Background */}
+                    {/* Footer: Always Visible, Persistent Shadow */}
                     {footer && (
-                        <div className="px-6 py-5 bg-gray-100/50 border-t border-gray-200 flex-shrink-0 z-20">
+                        <div className="px-8 py-5 bg-white border-t border-gray-100 flex-shrink-0 z-50 shadow-[0_-10px_30px_rgba(0,0,0,0.03)]">
                             <div className="flex justify-end gap-3 items-center">
                                 {footer}
                             </div>

@@ -68,7 +68,7 @@ export default function TenantDetailPage() {
                                 leftSection={<ArrowLeft size={16} />}
                                 p={0}
                             />
-                            <Title order={1} fw={900} className="text-[#16284F] tracking-tight">{tenant.nameEn}</Title>
+                            <Title order={1} fw={900} className="text-[#16284F] tracking-tight">{tenant.name}</Title>
                             <Badge size="lg" variant="dot" color={tenant.statusId === 1 ? 'teal' : 'orange'} className="glass border shadow-sm">
                                 {tenant.status?.name || 'Active'}
                             </Badge>

@@ -15,10 +15,10 @@ export const TenantTableRow = ({ tenant, onDelete }: Props) => {
             <Table.Td>
                 <Group gap="sm">
                     <Avatar color="blue" radius="xl">
-                        {tenant.nameEn.substring(0, 2).toUpperCase()}
+                        {tenant.name.substring(0, 2).toUpperCase()}
                     </Avatar>
                     <Box>
-                        <Text size="sm" fw={700}>{tenant.nameEn}</Text>
+                        <Text size="sm" fw={700}>{tenant.name}</Text>
                         <Text size="xs" c="dimmed">{tenant.companyRegNumber}</Text>
                     </Box>
                 </Group>

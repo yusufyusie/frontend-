@@ -77,6 +77,10 @@ const nextConfig = {
             },
         ];
     },
+    // Redirects for decommissioned routes
+    async redirects() {
+        return [];
+    },
 
     // Performance optimizations
     webpack: (config, { dev, isServer }) => {

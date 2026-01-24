@@ -239,11 +239,6 @@ export const TenantOnboardingWizard = ({
         >
             <style dangerouslySetInnerHTML={{
                 __html: `
-                * { scrollbar-width: thin; scrollbar-color: #0C7C9244 transparent; }
-                ::-webkit-scrollbar { width: 6px; }
-                ::-webkit-scrollbar-track { background: transparent; }
-                ::-webkit-scrollbar-thumb { background: #0C7C9244; border-radius: 10px; }
-                ::-webkit-scrollbar-thumb:hover { background: #0C7C9288; }
                 .pulse-nav { animation: shadow-pulse 2s infinite; }
                 @keyframes shadow-pulse {
                     0% { box-shadow: 0 0 0 0 rgba(110, 201, 196, 0.4); }
@@ -352,7 +347,7 @@ export const TenantOnboardingWizard = ({
                 {/* MAIN CONTENT: "The Interactive Stage" */}
                 <div className="flex-1 flex flex-col bg-white">
                     {/* Stage Header */}
-                    <Box px="3rem" py="2rem" style={{ borderBottom: '1px solid #f1f5f9' }}>
+                    <Box px="2rem" py="1.25rem" style={{ borderBottom: '1px solid #f1f5f9' }}>
                         <Group justify="space-between">
                             <Group gap="xl">
                                 <Box className="md:hidden" w={80}>
@@ -368,10 +363,10 @@ export const TenantOnboardingWizard = ({
                                 </Box>
                                 <div>
                                     <Group gap="xs">
-                                        <Text size="xs" fw={900} c="#0C7C92" tt="uppercase" lts="2px">Onboarding Step {active + 1}</Text>
+                                        <Text size="10px" fw={900} c="#0C7C92" tt="uppercase" lts="1.5px">Onboarding Step {active + 1}</Text>
                                         <Badge size="xs" variant="light" color="blue">Enterprise</Badge>
                                     </Group>
-                                    <Title order={2} fw={900} c="#16284F" lts="-1.5px" mt={4}>
+                                    <Title order={3} fw={900} c="#16284F" lts="-1px" mt={2}>
                                         {wizardSteps[active].label}
                                     </Title>
                                 </div>
@@ -389,7 +384,7 @@ export const TenantOnboardingWizard = ({
                                         <HelpCircle size={22} />
                                     </ActionIcon>
                                 </Tooltip>
-                                <ActionIcon variant="light" color="gray" size="xl" radius="xl" onClick={onClose}>
+                                <ActionIcon variant="light" color="gray" size="xl" radius="xl" onClick={onClose} className="hover:text-teal-600 hover:bg-teal-50 transition-all">
                                     <X size={22} />
                                 </ActionIcon>
                             </Group>
@@ -398,7 +393,7 @@ export const TenantOnboardingWizard = ({
 
                     {/* Stage Content */}
                     <div className="flex-1 flex overflow-hidden">
-                        <ScrollArea className="flex-1" viewportProps={{ style: { padding: '4rem 3rem' } }}>
+                        <ScrollArea className="flex-1 scrollbar-custom" viewportProps={{ style: { padding: '2.5rem 2rem' } }} scrollbarSize={12}>
                             <div className="max-w-[750px] mx-auto">
                                 <Transition mounted transition="slide-up" duration={400} timingFunction="ease">
                                     {(styles) => <div style={styles}>{renderStepContent()}</div>}
@@ -409,7 +404,7 @@ export const TenantOnboardingWizard = ({
                         {/* RIGHT CONTEXT PANEL: Previews & Help Hub */}
                         <Transition mounted={showHelp} transition="slide-left" duration={300}>
                             {(styles) => (
-                                <Box w={480} p="3rem" style={{ ...styles, background: '#F8FAFC', borderLeft: '1px solid #f1f5f9' }} className="hidden lg:block overflow-y-auto">
+                                <Box w={400} p="2rem" style={{ ...styles, background: '#F8FAFC', borderLeft: '1px solid #f1f5f9' }} className="hidden lg:block overflow-y-auto">
                                     <Stack gap="2.5rem">
                                         {/* Digital Certificate Preview */}
                                         <Box>
@@ -455,7 +450,7 @@ export const TenantOnboardingWizard = ({
                     </div>
 
                     {/* Stage Controls */}
-                    <Box px="3rem" py="2rem" style={{ background: 'white', borderTop: '1px solid #f1f5f9' }}>
+                    <Box px="2rem" py="1.25rem" style={{ background: 'white', borderTop: '1px solid #f1f5f9' }}>
                         <div className="max-w-[1200px] mx-auto flex justify-between items-center">
                             <Button
                                 variant="subtle"

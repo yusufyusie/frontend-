@@ -1,14 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Button, Group, Stack, Box, Text, Paper, Title, LoadingOverlay } from '@mantine/core';
-import { Plus, RefreshCw, Map, Grid3x3, MapPin, TrendingUp, X as CloseIcon, Save, Search as SearchIcon } from 'lucide-react';
+import { Plus, RefreshCw, Map, Grid3x3, MapPin, TrendingUp, X as CloseIcon, Save, Search as SearchIcon, Building2, Layers, DoorOpen } from 'lucide-react';
 import { locationsService } from '@/services/locations.service';
-import { LandForm } from '@/components/organisms/tms/LandForm';
-import { BuildingForm } from '@/components/organisms/tms/BuildingForm';
-import { buildingsService } from '@/services/buildings.service';
+import { SpatialResourceForm } from '@/components/organisms/tms/SpatialResourceForm';
 import { AdvancedTreeGrid, TreeNode } from '@/components/organisms/tms/AdvancedTreeGrid';
 import { Modal } from '@/components/Modal';
+import { Badge as MantineBadge } from '@mantine/core';
 import { toast } from '@/components/Toast';
 import { LayoutList } from 'lucide-react';
 
@@ -16,6 +16,11 @@ export default function LandPage() {
     const [treeData, setTreeData] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [opened, setOpened] = useState(false);
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
     const [isFormValid, setIsFormValid] = useState(false);
     const [activeResource, setActiveResource] = useState<Partial<any> | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
@@ -23,6 +28,8 @@ export default function LandPage() {
         zones: 0,
         blocks: 0,
         plots: 0,
+        buildings: 0,
+        floors: 0,
         rooms: 0,
         totalArea: 0
     });
@@ -35,25 +42,26 @@ export default function LandPage() {
             setTreeData(data);
 
             // Calculate metrics
-            let zones = 0, blocks = 0, buildings = 0, plots = 0, rooms = 0, totalArea = 0;
+            let zones = 0, blocks = 0, buildings = 0, plots = 0, floors = 0, rooms = 0, totalArea = 0;
             const countResources = (items: any[]) => {
                 items.forEach(item => {
                     if (item.type === 'ZONE') zones++;
                     if (item.type === 'BLOCK') blocks++;
-                    if (item.type === 'BUILDING') buildings++;
                     if (item.type === 'PLOT') {
                         plots++;
-                        totalArea += Number(item.areaM2 || 0);
+                        totalArea += Number(item.area || 0);
                     }
+                    if (item.type === 'BUILDING') buildings++;
+                    if (item.type === 'FLOOR') floors++;
                     if (item.type === 'ROOM') {
                         rooms++;
-                        if (!plots) totalArea += Number(item.areaM2 || 0);
+                        totalArea += Number(item.area || 0);
                     }
                     if (item.children) countResources(item.children);
                 });
             };
             countResources(data);
-            setMetrics({ zones, blocks, plots, rooms, totalArea });
+            setMetrics({ zones, blocks, plots, buildings, floors, rooms, totalArea });
         } catch (error) {
             toast.error('Failed to fetch land resource tree');
         } finally {
@@ -80,9 +88,10 @@ export default function LandPage() {
 
         const nextTypeMap: any = {
             'ZONE': 'BLOCK',
-            'BLOCK': 'BUILDING',
-            'BUILDING': 'PLOT',
-            'PLOT': 'ROOM',
+            'BLOCK': 'PLOT',
+            'PLOT': 'BUILDING',
+            'BUILDING': 'FLOOR',
+            'FLOOR': 'ROOM',
             'ROOM': 'ROOM',
         };
 
@@ -99,7 +108,7 @@ export default function LandPage() {
         const resource = findResourceById(treeData, node.id as any);
         if (!resource) return;
 
-        if (confirm(`⚠️ Delete ${resource.name || resource.nameEn}? This cannot be undone.`)) {
+        if (confirm(`⚠️ Delete ${resource.name}? This cannot be undone.`)) {
             try {
                 await locationsService.delete(resource.type, resource.realId);
                 toast.success('Resource deleted successfully');
@@ -119,12 +128,8 @@ export default function LandPage() {
     const handleSubmit = async (data: Partial<any>) => {
         setIsLoading(true);
         try {
-            if (activeResource?.type === 'BUILDING') {
-                await buildingsService.create(data);
-            } else {
-                await locationsService.create(data);
-            }
-            toast.success(`${activeResource?.type} created successfully`);
+            await locationsService.create(data);
+            toast.success(`${data.type} created successfully`);
             fetchTree();
             setOpened(false);
         } catch (error: any) {
@@ -138,21 +143,22 @@ export default function LandPage() {
     const convertToTreeNodes = (resources: any[]): TreeNode[] => {
         return resources.map(resource => ({
             id: resource.id,
-            label: resource.name || resource.nameEn,
-            icon: resource.type === 'ZONE' ? <Map size={16} /> :
-                resource.type === 'BLOCK' ? <Grid3x3 size={16} /> :
-                    resource.type === 'BUILDING' ? <MapPin size={16} className="text-blue-600" /> :
-                        resource.type === 'PLOT' ? <TrendingUp size={16} className="text-teal-600" /> :
-                            <LayoutList size={16} />,
+            label: resource.name || resource.code,
+            icon: resource.type === 'ZONE' ? <Map size={18} className="text-emerald-600" /> :
+                resource.type === 'BLOCK' ? <Grid3x3 size={18} className="text-blue-600" /> :
+                    resource.type === 'PLOT' ? <MapPin size={18} className="text-teal-600" /> :
+                        resource.type === 'BUILDING' ? <Building2 size={18} className="text-violet-600" /> :
+                            resource.type === 'FLOOR' ? <Layers size={18} className="text-amber-600" /> :
+                                <DoorOpen size={18} className="text-pink-600" />,
             children: resource.children ? convertToTreeNodes(resource.children) : undefined,
             meta: {
                 ...resource,
-                occupantName: resource.occupantName || 'v',
-                contractArea: resource.contractArea,
-                areaVariance: resource.areaVariance,
-                occupancyStatus: resource.roomStatus?.name || (resource.occupantName ? 'Occupied' : 'Vacant'),
                 usageType: resource.type,
-                ownershipType: resource.code
+                ownershipType: resource.code,
+                areaM2: resource.area || resource.totalArea || 0,
+                contractAreaM2: resource.contractArea || 0,
+                areaVarianceM2: resource.areaVariance || 0,
+                occupancyStatus: resource.roomStatus?.name || (resource.occupantName ? 'Occupied' : 'Vacant'),
             }
         }));
     };
@@ -168,13 +174,21 @@ export default function LandPage() {
         return null;
     };
 
+    const handleViewDetail = (node: TreeNode) => {
+        const resource = findResourceById(treeData, node.id as any);
+        if (resource) {
+            toast.info(`Viewing details for ${resource.name}...`);
+            // Future implementation: Open a robust detail drawer or analytics page
+        }
+    };
+
     return (
         <div className="space-y-6 animate-fade-in">
             {/* Page Header */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                    <h1 className="text-3xl md:text-4xl font-bold text-primary">Land Resources</h1>
-                    <p className="text-gray-500 mt-1">Territorial hierarchy management: Zones → Blocks → Plots</p>
+                    <h1 className="text-3xl md:text-4xl font-bold text-primary">Spatial Structure</h1>
+                    <p className="text-gray-500 mt-1">Unified territorial hierarchy: Zone → Block → Plot → Building → Floor → Room</p>
                 </div>
                 <button
                     onClick={handleCreateNewZone}
@@ -187,50 +201,59 @@ export default function LandPage() {
             </div>
 
             {/* Metrics Dashboard */}
-            <div className="grid grid-cols-5 gap-4">
-                <div className="card p-4 hover:shadow-lg transition-shadow">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+                <div className="card p-4 hover:shadow-lg transition-shadow border-emerald-100 bg-emerald-50/20">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Total Zones</p>
-                            <p className="text-2xl font-black text-gray-900 mt-1">{metrics.zones}</p>
+                            <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest">Zones</p>
+                            <p className="text-2xl font-black text-emerald-900 mt-1">{metrics.zones}</p>
                         </div>
-                        <Map className="w-10 h-10 text-primary/20" />
+                        <Map className="w-8 h-8 text-emerald-600/20" />
                     </div>
                 </div>
-                <div className="card p-4 hover:shadow-lg transition-shadow">
+                <div className="card p-4 hover:shadow-lg transition-shadow border-blue-100 bg-blue-50/20">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Total Blocks</p>
-                            <p className="text-2xl font-black text-gray-900 mt-1">{metrics.blocks}</p>
+                            <p className="text-[10px] font-bold text-blue-600 uppercase tracking-widest">Blocks</p>
+                            <p className="text-2xl font-black text-blue-900 mt-1">{metrics.blocks}</p>
                         </div>
-                        <Grid3x3 className="w-10 h-10 text-cyan-500/20" />
+                        <Grid3x3 className="w-8 h-8 text-blue-600/20" />
                     </div>
                 </div>
-                <div className="card p-4 hover:shadow-lg transition-shadow">
+                <div className="card p-4 hover:shadow-lg transition-shadow border-teal-100 bg-teal-50/20">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Total Plots</p>
-                            <p className="text-2xl font-black text-gray-900 mt-1">{metrics.plots}</p>
+                            <p className="text-[10px] font-bold text-teal-600 uppercase tracking-widest">Plots</p>
+                            <p className="text-2xl font-black text-teal-900 mt-1">{metrics.plots}</p>
                         </div>
-                        <MapPin className="w-10 h-10 text-success/20" />
+                        <MapPin className="w-8 h-8 text-teal-600/20" />
                     </div>
                 </div>
-                <div className="card p-4 hover:shadow-lg transition-shadow">
+                <div className="card p-4 hover:shadow-lg transition-shadow border-violet-100 bg-violet-50/20">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Total Rooms</p>
-                            <p className="text-2xl font-black text-gray-900 mt-1">{metrics.rooms}</p>
+                            <p className="text-[10px] font-bold text-violet-600 uppercase tracking-widest">Buildings</p>
+                            <p className="text-2xl font-black text-violet-900 mt-1">{metrics.buildings}</p>
                         </div>
-                        <LayoutList className="w-10 h-10 text-rose-500/20" />
+                        <Building2 className="w-8 h-8 text-violet-600/20" />
                     </div>
                 </div>
-                <div className="card p-4 hover:shadow-lg transition-shadow">
+                <div className="card p-4 hover:shadow-lg transition-shadow border-pink-100 bg-pink-50/20">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Total Area</p>
-                            <p className="text-2xl font-black text-gray-900 mt-1">{metrics.totalArea.toLocaleString()} m²</p>
+                            <p className="text-[10px] font-bold text-pink-600 uppercase tracking-widest">Rooms</p>
+                            <p className="text-2xl font-black text-pink-900 mt-1">{metrics.rooms}</p>
                         </div>
-                        <TrendingUp className="w-10 h-10 text-orange-500/20" />
+                        <DoorOpen className="w-8 h-8 text-pink-600/20" />
+                    </div>
+                </div>
+                <div className="card p-4 hover:shadow-lg transition shadow border-orange-100 bg-orange-50/20">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <p className="text-[10px] font-bold text-orange-600 uppercase tracking-widest">Total Area</p>
+                            <p className="text-2xl font-black text-orange-900 mt-1">{metrics.totalArea.toLocaleString()} <span className="text-xs font-bold">m²</span></p>
+                        </div>
+                        <TrendingUp className="w-8 h-8 text-orange-600/20" />
                     </div>
                 </div>
             </div>
@@ -241,9 +264,9 @@ export default function LandPage() {
                     <div className="flex items-center gap-3">
                         <Map size={20} className="text-primary flex-shrink-0" />
                         <div>
-                            <p className="text-sm font-bold text-gray-900">Territorial Hierarchy Overview</p>
+                            <p className="text-sm font-bold text-gray-900">Spatial Structure Hierarchy Overview</p>
                             <p className="text-xs text-gray-600 mt-1">
-                                Resources are organized as: <b>Zone</b> (e.g., Commercial) → <b>Block</b> (e.g., B01) → <b>Building</b> (e.g., ITS01) → <b>Plot/Unit</b> (e.g., U01).
+                                Physical layout: <b>Zone</b> → <b>Block</b> → <b>Plot</b> → <b>Building</b> → <b>Floor</b> → <b>Room</b>.
                             </p>
                         </div>
                     </div>
@@ -272,6 +295,7 @@ export default function LandPage() {
                         onEdit={handleEdit}
                         onDelete={handleDelete}
                         onAddChild={handleAddChild}
+                        onViewDetail={handleViewDetail}
                         searchable={true}
                         initialExpandLevel={1}
                         searchTerm={searchTerm}
@@ -286,62 +310,62 @@ export default function LandPage() {
                 )}
             </div>
 
-            {/* Branded Modal */}
-            <Modal
-                isOpen={opened}
-                onClose={() => setOpened(false)}
-                title={activeResource?.id ? 'Edit Land Resource' : 'New Land Resource'}
-                description="Territorial Management"
-                size="lg"
-                footer={
-                    <Group justify="flex-end" gap="md">
-                        <Button
-                            variant="subtle"
-                            color="gray"
-                            onClick={() => setOpened(false)}
-                            leftSection={<CloseIcon size={18} />}
-                            radius="xl"
-                            size="md"
-                            className="hover:bg-gray-200/50 text-gray-700 font-bold"
-                        >
-                            Cancel
-                        </Button>
-                        <Button
-                            variant="filled"
-                            bg="#0C7C92"
-                            onClick={() => {
-                                document.getElementById('land-form')?.dispatchEvent(
-                                    new Event('submit', { cancelable: true, bubbles: true })
-                                );
-                            }}
-                            disabled={!isFormValid}
-                            leftSection={<Save size={18} />}
-                            radius="xl"
-                            size="md"
-                            className={`shadow-lg shadow-teal-100 ${!isFormValid ? 'opacity-50 cursor-not-allowed' : ''}`}
-                        >
-                            Save Land Resource
-                        </Button>
-                    </Group>
-                }
-            >
-                {activeResource?.type === 'BUILDING' ? (
-                    <BuildingForm
+            {/* Branded Elite Modal Architecture - Aligned with System Lookups Reference */}
+            {mounted && createPortal(
+                <Modal
+                    isOpen={opened}
+                    onClose={() => setOpened(false)}
+                    mode="modal"
+                    size="lg"
+                    title={activeResource?.realId || activeResource?.id ? 'Edit Configuration' : `Register ${activeResource?.type || ''}`}
+                    description="Spatial Structure Management"
+                    icon={activeResource?.type === 'ZONE' ? <Map size={24} className="text-[#0C7C92]" /> :
+                        activeResource?.type === 'BLOCK' ? <Grid3x3 size={24} className="text-[#0C7C92]" /> :
+                            activeResource?.type === 'PLOT' ? <MapPin size={24} className="text-[#0C7C92]" /> :
+                                activeResource?.type === 'BUILDING' ? <Building2 size={24} className="text-[#0C7C92]" /> :
+                                    activeResource?.type === 'FLOOR' ? <Layers size={24} className="text-[#0C7C92]" /> :
+                                        activeResource?.type === 'ROOM' ? <DoorOpen size={24} className="text-[#0C7C92]" /> : undefined}
+                    footer={
+                        <Group justify="flex-end" gap="md">
+                            <Button
+                                variant="subtle"
+                                color="gray"
+                                onClick={() => setOpened(false)}
+                                leftSection={<CloseIcon size={18} />}
+                                radius="xl"
+                                size="md"
+                                className="hover:bg-gray-200/50 text-gray-700 font-bold"
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                variant="filled"
+                                bg="#0C7C92"
+                                onClick={() => {
+                                    document.getElementById('spatial-form')?.dispatchEvent(
+                                        new Event('submit', { cancelable: true, bubbles: true })
+                                    );
+                                }}
+                                disabled={!isFormValid}
+                                leftSection={<Save size={18} />}
+                                radius="xl"
+                                size="md"
+                                className={`shadow-lg shadow-teal-100 ${!isFormValid ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            >
+                                Save Configuration
+                            </Button>
+                        </Group>
+                    }
+                >
+                    <SpatialResourceForm
                         initialData={activeResource || {}}
                         onSubmit={handleSubmit}
                         isLoading={isLoading}
-                        blockId={activeResource?.parentId}
                         onValidityChange={setIsFormValid}
                     />
-                ) : (
-                    <LandForm
-                        initialData={activeResource || {}}
-                        onSubmit={handleSubmit}
-                        isLoading={isLoading}
-                        onValidityChange={setIsFormValid}
-                    />
-                )}
-            </Modal>
+                </Modal>,
+                document.body
+            )}
         </div>
     );
 }

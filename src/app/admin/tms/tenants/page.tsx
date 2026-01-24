@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Plus, Search, Filter, RefreshCw, Eye, Edit, Trash2, MoreVertical, Users, Building2, FileText, TrendingUp, Mail, Phone, ExternalLink } from 'lucide-react';
 import { tenantsService, Tenant } from '@/services/tenants.service';
+import { lookupsService } from '@/services/lookups.service';
 import { TenantOnboardingWizard } from '@/components/organisms/tms/TenantOnboardingWizardMaster';
 import { TenantStatusBadge } from '@/components/atoms/tms/TenantStatusBadge';
 import { SpatialStats } from '@/components/organisms/tms/SpatialStats';
@@ -13,7 +14,8 @@ export default function TenantDirectoryPage() {
     const [tenants, setTenants] = useState<Tenant[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [opened, setOpened] = useState(false);
-    const [filters, setFilters] = useState({ search: '', statusId: '', category: '' });
+    const [sectors, setSectors] = useState<any[]>([]);
+    const [filters, setFilters] = useState({ search: '', statusId: '', businessCategoryId: '' });
     const [activeTab, setActiveTab] = useState('all');
 
     // Metrics
@@ -43,6 +45,10 @@ export default function TenantDirectoryPage() {
             setIsLoading(false);
         }
     };
+
+    useEffect(() => {
+        lookupsService.getByCategory('BUSINESS_CATEGORIES').then(res => setSectors((res as any).data || res));
+    }, []);
 
     useEffect(() => {
         fetchTenants();
@@ -87,7 +93,7 @@ export default function TenantDirectoryPage() {
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                     <h1 className="text-3xl md:text-4xl font-bold text-primary">Tenant Directory</h1>
-                    <p className="text-gray-500 mt-1">Centralized database for IT Park registered companies</p>
+                    <p className="text-gray-500 mt-1">Enterprise-grade database of IT Park registered organizations</p>
                 </div>
                 <button
                     onClick={() => setOpened(true)}
@@ -101,24 +107,41 @@ export default function TenantDirectoryPage() {
             {/* Compact Intelligence Header - Replaces individual metric cards and large stats */}
             <SpatialStats tenantMetrics={metrics} />
 
-            {/* Search Filter */}
-            <div className="card p-0 overflow-hidden">
-                <div className="relative">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                    <input
-                        type="text"
-                        value={filters.search}
-                        onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-                        placeholder="Search by company name, registration, or TIN..."
-                        className="w-full pl-12 pr-4 py-4 border-none outline-none focus:ring-0 transition-all text-gray-700 bg-transparent"
-                    />
+            {/* Filters Row */}
+            <div className="flex flex-col md:flex-row gap-4">
+                <div className="card p-0 overflow-hidden flex-grow shadow-sm">
+                    <div className="relative">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                        <input
+                            type="text"
+                            value={filters.search}
+                            onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+                            placeholder="Search by company name, registration, or TIN..."
+                            className="w-full pl-12 pr-4 py-4 border-none outline-none focus:ring-0 transition-all text-sm font-medium text-gray-700 bg-transparent"
+                        />
+                    </div>
+                </div>
+                <div className="w-full md:w-64">
+                    <div className="card p-0 overflow-hidden shadow-sm h-full flex items-center bg-white">
+                        <Filter className="ml-4 w-4 h-4 text-gray-400" />
+                        <select
+                            value={filters.businessCategoryId}
+                            onChange={(e) => setFilters({ ...filters, businessCategoryId: e.target.value })}
+                            className="w-full py-4 px-3 border-none outline-none focus:ring-0 text-sm font-bold text-gray-600 bg-transparent cursor-pointer"
+                        >
+                            <option value="">All Sectors</option>
+                            {sectors.map(s => (
+                                <option key={s.id} value={s.id}>{s.lookupValue.en}</option>
+                            ))}
+                        </select>
+                    </div>
                 </div>
             </div>
 
-            {/* Tabs */}
-            <div className="flex gap-2 border-b border-gray-200">
+            {/* Tabs - Modern Pill Style */}
+            <div className="flex gap-4 p-1.5 bg-slate-100/50 rounded-2xl w-fit">
                 {[
-                    { key: 'all', label: 'All', count: tenants.length },
+                    { key: 'all', label: 'All Organizations', count: tenants.length },
                     { key: 'active', label: 'Active', count: metrics.active },
                     { key: 'onboarding', label: 'Onboarding', count: metrics.onboarding },
                     { key: 'suspended', label: 'Suspended', count: metrics.suspended }
@@ -126,98 +149,114 @@ export default function TenantDirectoryPage() {
                     <button
                         key={tab.key}
                         onClick={() => setActiveTab(tab.key)}
-                        className={`px-4 py-2 text-sm font-bold transition-all border-b-2 ${activeTab === tab.key
-                            ? 'text-primary border-primary'
-                            : 'text-gray-400 border-transparent hover:text-gray-600'
+                        className={`px-5 py-2 text-[11px] font-black transition-all rounded-[0.85rem] tracking-wider uppercase ${activeTab === tab.key
+                            ? 'bg-white text-primary shadow-sm'
+                            : 'text-gray-400 hover:text-gray-600'
                             }`}
                     >
-                        {tab.label} ({tab.count})
+                        {tab.label} <span className="ml-1 opacity-50">{tab.count}</span>
                     </button>
                 ))}
             </div>
 
             {/* Table - Access Control Style */}
-            <div className="card p-0 overflow-hidden shadow-sm">
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left">
+            <div className="border border-slate-200/60 rounded-3xl overflow-hidden bg-white shadow-xl shadow-slate-200/40">
+                <div className="overflow-x-auto custom-scrollbar">
+                    <table className="w-full text-left border-collapse">
                         <thead>
-                            <tr className="bg-gray-50/50 border-b border-gray-100">
-                                <th className="p-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Company Info</th>
-                                <th className="p-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Sector</th>
-                                <th className="p-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Contact Basics</th>
-                                <th className="p-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Assets</th>
-                                <th className="p-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-center">Status</th>
-                                <th className="p-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-right">Actions</th>
+                            <tr className="bg-[#F8FAFC] border-b border-slate-200">
+                                <th className="px-6 py-5 text-[10px] font-black text-[#64748B] uppercase tracking-[0.15em] w-[30%]">Organization Entity</th>
+                                <th className="px-6 py-5 text-[10px] font-black text-[#64748B] uppercase tracking-[0.15em] w-[15%]">Business Sector</th>
+                                <th className="px-6 py-5 text-[10px] font-black text-[#64748B] uppercase tracking-[0.15em] w-[20%]">Contact Interface</th>
+                                <th className="px-6 py-5 text-[10px] font-black text-[#64748B] uppercase tracking-[0.15em] w-[15%]">Resource Stack</th>
+                                <th className="px-6 py-5 text-[10px] font-black text-[#64748B] uppercase tracking-[0.15em] text-center w-[10%]">Status</th>
+                                <th className="px-6 py-5 text-[10px] font-black text-[#0C7C92] uppercase tracking-[0.15em] text-right w-[10%]">Operations</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-50">
+                        <tbody className="divide-y divide-slate-100">
                             {filteredTenants.length === 0 ? (
                                 <tr>
-                                    <td colSpan={6} className="text-center p-12 text-gray-400 italic">
-                                        No matching tenant records found.
+                                    <td colSpan={6} className="text-center py-32 bg-slate-50/50">
+                                        <div className="inline-flex p-8 bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 mb-6">
+                                            <TrendingUp size={56} className="text-slate-200" strokeWidth={1} />
+                                        </div>
+                                        <p className="text-xl font-black text-slate-800 tracking-tight">System Record Empty</p>
+                                        <p className="text-sm text-slate-400 mt-2 font-medium">No tenants match the current filter criteria.</p>
                                     </td>
                                 </tr>
                             ) : (
                                 filteredTenants.map((tenant) => (
-                                    <tr key={tenant.id} className="hover:bg-gray-50/30 transition-colors group">
-                                        <td className="p-4">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-bold text-sm border border-primary/20">
+                                    <tr key={tenant.id} className="hover:bg-teal-50/20 transition-all duration-200 group relative">
+                                        <td className="px-6 py-5">
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-12 h-12 rounded-[1rem] bg-white shadow-lg border border-slate-100 flex items-center justify-center text-primary font-black text-sm group-hover:scale-110 transition-transform">
                                                     {tenant.name.substring(0, 2).toUpperCase()}
                                                 </div>
                                                 <div>
-                                                    <div className="font-bold text-gray-900 leading-tight">{tenant.name}</div>
-                                                    <div className="text-[10px] font-mono text-gray-400 mt-0.5">REG: {tenant.companyRegNumber}</div>
+                                                    <div className="font-extrabold text-[#16284F] text-[14px] leading-tight mb-1">{tenant.name}</div>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 uppercase tracking-wider">REG: {tenant.companyRegNumber}</span>
+                                                        <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-orange-50 text-orange-500 uppercase tracking-wider">TIN: {tenant.tinNumber || 'PENDING'}</span>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="p-4">
-                                            <span className="px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 text-[10px] font-bold border border-blue-100 uppercase tracking-tighter">
-                                                {(tenant as any).businessCategory?.lookupValue?.en || 'N/A'}
-                                            </span>
+                                        <td className="px-6 py-5">
+                                            <div className="flex items-center gap-2">
+                                                <Building2 size={14} className="text-blue-400" />
+                                                <span className="text-[11px] font-black text-slate-600 uppercase tracking-tight">
+                                                    {(tenant as any).businessCategory?.lookupValue?.en || 'UNSPECIFIED'}
+                                                </span>
+                                            </div>
                                         </td>
-                                        <td className="p-4">
-                                            <div className="space-y-1">
+                                        <td className="px-6 py-5">
+                                            <div className="space-y-2">
                                                 {tenant.email && (
-                                                    <div className="flex items-center gap-1">
-                                                        <Mail size={10} className="text-gray-400" />
-                                                        <span className="text-xs text-gray-600">{tenant.email}</span>
-                                                    </div>
+                                                    <a href={`mailto:${tenant.email}`} className="flex items-center gap-2 group/link">
+                                                        <div className="p-1 rounded-md bg-slate-50 group-hover/link:bg-blue-50 transition-colors">
+                                                            <Mail size={12} className="text-slate-400 group-hover/link:text-blue-500" />
+                                                        </div>
+                                                        <span className="text-[11px] font-bold text-slate-500 group-hover/link:text-blue-600 truncate max-w-[150px]">{tenant.email}</span>
+                                                    </a>
                                                 )}
                                                 {tenant.phone && (
-                                                    <div className="flex items-center gap-1">
-                                                        <Phone size={10} className="text-gray-400" />
-                                                        <span className="text-xs text-gray-600">{tenant.phone}</span>
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="p-1 rounded-md bg-slate-50">
+                                                            <Phone size={12} className="text-slate-400" />
+                                                        </div>
+                                                        <span className="text-[11px] font-bold text-slate-500">{tenant.phone}</span>
                                                     </div>
                                                 )}
                                             </div>
                                         </td>
-                                        <td className="p-4">
-                                            <div className="flex gap-2">
-                                                <span className="px-1.5 py-0.5 rounded bg-blue-50 text-blue-600 text-[10px] font-bold">
-                                                    {tenant._count?.contacts || 0} Liaisons
-                                                </span>
-                                                <span className="px-1.5 py-0.5 rounded bg-orange-50 text-orange-600 text-[10px] font-bold">
-                                                    {tenant._count?.documents || 0} Docs
-                                                </span>
+                                        <td className="px-6 py-5">
+                                            <div className="flex flex-col gap-1.5">
+                                                <div className="flex items-center gap-2">
+                                                    <Users size={12} className="text-teal-500" />
+                                                    <span className="text-[11px] font-black text-slate-700">{tenant._count?.contacts || 0} Professional Liaisons</span>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <FileText size={12} className="text-orange-500" />
+                                                    <span className="text-[11px] font-black text-slate-700">{tenant._count?.documents || 0} Registered Documents</span>
+                                                </div>
                                             </div>
                                         </td>
-                                        <td className="p-4 text-center">
+                                        <td className="px-6 py-5 text-center">
                                             <TenantStatusBadge statusName={(tenant as any).status?.lookupCode} />
                                         </td>
-                                        <td className="p-4">
-                                            <div className="flex items-center justify-end gap-1.5">
+                                        <td className="px-6 py-5">
+                                            <div className="flex items-center justify-end gap-2 opacity-40 group-hover:opacity-100 transition-opacity">
                                                 <Link
                                                     href={`/admin/tms/tenants/${tenant.id}`}
-                                                    className="p-2 text-gray-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-all"
-                                                    title="View Profile"
+                                                    className="p-2.5 bg-white text-primary border border-slate-200 rounded-xl hover:shadow-lg hover:bg-slate-50 transition-all active:scale-95"
+                                                    title="Organization Intelligence"
                                                 >
                                                     <Eye className="w-4 h-4" />
                                                 </Link>
                                                 <button
                                                     onClick={() => handleDelete(tenant.id)}
-                                                    className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
-                                                    title="Deactivate Account"
+                                                    className="p-2.5 bg-white text-rose-500 border border-slate-200 rounded-xl hover:shadow-lg hover:bg-rose-50 transition-all active:scale-95"
+                                                    title="Deactivate Access"
                                                 >
                                                     <Trash2 className="w-4 h-4" />
                                                 </button>
