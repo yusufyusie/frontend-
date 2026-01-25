@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, useEffect, ReactNode } from 'react';
-import { ChevronRight, ChevronDown, Plus, Edit, Trash2, Search as SearchIcon, Eye } from 'lucide-react';
+import { ChevronRight, ChevronDown, Plus, Edit, Trash2, Search as SearchIcon, Eye, MapPin, FileText } from 'lucide-react';
 import { Badge, Text, Progress } from '@mantine/core';
 
 export interface TreeNode {
@@ -97,8 +97,7 @@ export function AdvancedTreeGrid({
         return (
             <div key={node.id} className="last:border-0 border-b border-slate-100/50">
                 <div
-                    onClick={() => hasChildren && toggleExpand(node.id)}
-                    className={`${GRID_LAYOUT} group items-center hover:bg-slate-50 transition-all duration-300 relative cursor-pointer active:bg-slate-100/50`}
+                    className={`${GRID_LAYOUT} group items-center hover:bg-slate-50 transition-all duration-300 relative active:bg-slate-100/50`}
                 >
 
                     {/* Active Selection Indicator */}
@@ -128,8 +127,12 @@ export function AdvancedTreeGrid({
                         <div className="flex items-center gap-3 min-w-0 z-10">
                             {hasChildren ? (
                                 <div
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        if (hasChildren) toggleExpand(node.id);
+                                    }}
                                     className={`
-                                        w-7 h-7 flex items-center justify-center rounded-lg transition-all shadow-sm border
+                                        w-7 h-7 flex items-center justify-center rounded-lg transition-all shadow-sm border cursor-pointer active:scale-90
                                         ${isExpanded ? 'bg-[#0C7C92] text-white border-[#0C7C92]' : 'bg-white text-slate-600 border-slate-200 group-hover:border-[#0C7C92]'}
                                     `}
                                 >
@@ -157,6 +160,18 @@ export function AdvancedTreeGrid({
                                         <span className="text-[8px] font-black text-[#0C7C92]/60 font-mono tracking-tighter leading-none">
                                             #{meta.code}
                                         </span>
+                                    )}
+                                    {meta.gpsCoordinates && (
+                                        <div className="flex items-center gap-0.5 text-[8px] text-blue-500 font-black animate-pulse" title={`GPS: ${meta.gpsCoordinates}`}>
+                                            <MapPin size={8} strokeWidth={3} />
+                                            GEO
+                                        </div>
+                                    )}
+                                    {meta.masterPlanRef && (
+                                        <div className="flex items-center gap-0.5 text-[8px] text-amber-500 font-black" title={`Plan Ref: ${meta.masterPlanRef}`}>
+                                            <FileText size={8} strokeWidth={3} />
+                                            ARCHIVE
+                                        </div>
                                     )}
                                 </div>
                             </div>
@@ -201,9 +216,19 @@ export function AdvancedTreeGrid({
                     {/* Variance */}
                     <div className="px-6 py-2 border-l border-slate-100/50 text-right h-full flex flex-col justify-center">
                         <span className="text-[8px] text-[#64748B] font-black uppercase tracking-[0.1em] mb-0.5">Variance</span>
-                        <span className={`text-[12px] font-mono font-black leading-none ${meta.areaVarianceM2 > 0 ? 'text-orange-600' : 'text-slate-900'}`}>
-                            {meta.areaVarianceM2 ? (meta.areaVarianceM2 > 0 ? '+' : '') + Number(meta.areaVarianceM2).toLocaleString() : '0'}
-                        </span>
+                        {(() => {
+                            const actual = Number(meta.areaM2 || 0);
+                            const contract = Number(meta.contractAreaM2 || 0);
+                            const variance = meta.areaVarianceM2 !== undefined ? Number(meta.areaVarianceM2) : (actual - contract);
+                            const isLeakage = variance < 0;
+                            const isSurplus = variance > 0;
+
+                            return (
+                                <span className={`text-[12px] font-mono font-black leading-none ${isLeakage ? 'text-rose-600' : isSurplus ? 'text-amber-600' : 'text-slate-400'}`}>
+                                    {variance === 0 ? '0' : (variance > 0 ? '+' : '') + variance.toLocaleString()}
+                                </span>
+                            );
+                        })()}
                     </div>
 
                     {/* Live Status */}

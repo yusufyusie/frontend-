@@ -297,7 +297,7 @@ export default function LandPage() {
                         onAddChild={handleAddChild}
                         onViewDetail={handleViewDetail}
                         searchable={true}
-                        initialExpandLevel={1}
+                        initialExpandLevel={0}
                         searchTerm={searchTerm}
                         onSearchChange={setSearchTerm}
                     />

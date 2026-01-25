@@ -120,7 +120,7 @@ export const SpatialResourceForm = ({ initialData, onSubmit, isLoading, onValidi
                         <TextInput
                             label="Identification Code"
                             placeholder={`e.g. ${formData.type === 'ZONE' ? 'Z-100' : 'CORE-001'}`}
-                            value={formData.code}
+                            value={formData.code ?? ''}
                             onChange={(e) => setFormData({ ...formData, code: e.currentTarget.value })}
                             required
                             radius="xl"
@@ -134,7 +134,7 @@ export const SpatialResourceForm = ({ initialData, onSubmit, isLoading, onValidi
                         <TextInput
                             label="Display Designation"
                             placeholder="Enter descriptive name..."
-                            value={formData.name}
+                            value={formData.name ?? ''}
                             onChange={(e) => setFormData({ ...formData, name: e.currentTarget.value })}
                             required
                             radius="xl"
@@ -151,7 +151,7 @@ export const SpatialResourceForm = ({ initialData, onSubmit, isLoading, onValidi
                                     label="Development Policy"
                                     placeholder="Select usage type"
                                     data={lookups.usageTypes.map(l => ({ value: l.id.toString(), label: l.lookupValue.en }))}
-                                    value={formData.usageTypeId?.toString()}
+                                    value={formData.usageTypeId?.toString() ?? null}
                                     onChange={(val) => setFormData({ ...formData, usageTypeId: val ? parseInt(val) : undefined })}
                                     radius="xl"
                                     size="md"
@@ -164,7 +164,7 @@ export const SpatialResourceForm = ({ initialData, onSubmit, isLoading, onValidi
                                     label="Asset Ownership"
                                     placeholder="Select ownership model"
                                     data={lookups.ownershipTypes.map(l => ({ value: l.id.toString(), label: l.lookupValue.en }))}
-                                    value={formData.ownershipTypeId?.toString()}
+                                    value={formData.ownershipTypeId?.toString() ?? null}
                                     onChange={(val) => setFormData({ ...formData, ownershipTypeId: val ? parseInt(val) : undefined })}
                                     radius="xl"
                                     size="md"
@@ -195,7 +195,7 @@ export const SpatialResourceForm = ({ initialData, onSubmit, isLoading, onValidi
                                     label="Infrastructure Grade"
                                     placeholder="Select grade"
                                     data={lookups.buildingClasses.map(l => ({ value: l.id.toString(), label: l.lookupValue.en }))}
-                                    value={formData.buildingClassId?.toString()}
+                                    value={formData.buildingClassId?.toString() ?? null}
                                     onChange={(val) => setFormData({ ...formData, buildingClassId: val ? parseInt(val) : undefined })}
                                     radius="xl"
                                     size="md"
@@ -212,7 +212,7 @@ export const SpatialResourceForm = ({ initialData, onSubmit, isLoading, onValidi
                                 <Select
                                     label="Strategic Space Use"
                                     data={lookups.roomTypes.map(l => ({ value: l.id.toString(), label: l.lookupValue.en }))}
-                                    value={formData.roomTypeId?.toString()}
+                                    value={formData.roomTypeId?.toString() ?? null}
                                     onChange={(val) => setFormData({ ...formData, roomTypeId: val ? parseInt(val) : undefined })}
                                     radius="xl"
                                     size="md"
@@ -224,7 +224,7 @@ export const SpatialResourceForm = ({ initialData, onSubmit, isLoading, onValidi
                                 <Select
                                     label="Real-time Availability"
                                     data={lookups.roomStatuses.map(l => ({ value: l.id.toString(), label: l.lookupValue.en }))}
-                                    value={formData.roomStatusId?.toString()}
+                                    value={formData.roomStatusId?.toString() ?? null}
                                     onChange={(val) => setFormData({ ...formData, roomStatusId: val ? parseInt(val) : undefined })}
                                     radius="xl"
                                     size="md"
@@ -237,15 +237,72 @@ export const SpatialResourceForm = ({ initialData, onSubmit, isLoading, onValidi
                         )}
                     </div>
 
+                    {/* ITPC Enterprise Metadata Section (Phase 22 Compliance) */}
+                    {(formData.type === 'PLOT' || formData.type === 'BUILDING' || formData.type === 'ROOM') && (
+                        <div className="mt-8 pt-8 border-t border-slate-100 relative z-10">
+                            <Group gap="xs" mb="lg">
+                                <Badge variant="light" color="indigo" radius="sm">Enterprise Metadata</Badge>
+                                <Text size="xs" fw={700} c="dimmed">ITPC Report Compliance Fields</Text>
+                            </Group>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-6">
+                                {(formData.type === 'PLOT' || formData.type === 'BUILDING') && (
+                                    <TextInput
+                                        label="GEO Coordinates (GPS)"
+                                        placeholder="e.g. 9.0123, 38.7456"
+                                        value={formData.gpsCoordinates || ''}
+                                        onChange={(e) => setFormData({ ...formData, gpsCoordinates: e.currentTarget.value })}
+                                        radius="xl"
+                                        size="md"
+                                        styles={{
+                                            label: { fontWeight: 900, color: '#16284F', fontSize: '11px', marginBottom: '4px' },
+                                            input: { border: '1px solid #E2E8F0', backgroundColor: '#F8FAFC' }
+                                        }}
+                                    />
+                                )}
+
+                                {formData.type === 'PLOT' && (
+                                    <TextInput
+                                        label="Master Plan Archive Reference"
+                                        placeholder="e.g. Wipro-2025-ARCH-001"
+                                        value={formData.masterPlanRef || ''}
+                                        onChange={(e) => setFormData({ ...formData, masterPlanRef: e.currentTarget.value })}
+                                        radius="xl"
+                                        size="md"
+                                        styles={{
+                                            label: { fontWeight: 900, color: '#16284F', fontSize: '11px', marginBottom: '4px' },
+                                            input: { border: '1px solid #E2E8F0', backgroundColor: '#F8FAFC' }
+                                        }}
+                                    />
+                                )}
+
+                                {(formData.type === 'PLOT' || formData.type === 'ROOM') && (
+                                    <TextInput
+                                        label="Historical Previous Occupant"
+                                        placeholder="Enter name of previous tenant..."
+                                        value={formData.previousOccupantName || ''}
+                                        onChange={(e) => setFormData({ ...formData, previousOccupantName: e.currentTarget.value })}
+                                        radius="xl"
+                                        size="md"
+                                        styles={{
+                                            label: { fontWeight: 900, color: '#16284F', fontSize: '11px', marginBottom: '4px' },
+                                            input: { border: '1px solid #E2E8F0', backgroundColor: '#F8FAFC' }
+                                        }}
+                                    />
+                                )}
+                            </div>
+                        </div>
+                    )}
+
                     {/* Secondary Capacity/Metric Row */}
                     {(['PLOT', 'FLOOR', 'ROOM', 'BUILDING'].includes(formData.type)) && (
                         <div className="mt-6 pt-6 border-t border-slate-50 relative z-10">
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 {(formData.type === 'PLOT' || formData.type === 'FLOOR' || formData.type === 'ROOM') && (
                                     <NumberInput
-                                        label="Dimension Metrics (m²)"
-                                        description="Calculate net usable area"
-                                        value={formData.area}
+                                        label="Physical Survey Area (m²)"
+                                        description="Actual measured site dimensions"
+                                        value={formData.area ?? 0}
                                         onChange={(val) => setFormData({ ...formData, area: Number(val) || 0 })}
                                         radius="xl"
                                         size="md"
@@ -257,11 +314,26 @@ export const SpatialResourceForm = ({ initialData, onSubmit, isLoading, onValidi
                                         }}
                                     />
                                 )}
+                                {(formData.type === 'PLOT' || formData.type === 'ROOM') && (
+                                    <NumberInput
+                                        label="Contract Validated Area (m²)"
+                                        description="Dimensions as per legal agreement"
+                                        value={formData.contractArea ?? 0}
+                                        onChange={(val) => setFormData({ ...formData, contractArea: Number(val) || 0 })}
+                                        radius="xl"
+                                        size="md"
+                                        rightSection={<Text size="xs" fw={900} pr="md" c="blue.5">LEASED</Text>}
+                                        styles={{
+                                            label: { fontWeight: 900, color: '#16284F', fontSize: '12px' },
+                                            input: { border: '2px solid #E0F2FE', backgroundColor: '#F0F9FF', fontWeight: 800, color: '#0369A1' }
+                                        }}
+                                    />
+                                )}
                                 {formData.type === 'ROOM' && (
                                     <NumberInput
                                         label="Human Capacity"
                                         description="Maximum professional load"
-                                        value={formData.capacity}
+                                        value={formData.capacity ?? 0}
                                         onChange={(val) => setFormData({ ...formData, capacity: Number(val) || 0 })}
                                         radius="xl"
                                         size="md"
@@ -279,14 +351,14 @@ export const SpatialResourceForm = ({ initialData, onSubmit, isLoading, onValidi
                                                 <Checkbox
                                                     label="High-Speed Elevators"
                                                     description="Vertical mobility accessibility"
-                                                    checked={formData.hasElevator}
+                                                    checked={formData.hasElevator ?? false}
                                                     onChange={(e) => setFormData({ ...formData, hasElevator: e.currentTarget.checked })}
                                                     styles={{ label: { fontWeight: 900, fontSize: '14px', color: '#16284F' }, description: { fontSize: '10px', fontWeight: 700 } }}
                                                 />
                                                 <Checkbox
                                                     label="Managed Parking Zone"
                                                     description="Vehicle storage infrastructure"
-                                                    checked={formData.hasParking}
+                                                    checked={formData.hasParking ?? false}
                                                     onChange={(e) => setFormData({ ...formData, hasParking: e.currentTarget.checked })}
                                                     styles={{ label: { fontWeight: 900, fontSize: '14px', color: '#16284F' }, description: { fontSize: '10px', fontWeight: 700 } }}
                                                 />
@@ -314,7 +386,7 @@ export const SpatialResourceForm = ({ initialData, onSubmit, isLoading, onValidi
                     <TextInput
                         label="Internal Description & Scope"
                         placeholder="Provide high-level context..."
-                        value={formData.description}
+                        value={formData.description ?? ''}
                         onChange={(e) => setFormData({ ...formData, description: e.currentTarget.value })}
                         radius="xl"
                         size="md"
