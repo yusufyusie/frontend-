@@ -280,13 +280,28 @@ export const SpatialResourceForm = ({ initialData, onSubmit, isLoading, onValidi
                                     <TextInput
                                         label="Historical Previous Occupant"
                                         placeholder="Enter name of previous tenant..."
-                                        value={formData.previousOccupantName || ''}
+                                        value={formData.previousOccupantName ?? ''}
                                         onChange={(e) => setFormData({ ...formData, previousOccupantName: e.currentTarget.value })}
                                         radius="xl"
                                         size="md"
                                         styles={{
                                             label: { fontWeight: 900, color: '#16284F', fontSize: '11px', marginBottom: '4px' },
                                             input: { border: '1px solid #E2E8F0', backgroundColor: '#F8FAFC' }
+                                        }}
+                                    />
+                                )}
+
+                                {formData.type === 'PLOT' && (
+                                    <TextInput
+                                        label="Land Title Reference"
+                                        placeholder="e.g. LTR-2025-ETH-001"
+                                        value={formData.landTitleRef ?? ''}
+                                        onChange={(e) => setFormData({ ...formData, landTitleRef: e.currentTarget.value })}
+                                        radius="xl"
+                                        size="md"
+                                        styles={{
+                                            label: { fontWeight: 900, color: '#16284F', fontSize: '11px', marginBottom: '4px' },
+                                            input: { border: '1px solid #3B82F6', backgroundColor: '#EFF6FF' } // Slightly distinctive blue for legal
                                         }}
                                     />
                                 )}
