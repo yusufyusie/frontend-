@@ -18,7 +18,11 @@ interface NodeProps {
 
 const LookupNode = ({ node, onEdit, onAddChild, onDelete }: NodeProps) => {
     const [opened, { toggle }] = useDisclosure(true);
+    const [page, setPage] = useState(1);
+    const pageSize = 5;
     const hasChildren = node.children && node.children.length > 0;
+    const totalPages = hasChildren ? Math.ceil(node.children!.length / pageSize) : 0;
+    const paginatedChildren = hasChildren ? node.children!.slice((page - 1) * pageSize, page * pageSize) : [];
 
     const Icon = (Icons as any)[node.metadata?.icon] || Hash;
 
@@ -151,7 +155,7 @@ const LookupNode = ({ node, onEdit, onAddChild, onDelete }: NodeProps) => {
                             {/* Systemic Hierarchy Line */}
                             <div className="absolute left-[25px] top-0 bottom-8 border-l-2 border-slate-200/50" />
                             <Stack gap={8} py={2}>
-                                {node.children?.map((child) => (
+                                {paginatedChildren.map((child) => (
                                     <LookupNode
                                         key={child.id}
                                         node={child}
@@ -160,6 +164,18 @@ const LookupNode = ({ node, onEdit, onAddChild, onDelete }: NodeProps) => {
                                         onDelete={onDelete}
                                     />
                                 ))}
+
+                                {totalPages > 1 && (
+                                    <Box py="xs" className="border-t border-slate-100/50">
+                                        <SmartPagination
+                                            currentPage={page}
+                                            totalPages={totalPages}
+                                            pageSize={pageSize}
+                                            totalElements={node.children?.length || 0}
+                                            onPageChange={setPage}
+                                        />
+                                    </Box>
+                                )}
                             </Stack>
                         </Box>
                     </motion.div>
