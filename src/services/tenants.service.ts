@@ -22,6 +22,8 @@ export interface Tenant {
     phone?: string;
     website?: string;
     address?: string;
+    regionId?: number;
+    cityId?: number;
     metadata?: any;
     createdAt?: string;
     updatedAt?: string;

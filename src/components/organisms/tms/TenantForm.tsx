@@ -1,8 +1,9 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { Stack, TextInput, Group, Select, Button, Box, LoadingOverlay, Title, Divider, Paper, Text, rem } from '@mantine/core';
-import { Building2, FileText, Globe, Phone, Mail, MapPin, Sparkles } from 'lucide-react';
+import { Building2, FileText, Globe, Phone, Mail, MapPin, Sparkles, Landmark } from 'lucide-react';
 import { Tenant, tenantsService } from '@/services/tenants.service';
 import { lookupsService, SystemLookup } from '@/services/lookups.service';
+import { geoService, Region, City } from '@/services/geo.service';
 
 interface Props {
     initialData?: Partial<Tenant>;
@@ -22,17 +23,30 @@ export const TenantForm = ({ initialData, onSubmit, isLoading, onValidityChange 
         phone: '',
         website: '',
         address: '',
+        regionId: undefined,
+        cityId: undefined,
         ...initialData
     });
 
     const [bizCategories, setBizCategories] = useState<SystemLookup[]>([]);
     const [statusTypes, setStatusTypes] = useState<SystemLookup[]>([]);
+    const [regions, setRegions] = useState<Region[]>([]);
+    const [cities, setCities] = useState<City[]>([]);
     const lastValidity = useRef<boolean>(false);
 
     useEffect(() => {
         lookupsService.getByCategory('BUSINESS_CATEGORIES').then(res => setBizCategories((res as any).data || res));
         lookupsService.getByCategory('TENANT_STATUS').then(res => setStatusTypes((res as any).data || res));
+        geoService.getRegions().then(res => setRegions(res.data || []));
     }, []);
+
+    useEffect(() => {
+        if (formData.regionId) {
+            geoService.getCities(formData.regionId).then(res => setCities(res.data || []));
+        } else {
+            setCities([]);
+        }
+    }, [formData.regionId]);
 
     const bizCategoryData = useMemo(
         () => bizCategories.map(c => ({ value: c.id.toString(), label: c.lookupValue.en })),
@@ -158,10 +172,34 @@ export const TenantForm = ({ initialData, onSubmit, isLoading, onValidityChange 
                                     styles={inputStyles}
                                 />
                             </Group>
+                            <Group grow gap="xl">
+                                <Select
+                                    label="Region / State"
+                                    placeholder="Select region"
+                                    data={regions.map(r => ({ value: r.id.toString(), label: r.name }))}
+                                    value={formData.regionId?.toString()}
+                                    onChange={(val) => setFormData({ ...formData, regionId: val ? parseInt(val) : undefined, cityId: undefined })}
+                                    leftSection={<Landmark size={18} className="text-slate-400" />}
+                                    size="md"
+                                    styles={inputStyles}
+                                    searchable
+                                />
+                                <Select
+                                    label="City / District"
+                                    placeholder="Select city"
+                                    data={cities.map(c => ({ value: c.id.toString(), label: c.name }))}
+                                    value={formData.cityId?.toString()}
+                                    onChange={(val) => setFormData({ ...formData, cityId: val ? parseInt(val) : undefined })}
+                                    leftSection={<MapPin size={18} className="text-slate-400" />}
+                                    size="md"
+                                    styles={inputStyles}
+                                    searchable
+                                    disabled={!formData.regionId}
+                                />
+                            </Group>
                             <TextInput
-                                label="Physical Address"
-                                placeholder="Building, Street, City"
-                                leftSection={<MapPin size={18} className="text-slate-400" />}
+                                label="Detailed Physical Address"
+                                placeholder="Plot #, Building, Street"
                                 value={formData.address}
                                 onChange={(e) => setFormData({ ...formData, address: e.currentTarget.value })}
                                 size="md"
