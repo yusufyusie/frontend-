@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { locationsService } from '@/services/locations.service';
 import { SpatialResourceForm } from '@/components/organisms/tms/SpatialResourceForm';
+import { SmartPagination } from '@/components/SmartPagination';
 import { Modal } from '@/components/Modal';
 import { toast } from '@/components/Toast';
 
@@ -24,6 +25,8 @@ export default function BuildingsCatalogPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [activeBuilding, setActiveBuilding] = useState<any | null>(null);
     const [isFormValid, setIsFormValid] = useState(false);
+    const [page, setPage] = useState(1);
+    const pageSize = 6;
 
     useEffect(() => {
         setMounted(true);
@@ -89,6 +92,9 @@ export default function BuildingsCatalogPage() {
         b.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         b.code?.toLowerCase().includes(searchTerm.toLowerCase())
     );
+
+    const paginatedBuildings = filteredBuildings.slice((page - 1) * pageSize, page * pageSize);
+    const totalPages = Math.ceil(filteredBuildings.length / pageSize);
 
     const stats = {
         total: buildings.length,
@@ -177,96 +183,110 @@ export default function BuildingsCatalogPage() {
                     <div className="spinner spinner-lg text-[#0C7C92]" />
                     <p className="mt-4 text-slate-400 font-bold uppercase tracking-widest text-xs">Accessing intelligence satellite...</p>
                 </div>
-            ) : filteredBuildings.length > 0 ? (
-                <Grid gutter="xl">
-                    {filteredBuildings.map((building) => (
-                        <Grid.Col key={building.id} span={{ base: 12, sm: 6, lg: 4 }}>
-                            <Card
-                                padding="xl"
-                                className="rounded-[2.5rem] border border-slate-100 hover:border-[#0C7C92]/30 hover:shadow-2xl hover:shadow-slate-200 transition-all group overflow-visible"
-                            >
-                                <div className="absolute top-6 right-6 flex flex-col gap-2">
-                                    <MantineBadge
-                                        variant="filled"
-                                        bg={building.occupantName ? '#0C7C92' : '#94A3B8'}
-                                        radius="md"
-                                        className="shadow-sm uppercase text-[9px] font-black tracking-widest px-3"
-                                    >
-                                        {building.occupantName ? 'Occupied' : 'Vacant'}
-                                    </MantineBadge>
-                                </div>
-
-                                <Stack gap="xs">
-                                    <Group gap="md">
-                                        <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-[#16284F] group-hover:bg-[#16284F] group-hover:text-white transition-all duration-300">
-                                            <Building2 size={24} strokeWidth={2.5} />
-                                        </div>
-                                        <div className="flex-1">
-                                            <Title order={4} className="text-lg font-black text-[#16284F] truncate">{building.name}</Title>
-                                            <Text className="text-[10px] font-bold text-slate-400 font-mono tracking-tighter leading-none">ID: {building.code}</Text>
-                                        </div>
-                                    </Group>
-
-                                    <div className="mt-4 p-4 bg-slate-50/50 rounded-2xl border border-slate-100/50">
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div className="flex flex-col">
-                                                <Text className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Base Plot</Text>
-                                                <Group gap={4} className="mt-1">
-                                                    <MapPin size={10} className="text-rose-400" />
-                                                    <Text className="text-xs font-black text-[#16284F] truncate">{building.plot?.name || 'N/A'}</Text>
-                                                </Group>
-                                            </div>
-                                            <div className="flex flex-col text-right">
-                                                <Text className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Build Area</Text>
-                                                <Text className="text-xs font-black text-slate-700 mt-1">{building.totalArea || '-'} <span className="text-[8px] opacity-40">m²</span></Text>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="mt-2 space-y-1">
-                                        <Group justify="space-between" align="center">
-                                            <Text className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Floor Capacity</Text>
-                                            <Text className="text-[9px] font-black text-[#0C7C92] uppercase">{building._count?.floorDetails || 0} Constructed</Text>
-                                        </Group>
-                                        <Progress
-                                            value={(building._count?.floorDetails / 10) * 100}
-                                            size="sm"
-                                            radius="xl"
-                                            color="#0C7C92"
-                                            className="bg-slate-100 shadow-inner"
-                                        />
-                                    </div>
-
-                                    <div className="mt-6 flex items-center justify-between gap-3">
-                                        <div className="flex items-center gap-1.5 flex-1">
-                                            <button
-                                                onClick={() => handleEdit(building)}
-                                                className="w-10 h-10 flex items-center justify-center text-blue-500 bg-blue-50 border border-blue-100 rounded-xl hover:bg-blue-500 hover:text-white transition-all shadow-sm"
-                                                title="Edit Blueprint"
-                                            >
-                                                <Edit size={16} strokeWidth={2.5} />
-                                            </button>
-                                            <button
-                                                onClick={() => handleDelete(building)}
-                                                className="w-10 h-10 flex items-center justify-center text-rose-500 bg-rose-50 border border-rose-100 rounded-xl hover:bg-rose-500 hover:text-white transition-all shadow-sm"
-                                                title="Archive Asset"
-                                            >
-                                                <Trash2 size={16} strokeWidth={2.5} />
-                                            </button>
-                                        </div>
-                                        <button
-                                            className="h-10 px-5 bg-[#16284F] text-white rounded-xl font-bold text-xs flex items-center gap-2 hover:brightness-125 transition-all shadow-md active:scale-95"
+            ) : paginatedBuildings.length > 0 ? (
+                <>
+                    <Grid gutter="xl">
+                        {paginatedBuildings.map((building) => (
+                            <Grid.Col key={building.id} span={{ base: 12, sm: 6, lg: 4 }}>
+                                <Card
+                                    padding="xl"
+                                    className="rounded-[2.5rem] border border-slate-100 hover:border-[#0C7C92]/30 hover:shadow-2xl hover:shadow-slate-200 transition-all group overflow-visible"
+                                >
+                                    <div className="absolute top-6 right-6 flex flex-col gap-2">
+                                        <MantineBadge
+                                            variant="filled"
+                                            bg={building.occupantName ? '#0C7C92' : '#94A3B8'}
+                                            radius="md"
+                                            className="shadow-sm uppercase text-[9px] font-black tracking-widest px-3"
                                         >
-                                            <Eye size={14} />
-                                            <span>Full Intelligence</span>
-                                            <ArrowUpRight size={14} />
-                                        </button>
+                                            {building.occupantName ? 'Occupied' : 'Vacant'}
+                                        </MantineBadge>
                                     </div>
-                                </Stack>
-                            </Card>
-                        </Grid.Col>
-                    ))}
-                </Grid>
+
+                                    <Stack gap="xs">
+                                        <Group gap="md">
+                                            <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-[#16284F] group-hover:bg-[#16284F] group-hover:text-white transition-all duration-300">
+                                                <Building2 size={24} strokeWidth={2.5} />
+                                            </div>
+                                            <div className="flex-1">
+                                                <Title order={4} className="text-lg font-black text-[#16284F] truncate">{building.name}</Title>
+                                                <Text className="text-[10px] font-bold text-slate-400 font-mono tracking-tighter leading-none">ID: {building.code}</Text>
+                                            </div>
+                                        </Group>
+
+                                        <div className="mt-4 p-4 bg-slate-50/50 rounded-2xl border border-slate-100/50">
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div className="flex flex-col">
+                                                    <Text className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Base Plot</Text>
+                                                    <Group gap={4} className="mt-1">
+                                                        <MapPin size={10} className="text-rose-400" />
+                                                        <Text className="text-xs font-black text-[#16284F] truncate">{building.plot?.name || 'N/A'}</Text>
+                                                    </Group>
+                                                </div>
+                                                <div className="flex flex-col text-right">
+                                                    <Text className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Build Area</Text>
+                                                    <Text className="text-xs font-black text-slate-700 mt-1">{building.totalArea || '-'} <span className="text-[8px] opacity-40">m²</span></Text>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="mt-2 space-y-1">
+                                            <Group justify="space-between" align="center">
+                                                <Text className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Floor Capacity</Text>
+                                                <Text className="text-[9px] font-black text-[#0C7C92] uppercase">{building._count?.floorDetails || 0} Constructed</Text>
+                                            </Group>
+                                            <Progress
+                                                value={(building._count?.floorDetails / 10) * 100}
+                                                size="sm"
+                                                radius="xl"
+                                                color="#0C7C92"
+                                                className="bg-slate-100 shadow-inner"
+                                            />
+                                        </div>
+
+                                        <div className="mt-6 flex items-center justify-between gap-3">
+                                            <div className="flex items-center gap-1.5 flex-1">
+                                                <button
+                                                    onClick={() => handleEdit(building)}
+                                                    className="w-10 h-10 flex items-center justify-center text-blue-500 bg-blue-50 border border-blue-100 rounded-xl hover:bg-blue-500 hover:text-white transition-all shadow-sm"
+                                                    title="Edit Blueprint"
+                                                >
+                                                    <Edit size={16} strokeWidth={2.5} />
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDelete(building)}
+                                                    className="w-10 h-10 flex items-center justify-center text-rose-500 bg-rose-50 border border-rose-100 rounded-xl hover:bg-rose-500 hover:text-white transition-all shadow-sm"
+                                                    title="Archive Asset"
+                                                >
+                                                    <Trash2 size={16} strokeWidth={2.5} />
+                                                </button>
+                                            </div>
+                                            <button
+                                                className="h-10 px-5 bg-[#16284F] text-white rounded-xl font-bold text-xs flex items-center gap-2 hover:brightness-125 transition-all shadow-md active:scale-95"
+                                            >
+                                                <Eye size={14} />
+                                                <span>Full Intelligence</span>
+                                                <ArrowUpRight size={14} />
+                                            </button>
+                                        </div>
+                                    </Stack>
+                                </Card>
+                            </Grid.Col>
+                        ))}
+                    </Grid>
+
+                    {totalPages > 1 && (
+                        <Box mt="xl">
+                            <SmartPagination
+                                currentPage={page}
+                                totalPages={totalPages}
+                                pageSize={pageSize}
+                                totalElements={filteredBuildings.length}
+                                onPageChange={setPage}
+                            />
+                        </Box>
+                    )}
+                </>
             ) : (
                 <div className="py-40 text-center bg-white rounded-[3rem] border-2 border-dashed border-slate-100">
                     <div className="inline-flex p-10 bg-slate-50 rounded-[3rem] shadow-inner mb-8">

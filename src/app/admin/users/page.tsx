@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { usersService, type User, type CreateUserData } from '@/services/users.service';
 import { rolesService, type Role } from '@/services/roles.service';
+import { DataTable } from '@/components/DataTable';
 import { Modal } from '@/components/Modal';
 import { FormInput } from '@/components/FormInput';
 import { DynamicSelect } from '@/components/DynamicSelect';
@@ -125,113 +126,110 @@ export default function AdminUsersPage() {
             </div>
 
             {/* Main users data table */}
-            <div className="card p-0 overflow-hidden shadow-sm">
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left">
-                        <thead>
-                            <tr className="bg-gray-50/50 border-b border-gray-100">
-                                <th className="p-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Identity</th>
-                                <th className="p-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Email Address</th>
-                                <th className="p-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Assigned Roles</th>
-                                <th className="p-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-center">Status</th>
-                                <th className="p-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-50">
-                            {filteredUsers.length === 0 ? (
-                                <tr>
-                                    <td colSpan={5} className="text-center p-12 text-gray-400 italic">
-                                        No matching user records found.
-                                    </td>
-                                </tr>
-                            ) : (
-                                filteredUsers.map((user) => (
-                                    <tr key={user.id} className="hover:bg-gray-50/30 transition-colors group">
-                                        <td className="p-4">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-bold text-sm border border-primary/20">
-                                                    {user.username.substring(0, 1).toUpperCase()}
-                                                </div>
-                                                <div>
-                                                    <div className="font-bold text-gray-900 leading-tight">{user.username}</div>
-                                                    <div className="text-[10px] font-mono text-gray-400 mt-0.5">UUID: {user.id}</div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="p-4">
-                                            <span className="text-sm text-gray-600 font-medium">{user.email}</span>
-                                        </td>
-                                        <td className="p-4">
-                                            <div className="flex flex-wrap gap-1.5">
-                                                {user.roles && user.roles.length > 0 ? (
-                                                    user.roles.map(role => (
-                                                        <span key={role.id} className="px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 text-[10px] font-bold border border-blue-100 uppercase tracking-tighter">
-                                                            {role.name}
-                                                        </span>
-                                                    ))
-                                                ) : (
-                                                    <span className="text-[10px] text-gray-300 italic">No Roles</span>
-                                                )}
-                                            </div>
-                                        </td>
-                                        <td className="p-4 text-center">
-                                            <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest ${user.isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                                                {user.isActive ? 'Active' : 'Inactive'}
-                                            </span>
-                                        </td>
-                                        <td className="p-4">
-                                            <div className="flex items-center justify-end gap-1.5">
-                                                <button
-                                                    onClick={() => handleViewUser(user.id)}
-                                                    className="p-2 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg transition-all border border-blue-100 shadow-sm active:scale-90"
-                                                    title="View Profile"
-                                                >
-                                                    <Eye className="w-4 h-4" strokeWidth={2.5} />
-                                                </button>
-                                                <PermissionGate permission="User.Edit">
-                                                    <button
-                                                        onClick={() => {
-                                                            setSelectedUser(user);
-                                                            setAssignRolesModalOpen(true);
-                                                        }}
-                                                        className="p-2 bg-secondary/5 text-secondary hover:bg-secondary/10 rounded-lg transition-all border border-secondary/10 shadow-sm active:scale-90"
-                                                        title="Manage Roles"
-                                                    >
-                                                        <Shield className="w-4 h-4" strokeWidth={2.5} />
-                                                    </button>
-                                                    <button
-                                                        onClick={() => {
-                                                            setSelectedUser(user);
-                                                            setEditModalOpen(true);
-                                                        }}
-                                                        className="p-2 bg-teal-50 text-teal-700 hover:bg-teal-100 rounded-lg transition-all border border-teal-100/50 shadow-sm active:scale-90"
-                                                        style={{ color: '#0C7C92' }}
-                                                        title="Edit Details"
-                                                    >
-                                                        <Edit className="w-4 h-4" strokeWidth={2.5} />
-                                                    </button>
-                                                </PermissionGate>
-                                                <PermissionGate permission="User.Delete">
-                                                    <button
-                                                        onClick={() => {
-                                                            setSelectedUser(user);
-                                                            setDeleteConfirmOpen(true);
-                                                        }}
-                                                        className="p-2 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-lg transition-all border border-rose-100 shadow-sm active:scale-90"
-                                                        title="Terminate Account"
-                                                    >
-                                                        <Trash className="w-4 h-4" strokeWidth={2.5} />
-                                                    </button>
-                                                </PermissionGate>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+            <DataTable
+                data={filteredUsers}
+                columns={[
+                    {
+                        key: 'identity',
+                        header: 'Identity',
+                        render: (user: User) => (
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-bold text-sm border border-primary/20">
+                                    {user.username.substring(0, 1).toUpperCase()}
+                                </div>
+                                <div>
+                                    <div className="font-bold text-gray-900 leading-tight">{user.username}</div>
+                                    <div className="text-[10px] font-mono text-gray-400 mt-0.5">UUID: {user.id}</div>
+                                </div>
+                            </div>
+                        )
+                    },
+                    {
+                        key: 'email',
+                        header: 'Email Address',
+                        render: (user: User) => <span className="text-sm text-gray-600 font-medium">{user.email}</span>
+                    },
+                    {
+                        key: 'roles',
+                        header: 'Assigned Roles',
+                        render: (user: User) => (
+                            <div className="flex flex-wrap gap-1.5">
+                                {user.roles && user.roles.length > 0 ? (
+                                    user.roles.map((role) => (
+                                        <span key={role.id} className="px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 text-[10px] font-bold border border-blue-100 uppercase tracking-tighter">
+                                            {role.name}
+                                        </span>
+                                    ))
+                                ) : (
+                                    <span className="text-[10px] text-gray-300 italic">No Roles</span>
+                                )}
+                            </div>
+                        )
+                    },
+                    {
+                        key: 'status',
+                        header: 'Status',
+                        className: 'text-center',
+                        render: (user: User) => (
+                            <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest ${user.isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                                {user.isActive ? 'Active' : 'Inactive'}
+                            </span>
+                        )
+                    },
+                    {
+                        key: 'actions',
+                        header: 'Actions',
+                        className: 'text-right',
+                        render: (user: User) => (
+                            <div className="flex items-center justify-end gap-1.5">
+                                <button
+                                    onClick={() => handleViewUser(user.id)}
+                                    className="p-2 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg transition-all border border-blue-100 shadow-sm active:scale-90"
+                                    title="View Profile"
+                                >
+                                    <Eye className="w-4 h-4" strokeWidth={2.5} />
+                                </button>
+                                <PermissionGate permission="User.Edit">
+                                    <button
+                                        onClick={() => {
+                                            setSelectedUser(user);
+                                            setAssignRolesModalOpen(true);
+                                        }}
+                                        className="p-2 bg-secondary/5 text-secondary hover:bg-secondary/10 rounded-lg transition-all border border-secondary/10 shadow-sm active:scale-90"
+                                        title="Manage Roles"
+                                    >
+                                        <Shield className="w-4 h-4" strokeWidth={2.5} />
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            setSelectedUser(user);
+                                            setEditModalOpen(true);
+                                        }}
+                                        className="p-2 bg-teal-50 text-teal-700 hover:bg-teal-100 rounded-lg transition-all border border-teal-100/50 shadow-sm active:scale-90"
+                                        style={{ color: '#0C7C92' }}
+                                        title="Edit Details"
+                                    >
+                                        <Edit className="w-4 h-4" strokeWidth={2.5} />
+                                    </button>
+                                </PermissionGate>
+                                <PermissionGate permission="User.Delete">
+                                    <button
+                                        onClick={() => {
+                                            setSelectedUser(user);
+                                            setDeleteConfirmOpen(true);
+                                        }}
+                                        className="p-2 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-lg transition-all border border-rose-100 shadow-sm active:scale-90"
+                                        title="Terminate Account"
+                                    >
+                                        <Trash className="w-4 h-4" strokeWidth={2.5} />
+                                    </button>
+                                </PermissionGate>
+                            </div>
+                        )
+                    }
+                ]}
+                pageSize={10}
+            />
 
             {/* Interaction components */}
             <CreateUserModal

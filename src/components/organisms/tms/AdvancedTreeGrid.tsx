@@ -2,7 +2,8 @@
 
 import { useState, useMemo, useEffect, ReactNode } from 'react';
 import { ChevronRight, ChevronDown, Plus, Edit, Trash2, Search as SearchIcon, Eye, MapPin, FileText } from 'lucide-react';
-import { Badge, Text, Progress } from '@mantine/core';
+import { Badge, Text, Progress, Box } from '@mantine/core';
+import { SmartPagination } from '@/components/SmartPagination';
 
 export interface TreeNode {
     id: string | number;
@@ -41,6 +42,8 @@ export function AdvancedTreeGrid({
     const [internalSearchTerm, setInternalSearchTerm] = useState('');
     const searchTerm = externalSearchTerm !== undefined ? externalSearchTerm : internalSearchTerm;
     const [expandedIds, setExpandedIds] = useState<Set<string | number>>(new Set());
+    const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
 
     // Auto-expand initial levels
     useEffect(() => {
@@ -78,7 +81,10 @@ export function AdvancedTreeGrid({
         }, [] as TreeNode[]);
     };
 
+
     const filteredData = useMemo(() => filterTree(data), [data, searchTerm]);
+    const totalPages = Math.ceil(filteredData.length / pageSize);
+    const paginatedData = filteredData.slice((page - 1) * pageSize, page * pageSize);
 
     const toggleExpand = (nodeId: string | number) => {
         setExpandedIds(prev => {
@@ -326,8 +332,8 @@ export function AdvancedTreeGrid({
 
                     {/* High-Performance Scroller Body */}
                     <div className="max-h-[700px] overflow-y-auto custom-scrollbar-visible bg-white">
-                        {filteredData.length > 0 ? (
-                            filteredData.map(node => renderNode(node))
+                        {paginatedData.length > 0 ? (
+                            paginatedData.map(node => renderNode(node))
                         ) : (
                             <div className="py-40 text-center">
                                 <div className="inline-flex p-10 bg-slate-50 rounded-[3rem] shadow-inner mb-8">
@@ -338,7 +344,21 @@ export function AdvancedTreeGrid({
                             </div>
                         )}
                     </div>
+
                 </div>
+
+                {filteredData.length > 0 && (
+                    <div className="p-6 border-t border-slate-100 bg-slate-50/30">
+                        <SmartPagination
+                            currentPage={page}
+                            totalPages={totalPages || 1}
+                            pageSize={pageSize}
+                            totalElements={filteredData.length}
+                            onPageChange={setPage}
+                            onPageSizeChange={setPageSize}
+                        />
+                    </div>
+                )}
             </div>
             <style jsx>{`
                 .custom-scrollbar-visible::-webkit-scrollbar {

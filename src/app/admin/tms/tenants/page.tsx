@@ -7,6 +7,7 @@ import { lookupsService } from '@/services/lookups.service';
 import { TenantOnboardingWizard } from '@/components/organisms/tms/TenantOnboardingWizardMaster';
 import { TenantStatusBadge } from '@/components/atoms/tms/TenantStatusBadge';
 import { SpatialStats } from '@/components/organisms/tms/SpatialStats';
+import { SmartPagination } from '@/components/SmartPagination';
 import { toast } from '@/components/Toast';
 import Link from 'next/link';
 
@@ -17,6 +18,8 @@ export default function TenantDirectoryPage() {
     const [sectors, setSectors] = useState<any[]>([]);
     const [filters, setFilters] = useState({ search: '', statusId: '', businessCategoryId: '' });
     const [activeTab, setActiveTab] = useState('all');
+    const [page, setPage] = useState(1);
+    const pageSize = 10;
 
     // Metrics
     const [metrics, setMetrics] = useState({
@@ -87,12 +90,15 @@ export default function TenantDirectoryPage() {
         return true;
     });
 
+    const paginatedTenants = filteredTenants.slice((page - 1) * pageSize, page * pageSize);
+    const totalPages = Math.ceil(filteredTenants.length / pageSize);
+
     return (
         <div className="space-y-6 animate-fade-in">
             {/* Page Header - Access Control Style */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                    <h1 className="text-3xl md:text-4xl font-bold text-primary">Tenant Directory</h1>
+                    <h1 className="text-3xl md:text-4xl font-bold text-primary">Tenant Profile</h1>
                     <p className="text-gray-500 mt-1">Enterprise-grade database of IT Park registered organizations</p>
                 </div>
                 <button
@@ -174,7 +180,7 @@ export default function TenantDirectoryPage() {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
-                            {filteredTenants.length === 0 ? (
+                            {paginatedTenants.length === 0 ? (
                                 <tr>
                                     <td colSpan={6} className="text-center py-32 bg-slate-50/50">
                                         <div className="inline-flex p-8 bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 mb-6">
@@ -185,7 +191,7 @@ export default function TenantDirectoryPage() {
                                     </td>
                                 </tr>
                             ) : (
-                                filteredTenants.map((tenant) => (
+                                paginatedTenants.map((tenant) => (
                                     <tr key={tenant.id} className="hover:bg-teal-50/20 transition-all duration-200 group relative">
                                         <td className="px-6 py-5">
                                             <div className="flex items-center gap-4">
@@ -268,6 +274,18 @@ export default function TenantDirectoryPage() {
                         </tbody>
                     </table>
                 </div>
+
+                {totalPages > 1 && (
+                    <div className="p-6 border-t border-slate-100 bg-[#F8FAFC]/50">
+                        <SmartPagination
+                            currentPage={page}
+                            totalPages={totalPages}
+                            pageSize={pageSize}
+                            totalElements={filteredTenants.length}
+                            onPageChange={setPage}
+                        />
+                    </div>
+                )}
             </div>
 
             {/* Beautiful Wizard Modal */}

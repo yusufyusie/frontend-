@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { ChevronUp, ChevronDown, Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronUp, ChevronDown, Search } from 'lucide-react';
+import { SmartPagination } from './SmartPagination';
 
 // End of file (technically not needed but satisfies the tool)
 export interface Column<T> {
@@ -22,7 +23,9 @@ interface DataTableProps<T> {
     className?: string;
     currentPage?: number;
     totalPages?: number;
+    totalElements?: number;
     onPageChange?: (page: number) => void;
+    onPageSizeChange?: (size: number) => void;
 }
 
 export function DataTable<T extends Record<string, any>>({
@@ -35,7 +38,9 @@ export function DataTable<T extends Record<string, any>>({
     className = '',
     currentPage: externalPage,
     totalPages: externalTotalPages,
+    totalElements: externalTotalElements,
     onPageChange,
+    onPageSizeChange,
 }: DataTableProps<T>) {
     const [searchTerm, setSearchTerm] = useState('');
     const [sortColumn, setSortColumn] = useState<string | null>(null);
@@ -81,6 +86,7 @@ export function DataTable<T extends Record<string, any>>({
     }, [sortedData, currentPage, pageSize, isControlled]);
 
     const totalPages = isControlled ? externalTotalPages : Math.ceil(sortedData.length / pageSize);
+    const totalElements = isControlled ? (externalTotalElements || externalTotalPages * pageSize) : sortedData.length;
 
     const handleSort = (columnKey: string) => {
         if (sortColumn === columnKey) {
@@ -171,56 +177,16 @@ export function DataTable<T extends Record<string, any>>({
                 </table>
             </div>
 
-            {/* Pagination */}
+            {/* Premium Smart Pagination */}
             {totalPages > 1 && (
-                <div className="flex items-center justify-between">
-                    <div className="text-sm text-gray-600">
-                        Showing {(currentPage - 1) * pageSize + 1} to{' '}
-                        {Math.min(currentPage * pageSize, isControlled ? totalPages * pageSize : sortedData.length)} of {isControlled ? totalPages * pageSize : sortedData.length} results
-                    </div>
-
-                    <div className="pagination">
-                        <button
-                            onClick={() => handlePageChange(currentPage - 1)}
-                            disabled={currentPage === 1}
-                            className="pagination-btn disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            <ChevronLeft className="w-5 h-5" />
-                        </button>
-
-                        {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                            let pageNum;
-                            if (totalPages <= 5) {
-                                pageNum = i + 1;
-                            } else if (currentPage <= 3) {
-                                pageNum = i + 1;
-                            } else if (currentPage >= totalPages - 2) {
-                                pageNum = totalPages - 4 + i;
-                            } else {
-                                pageNum = currentPage - 2 + i;
-                            }
-
-                            return (
-                                <button
-                                    key={pageNum}
-                                    onClick={() => handlePageChange(pageNum)}
-                                    className={`pagination-btn ${currentPage === pageNum ? 'pagination-btn-active' : ''
-                                        }`}
-                                >
-                                    {pageNum}
-                                </button>
-                            );
-                        })}
-
-                        <button
-                            onClick={() => handlePageChange(currentPage + 1)}
-                            disabled={currentPage === totalPages}
-                            className="pagination-btn disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            <ChevronRight className="w-5 h-5" />
-                        </button>
-                    </div>
-                </div>
+                <SmartPagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    pageSize={pageSize}
+                    totalElements={totalElements}
+                    onPageChange={handlePageChange}
+                    onPageSizeChange={onPageSizeChange}
+                />
             )}
         </div>
     );

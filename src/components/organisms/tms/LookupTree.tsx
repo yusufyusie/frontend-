@@ -3,9 +3,11 @@ import { useDisclosure } from '@mantine/hooks';
 import { ChevronRight, ChevronDown, Edit, Plus, Trash2, Hash, Database, LucideIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { SystemLookup } from '@/services/lookups.service';
+import { SmartPagination } from '@/components/SmartPagination';
 import { LocalizedText } from '@/components/atoms/tms/LocalizedText';
 import { LookupStatusBadge } from '@/components/atoms/tms/LookupStatusBadge';
 import * as Icons from 'lucide-react';
+import { useState } from 'react';
 
 interface NodeProps {
     node: SystemLookup;
@@ -175,9 +177,14 @@ interface TreeProps {
 }
 
 export const LookupTree = ({ data, onEdit, onAddChild, onDelete }: TreeProps) => {
+    const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(5);
+    const totalPages = Math.ceil(data.length / pageSize);
+    const paginatedData = data.slice((page - 1) * pageSize, page * pageSize);
+
     return (
-        <Stack gap={8}>
-            {data.map((node) => (
+        <Stack gap={10}>
+            {paginatedData.map((node) => (
                 <LookupNode
                     key={node.id}
                     node={node}
@@ -191,6 +198,20 @@ export const LookupTree = ({ data, onEdit, onAddChild, onDelete }: TreeProps) =>
                     <Text c="dimmed">No lookups found in this category.</Text>
                 </Paper>
             )}
+
+            {data.length > 0 && (
+                <Box pt="sm" className="border-t border-slate-100">
+                    <SmartPagination
+                        currentPage={page}
+                        totalPages={totalPages || 1}
+                        pageSize={pageSize}
+                        totalElements={data.length}
+                        onPageChange={setPage}
+                        onPageSizeChange={setPageSize}
+                    />
+                </Box>
+            )}
         </Stack>
     );
 };
+
