@@ -263,6 +263,21 @@ export const SpatialResourceForm = ({ initialData, onSubmit, isLoading, onValidi
 
                                 {formData.type === 'PLOT' && (
                                     <TextInput
+                                        label="ITPC Building Specification"
+                                        placeholder="e.g. G+7, G+8 (Two Bldgs)"
+                                        value={formData.itpcBuildingType || ''}
+                                        onChange={(e) => setFormData({ ...formData, itpcBuildingType: e.currentTarget.value })}
+                                        radius="xl"
+                                        size="md"
+                                        styles={{
+                                            label: { fontWeight: 900, color: '#16284F', fontSize: '11px', marginBottom: '4px' },
+                                            input: { border: '1px solid #E2E8F0', backgroundColor: '#F8FAFC' }
+                                        }}
+                                    />
+                                )}
+
+                                {formData.type === 'PLOT' && (
+                                    <TextInput
                                         label="Master Plan Archive Reference"
                                         placeholder="e.g. Wipro-2025-ARCH-001"
                                         value={formData.masterPlanRef || ''}
@@ -277,18 +292,44 @@ export const SpatialResourceForm = ({ initialData, onSubmit, isLoading, onValidi
                                 )}
 
                                 {(formData.type === 'PLOT' || formData.type === 'ROOM') && (
-                                    <TextInput
-                                        label="Historical Previous Occupant"
-                                        placeholder="Enter name of previous tenant..."
-                                        value={formData.previousOccupantName ?? ''}
-                                        onChange={(e) => setFormData({ ...formData, previousOccupantName: e.currentTarget.value })}
-                                        radius="xl"
-                                        size="md"
-                                        styles={{
-                                            label: { fontWeight: 900, color: '#16284F', fontSize: '11px', marginBottom: '4px' },
-                                            input: { border: '1px solid #E2E8F0', backgroundColor: '#F8FAFC' }
-                                        }}
-                                    />
+                                    <>
+                                        <TextInput
+                                            label="Historical Previous Occupant"
+                                            placeholder="Enter name of previous tenant..."
+                                            value={formData.previousOccupantName ?? ''}
+                                            onChange={(e) => setFormData({ ...formData, previousOccupantName: e.currentTarget.value })}
+                                            radius="xl"
+                                            size="md"
+                                            styles={{
+                                                label: { fontWeight: 900, color: '#16284F', fontSize: '11px', marginBottom: '4px' },
+                                                input: { border: '1px solid #E2E8F0', backgroundColor: '#F8FAFC' }
+                                            }}
+                                        />
+                                        <TextInput
+                                            label="Previous Occupant Company ID"
+                                            placeholder="e.g. EITP-RES-REN-REG-XXXXX"
+                                            value={formData.previousOccupantId ?? ''}
+                                            onChange={(e) => setFormData({ ...formData, previousOccupantId: e.currentTarget.value })}
+                                            radius="xl"
+                                            size="md"
+                                            styles={{
+                                                label: { fontWeight: 900, color: '#16284F', fontSize: '11px', marginBottom: '4px' },
+                                                input: { border: '1px solid #E2E8F0', backgroundColor: '#F8FAFC' }
+                                            }}
+                                        />
+                                        <NumberInput
+                                            label="Legacy Measured Area (m²)"
+                                            placeholder="Previous area record..."
+                                            value={formData.previousOccupantArea ?? 0}
+                                            onChange={(val) => setFormData({ ...formData, previousOccupantArea: Number(val) || 0 })}
+                                            radius="xl"
+                                            size="md"
+                                            styles={{
+                                                label: { fontWeight: 900, color: '#16284F', fontSize: '11px', marginBottom: '4px' },
+                                                input: { border: '1px solid #E2E8F0', backgroundColor: '#F8FAFC' }
+                                            }}
+                                        />
+                                    </>
                                 )}
 
                                 {formData.type === 'PLOT' && (
