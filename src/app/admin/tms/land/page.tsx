@@ -201,66 +201,8 @@ export default function LandPage() {
                 </button>
             </div>
 
-            {/* Official Audit Intelligence */}
-            <AuditSummaryCards />
-
-            {/* Metrics Dashboard */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4">
-                <div className="card p-4 hover:shadow-lg transition-shadow border-emerald-100 bg-emerald-50/20">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest">Zones</p>
-                            <p className="text-2xl font-black text-emerald-900 mt-1">{metrics.zones}</p>
-                        </div>
-                        <Map className="w-8 h-8 text-emerald-600/20" />
-                    </div>
-                </div>
-                <div className="card p-4 hover:shadow-lg transition-shadow border-blue-100 bg-blue-50/20">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-[10px] font-bold text-blue-600 uppercase tracking-widest">Blocks</p>
-                            <p className="text-2xl font-black text-blue-900 mt-1">{metrics.blocks}</p>
-                        </div>
-                        <Grid3x3 className="w-8 h-8 text-blue-600/20" />
-                    </div>
-                </div>
-                <div className="card p-4 hover:shadow-lg transition-shadow border-teal-100 bg-teal-50/20">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-[10px] font-bold text-teal-600 uppercase tracking-widest">Plots</p>
-                            <p className="text-2xl font-black text-teal-900 mt-1">{metrics.plots}</p>
-                        </div>
-                        <MapPin className="w-8 h-8 text-teal-600/20" />
-                    </div>
-                </div>
-                <div className="card p-4 hover:shadow-lg transition-shadow border-violet-100 bg-violet-50/20">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-[10px] font-bold text-violet-600 uppercase tracking-widest">Buildings</p>
-                            <p className="text-2xl font-black text-violet-900 mt-1">{metrics.buildings}</p>
-                        </div>
-                        <Building2 className="w-8 h-8 text-violet-600/20" />
-                    </div>
-                </div>
-                <div className="card p-4 hover:shadow-lg transition-shadow border-pink-100 bg-pink-50/20">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-[10px] font-bold text-pink-600 uppercase tracking-widest">Rooms</p>
-                            <p className="text-2xl font-black text-pink-900 mt-1">{metrics.rooms}</p>
-                        </div>
-                        <DoorOpen className="w-8 h-8 text-pink-600/20" />
-                    </div>
-                </div>
-                <div className="card p-4 hover:shadow-lg transition shadow border-orange-100 bg-orange-50/20">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-[10px] font-bold text-orange-600 uppercase tracking-widest">Total Area</p>
-                            <p className="text-2xl font-black text-orange-900 mt-1">{metrics.totalArea.toLocaleString()} <span className="text-xs font-bold">m²</span></p>
-                        </div>
-                        <TrendingUp className="w-8 h-8 text-orange-600/20" />
-                    </div>
-                </div>
-            </div>
+            {/* Official Audit Intelligence - Unified Single Row Command Center */}
+            <AuditSummaryCards structuralMetrics={metrics} />
 
             {/* Info Banner with Integrated Search */}
             <div className="card p-4 bg-gradient-to-r from-blue-50 to-blue-100/50 border-l-4 border-primary">

@@ -1,9 +1,21 @@
 import React, { useEffect, useState } from 'react';
-import { Paper, Group, Text, Stack, ThemeIcon, Box, SimpleGrid, RingProgress, Badge } from '@mantine/core';
-import { Map, MapPin, Building2, Trees, Landmark, Gauge, AlertCircle } from 'lucide-react';
+import { Paper, Group, Text, Stack, ThemeIcon, Box, Badge, Divider } from '@mantine/core';
+import { Map, MapPin, Building2, Trees, Landmark, Gauge, AlertCircle, Grid3x3, Layers, DoorOpen, TrendingUp } from 'lucide-react';
 import { leasesService } from '@/services/leases.service';
+import { Title } from '@mantine/core';
 
-export const AuditSummaryCards = () => {
+interface Props {
+    structuralMetrics?: {
+        zones: number;
+        blocks: number;
+        plots: number;
+        buildings: number;
+        rooms: number;
+        totalArea: number;
+    };
+}
+
+export const AuditSummaryCards = ({ structuralMetrics }: Props) => {
     const [stats, setStats] = useState<any>(null);
 
     useEffect(() => {
@@ -14,64 +26,83 @@ export const AuditSummaryCards = () => {
 
     const { reportSummary, summary } = stats;
 
-    const cards = [
-        {
-            title: 'Sub-Leased Area',
-            value: `${reportSummary.subLeasedArea.toLocaleString()} m²`,
-            sub: 'Active Industrial Tenants',
-            icon: Landmark,
-            color: 'teal'
-        },
-        {
-            title: 'Vacant Space',
-            value: `${reportSummary.vacantSpace.toLocaleString()} m²`,
-            sub: 'Immediately Leasable',
-            icon: Map,
-            color: 'blue'
-        },
-        {
-            title: 'Infrastructure',
-            value: `${(reportSummary.roads + reportSummary.greenArea + reportSummary.utilities).toLocaleString()} m²`,
-            sub: 'Roads, Green & Utilities',
-            icon: Trees,
-            color: 'green'
-        }
-    ];
-
     return (
-        <Stack gap="lg" mb="xl" className="animate-fade-in">
-            <Group justify="space-between" mb={-10}>
-                <div>
-                    <Text size="xs" fw={900} c="dimmed" tt="uppercase" lts="1.5px">Official ITPC Record Status</Text>
-                    <Title order={4} className="text-slate-800 font-black">September 2025 Audit Baseline</Title>
-                </div>
-                <Badge variant="light" color="gray" size="sm" radius="md">Source: CEO Assigned Committee Report</Badge>
-            </Group>
+        <Stack gap="xs" mb="lg" className="animate-fade-in">
+            <Paper p="md" radius="2rem" withBorder className="bg-white border-slate-100 shadow-sm">
+                <Group justify="space-between" align="center" wrap="nowrap">
+                    {/* Primary Audit Metrics */}
+                    <Group gap="xl" wrap="nowrap">
+                        <Box>
+                            <Text size="10px" fw={900} c="dimmed" tt="uppercase" lts="1px" mb={4}>Sub-Leased</Text>
+                            <Group gap="xs">
+                                <ThemeIcon size="sm" variant="light" color="teal" radius="xl"><Landmark size={14} /></ThemeIcon>
+                                <Text size="md" fw={900} c="teal">{reportSummary.subLeasedArea.toLocaleString()} m²</Text>
+                            </Group>
+                        </Box>
 
-            <SimpleGrid cols={{ base: 1, md: 3 }} spacing="xl">
-                {cards.map((card, index) => (
-                    <Paper key={index} p="xl" radius="2rem" withBorder className="bg-white border-slate-100 shadow-sm hover:shadow-md transition-shadow">
-                        <Group justify="space-between" wrap="nowrap">
-                            <Stack gap={4}>
-                                <Text size="xs" fw={800} c="dimmed" tt="uppercase" lts="1px">{card.title}</Text>
-                                <Text size="xl" fw={900} className="text-slate-800">{card.value}</Text>
-                                <Text size="xs" c="dimmed" fw={600}>{card.sub}</Text>
-                            </Stack>
-                            <ThemeIcon size={58} radius="xl" variant="light" color={card.color}>
-                                <card.icon size={26} strokeWidth={2.5} />
-                            </ThemeIcon>
+                        <Divider orientation="vertical" />
+
+                        <Box>
+                            <Text size="10px" fw={900} c="dimmed" tt="uppercase" lts="1px" mb={4}>Vacant Space</Text>
+                            <Group gap="xs">
+                                <ThemeIcon size="sm" variant="light" color="blue" radius="xl"><Map size={14} /></ThemeIcon>
+                                <Text size="md" fw={900} c="blue">{reportSummary.vacantSpace.toLocaleString()} m²</Text>
+                            </Group>
+                        </Box>
+
+                        <Divider orientation="vertical" />
+
+                        <Box>
+                            <Text size="10px" fw={900} c="dimmed" tt="uppercase" lts="1px" mb={4}>Infrastructure</Text>
+                            <Group gap="xs">
+                                <ThemeIcon size="sm" variant="light" color="green" radius="xl"><Trees size={14} /></ThemeIcon>
+                                <Text size="md" fw={900} c="green">{(reportSummary.roads + reportSummary.greenArea + reportSummary.utilities).toLocaleString()} m²</Text>
+                            </Group>
+                        </Box>
+                    </Group>
+
+                    {/* Structural Counts (Compact) */}
+                    {structuralMetrics && (
+                        <Group gap="xs" bg="slate.0" p={8} style={{ borderRadius: '1.25rem', border: '1px solid #f1f5f9' }}>
+                            <div className="flex flex-col items-center px-3 border-r border-slate-200">
+                                <Text size="10px" fw={900} c="dimmed">{structuralMetrics.zones}</Text>
+                                <Text size="8px" fw={700} tt="uppercase" c="dimmed">Zones</Text>
+                            </div>
+                            <div className="flex flex-col items-center px-3 border-r border-slate-200">
+                                <Text size="10px" fw={900} c="dimmed">{structuralMetrics.blocks}</Text>
+                                <Text size="8px" fw={700} tt="uppercase" c="dimmed">Blocks</Text>
+                            </div>
+                            <div className="flex flex-col items-center px-3 border-r border-slate-200">
+                                <Text size="10px" fw={900} c="dimmed">{structuralMetrics.buildings}</Text>
+                                <Text size="8px" fw={700} tt="uppercase" c="dimmed">Bldgs</Text>
+                            </div>
+                            <div className="flex flex-col items-center px-3">
+                                <Text size="10px" fw={900} c="dimmed">{structuralMetrics.rooms}</Text>
+                                <Text size="8px" fw={700} tt="uppercase" c="dimmed">Units</Text>
+                            </div>
                         </Group>
-                    </Paper>
-                ))}
-            </SimpleGrid>
+                    )}
+
+                    {/* Total Area / Compliance Baseline */}
+                    <Box ta="right">
+                        <Badge variant="light" color="gray" size="xs" radius="xl" mb={4}>Sept 2025 Baseline</Badge>
+                        <Group gap="xs" justify="flex-end">
+                            <Text size="xs" fw={900} c="#16284F">
+                                {structuralMetrics?.totalArea.toLocaleString() || reportSummary.totalArea.toLocaleString()} m²
+                            </Text>
+                            <TrendingUp size={14} className="text-slate-400" />
+                        </Group>
+                    </Box>
+                </Group>
+            </Paper>
 
             {summary.variance !== 0 && (
-                <Paper p="md" radius="1.2rem" bg="orange.0" className="border border-orange-100">
-                    <Group gap="sm">
-                        <AlertCircle size={20} className="text-orange-600" />
-                        <Text size="xs" fw={700} c="orange.9">
-                            System Alert: Detected Spatial Variance of <span className="font-black underline">{summary.variance.toFixed(2)} m²</span> between Contractual Agreements and Physical Measurements.
-                            <span className="ml-2 font-bold opacity-75">(Requires Management Investigation)</span>
+                <Paper p="xs" radius="1rem" bg="orange.0" className="border border-orange-100">
+                    <Group gap="xs">
+                        <AlertCircle size={16} className="text-orange-600" />
+                        <Text size="10px" fw={700} c="orange.9">
+                            System Alert: Spatial Variance of <span className="font-black underline">{summary.variance.toFixed(2)} m²</span> detected.
+                            <span className="ml-1 opacity-75 font-semibold">(Physical Survey ≠ Legal Contract)</span>
                         </Text>
                     </Group>
                 </Paper>
@@ -79,5 +110,3 @@ export const AuditSummaryCards = () => {
         </Stack>
     );
 };
-
-import { Title } from '@mantine/core';
