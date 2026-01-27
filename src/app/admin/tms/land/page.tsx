@@ -55,7 +55,7 @@ export default function LandPage() {
                     }
                     if (item.type === 'BUILDING') buildings++;
                     if (item.type === 'FLOOR') floors++;
-                    if (item.type === 'ROOM') {
+                    if (item.type === 'ROOM' || item.type === 'UNIT') {
                         rooms++;
                         totalArea += Number(item.area || 0);
                     }
@@ -99,6 +99,7 @@ export default function LandPage() {
 
         setActiveResource({
             parentId: parent.realId || parent.id,
+            parentName: parent.name,
             type: nextTypeMap[parent.type],
             code: `${parent.code}-`
         } as any);
@@ -219,6 +220,7 @@ export default function LandPage() {
             const parent = navigationStack[navigationStack.length - 1];
             setActiveResource({
                 parentId: parent.realId || parent.id,
+                parentName: parent.name,
                 type: currentLevel,
                 code: `${parent.code}-`
             } as any);
@@ -227,13 +229,20 @@ export default function LandPage() {
         }
     };
 
-    const handleLevelClick = (level: 'ZONE' | 'BLOCK' | 'PLOT' | 'BUILDING' | 'ROOM') => {
+    const handleLevelClick = (level: 'ZONE' | 'BLOCK' | 'PLOT' | 'BUILDING' | 'FLOOR' | 'ROOM') => {
         // Reset navigation to show all entities of the clicked level
         setNavigationStack([]);
 
-        // For now, clicking a level badge returns to the Zones view
-        // In the future, this could be expanded to filter by specific entity types
-        toast.info(`Viewing all ${level.toLowerCase()}s`);
+        const labelMap: any = {
+            'ZONE': 'Zones',
+            'BLOCK': 'Blocks',
+            'PLOT': 'Plots',
+            'BUILDING': 'Buildings',
+            'FLOOR': 'Floors',
+            'ROOM': 'Rooms'
+        };
+
+        toast.info(`Viewing all ${labelMap[level].toLowerCase()}`);
     };
 
     // Professional Contextual Column Definitions (Database-Aligned)
@@ -402,7 +411,10 @@ export default function LandPage() {
                     style={{ backgroundColor: '#0C7C92' }}
                 >
                     <Plus className="w-5 h-5" />
-                    <span>Add New {currentLevel.charAt(0) + currentLevel.slice(1).toLowerCase()}</span>
+                    <span>Add New {currentLevel === 'ROOM' ? 'Room' :
+                        currentLevel === 'FLOOR' ? 'Floor' :
+                            currentLevel === 'PLOT' ? 'Plot' :
+                                currentLevel === 'BLOCK' ? 'Block' : 'Zone'}</span>
                 </button>
             </div>
 
@@ -531,7 +543,9 @@ export default function LandPage() {
                     onClose={() => setOpened(false)}
                     mode="modal"
                     size="lg"
-                    title={activeResource?.realId || activeResource?.id ? 'Edit Configuration' : `Register ${activeResource?.type || ''}`}
+                    title={activeResource?.realId || activeResource?.id ?
+                        `Edit ${activeResource?.type?.charAt(0) + activeResource?.type?.slice(1).toLowerCase()}` :
+                        `Register ${activeResource?.type?.charAt(0) + activeResource?.type?.slice(1).toLowerCase()}`}
                     description="Spatial Structure Management"
                     icon={activeResource?.type === 'ZONE' ? <Map size={24} className="text-[#0C7C92]" /> :
                         activeResource?.type === 'BLOCK' ? <Grid3x3 size={24} className="text-[#0C7C92]" /> :
@@ -566,7 +580,7 @@ export default function LandPage() {
                                 size="md"
                                 className={`shadow-lg shadow-teal-100 ${!isFormValid ? 'opacity-50 cursor-not-allowed' : ''}`}
                             >
-                                Save Configuration
+                                Save Changes
                             </Button>
                         </Group>
                     }

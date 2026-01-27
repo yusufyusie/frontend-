@@ -19,6 +19,16 @@ export const SpatialResourceForm = ({ initialData, onSubmit, isLoading, onValidi
         ...initialData
     });
 
+    // Sync form data when initialData changes (critical for modal reuse)
+    useEffect(() => {
+        if (initialData) {
+            setFormData(prev => ({
+                ...prev,
+                ...initialData
+            }));
+        }
+    }, [initialData]);
+
     // Lookups state
     const [lookups, setLookups] = useState<{
         usageTypes: SystemLookup[];
@@ -110,16 +120,26 @@ export const SpatialResourceForm = ({ initialData, onSubmit, isLoading, onValidi
                                 <Text size="10px" fw={900} className="text-slate-400 tracking-[0.2em] uppercase">Structural Identity</Text>
                             </Group>
                             <Title order={3} fw={900} lts="-1px" c="#16284F" className="text-2xl">
-                                {formData.type} Configuration
+                                {formData.id ? 'Edit' : 'Register'} {formData.type === 'ZONE' ? 'Zone' :
+                                    formData.type === 'BLOCK' ? 'Block' :
+                                        formData.type === 'PLOT' ? 'Plot' :
+                                            formData.type === 'BUILDING' ? 'Building' :
+                                                formData.type === 'FLOOR' ? 'Floor' : 'Room'}
                             </Title>
-                            <Text size="xs" c="dimmed" fw={700} className="mt-1 max-w-sm leading-relaxed">Define the foundational attributes and role of this resource.</Text>
+                            <Text size="xs" c="dimmed" fw={700} className="mt-1 max-w-sm leading-relaxed">
+                                {formData.parentName ? `Registering under ${formData.parentName}` : `Define essential attributes for the ${formData.type?.toLowerCase()}.`}
+                            </Text>
                         </div>
                     </Group>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8 relative z-10">
                         <TextInput
-                            label="Identification Code"
-                            placeholder={`e.g. ${formData.type === 'ZONE' ? 'Z-100' : 'CORE-001'}`}
+                            label={formData.type === 'ZONE' ? 'Zone Code' :
+                                formData.type === 'BLOCK' ? 'Block Code' :
+                                    formData.type === 'PLOT' ? 'Plot Code' :
+                                        formData.type === 'BUILDING' ? 'Building Code' :
+                                            formData.type === 'FLOOR' ? 'Floor Code' : 'Room Code'}
+                            placeholder="e.g. F-100"
                             value={formData.code ?? ''}
                             onChange={(e) => setFormData({ ...formData, code: e.currentTarget.value })}
                             required
@@ -132,8 +152,12 @@ export const SpatialResourceForm = ({ initialData, onSubmit, isLoading, onValidi
                         />
 
                         <TextInput
-                            label="Display Designation"
-                            placeholder="Enter descriptive name..."
+                            label={formData.type === 'ZONE' ? 'Zone Name' :
+                                formData.type === 'BLOCK' ? 'Block Name' :
+                                    formData.type === 'PLOT' ? 'Plot Name' :
+                                        formData.type === 'BUILDING' ? 'Building Name' :
+                                            formData.type === 'FLOOR' ? 'Floor Name' : 'Room Name'}
+                            placeholder={`Enter ${formData.type?.toLowerCase()} name...`}
                             value={formData.name ?? ''}
                             onChange={(e) => setFormData({ ...formData, name: e.currentTarget.value })}
                             required
@@ -148,7 +172,7 @@ export const SpatialResourceForm = ({ initialData, onSubmit, isLoading, onValidi
                         {formData.type === 'PLOT' && (
                             <>
                                 <Select
-                                    label="Development Policy"
+                                    label="Land Usage"
                                     placeholder="Select usage type"
                                     data={lookups.usageTypes.map(l => ({ value: l.id.toString(), label: l.lookupValue.en }))}
                                     value={formData.usageTypeId?.toString() ?? null}
@@ -161,7 +185,7 @@ export const SpatialResourceForm = ({ initialData, onSubmit, isLoading, onValidi
                                     }}
                                 />
                                 <Select
-                                    label="Asset Ownership"
+                                    label="Ownership Type"
                                     placeholder="Select ownership model"
                                     data={lookups.ownershipTypes.map(l => ({ value: l.id.toString(), label: l.lookupValue.en }))}
                                     value={formData.ownershipTypeId?.toString() ?? null}
@@ -179,7 +203,7 @@ export const SpatialResourceForm = ({ initialData, onSubmit, isLoading, onValidi
                         {formData.type === 'BUILDING' && (
                             <>
                                 <NumberInput
-                                    label="Vertical Elevation"
+                                    label="Total Floors"
                                     min={1}
                                     value={formData.floors}
                                     onChange={(val) => setFormData({ ...formData, floors: Number(val) || 0 })}
@@ -192,8 +216,8 @@ export const SpatialResourceForm = ({ initialData, onSubmit, isLoading, onValidi
                                     }}
                                 />
                                 <Select
-                                    label="Infrastructure Grade"
-                                    placeholder="Select grade"
+                                    label="Building Class"
+                                    placeholder="Select class"
                                     data={lookups.buildingClasses.map(l => ({ value: l.id.toString(), label: l.lookupValue.en }))}
                                     value={formData.buildingClassId?.toString() ?? null}
                                     onChange={(val) => setFormData({ ...formData, buildingClassId: val ? parseInt(val) : undefined })}
@@ -210,7 +234,8 @@ export const SpatialResourceForm = ({ initialData, onSubmit, isLoading, onValidi
                         {formData.type === 'ROOM' && (
                             <>
                                 <Select
-                                    label="Strategic Space Use"
+                                    label="Room Type"
+                                    placeholder="Select room type"
                                     data={lookups.roomTypes.map(l => ({ value: l.id.toString(), label: l.lookupValue.en }))}
                                     value={formData.roomTypeId?.toString() ?? null}
                                     onChange={(val) => setFormData({ ...formData, roomTypeId: val ? parseInt(val) : undefined })}
@@ -222,7 +247,8 @@ export const SpatialResourceForm = ({ initialData, onSubmit, isLoading, onValidi
                                     }}
                                 />
                                 <Select
-                                    label="Real-time Availability"
+                                    label="Room Status"
+                                    placeholder="Select room status"
                                     data={lookups.roomStatuses.map(l => ({ value: l.id.toString(), label: l.lookupValue.en }))}
                                     value={formData.roomStatusId?.toString() ?? null}
                                     onChange={(val) => setFormData({ ...formData, roomStatusId: val ? parseInt(val) : undefined })}
@@ -241,14 +267,14 @@ export const SpatialResourceForm = ({ initialData, onSubmit, isLoading, onValidi
                     {(formData.type === 'PLOT' || formData.type === 'BUILDING' || formData.type === 'ROOM') && (
                         <div className="mt-8 pt-8 border-t border-slate-100 relative z-10">
                             <Group gap="xs" mb="lg">
-                                <Badge variant="light" color="indigo" radius="sm">Enterprise Metadata</Badge>
-                                <Text size="xs" fw={700} c="dimmed">ITPC Report Compliance Fields</Text>
+                                <Badge variant="light" color="indigo" radius="sm">Audit Metadata</Badge>
+                                <Text size="xs" fw={700} c="dimmed">Reference & Compliance Fields</Text>
                             </Group>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-6">
                                 {(formData.type === 'PLOT' || formData.type === 'BUILDING') && (
                                     <TextInput
-                                        label="GEO Coordinates (GPS)"
+                                        label="GPS Coordinates"
                                         placeholder="e.g. 9.0123, 38.7456"
                                         value={formData.gpsCoordinates || ''}
                                         onChange={(e) => setFormData({ ...formData, gpsCoordinates: e.currentTarget.value })}
@@ -263,8 +289,8 @@ export const SpatialResourceForm = ({ initialData, onSubmit, isLoading, onValidi
 
                                 {formData.type === 'PLOT' && (
                                     <TextInput
-                                        label="ITPC Building Specification"
-                                        placeholder="e.g. G+7, G+8 (Two Bldgs)"
+                                        label="Building Type"
+                                        placeholder="e.g. G+7"
                                         value={formData.itpcBuildingType || ''}
                                         onChange={(e) => setFormData({ ...formData, itpcBuildingType: e.currentTarget.value })}
                                         radius="xl"
@@ -278,7 +304,7 @@ export const SpatialResourceForm = ({ initialData, onSubmit, isLoading, onValidi
 
                                 {formData.type === 'PLOT' && (
                                     <TextInput
-                                        label="Master Plan Archive Reference"
+                                        label="Master Plan Ref"
                                         placeholder="e.g. Wipro-2025-ARCH-001"
                                         value={formData.masterPlanRef || ''}
                                         onChange={(e) => setFormData({ ...formData, masterPlanRef: e.currentTarget.value })}
@@ -294,8 +320,8 @@ export const SpatialResourceForm = ({ initialData, onSubmit, isLoading, onValidi
                                 {(formData.type === 'PLOT' || formData.type === 'ROOM') && (
                                     <>
                                         <TextInput
-                                            label="Historical Previous Occupant"
-                                            placeholder="Enter name of previous tenant..."
+                                            label="Previous Occupant"
+                                            placeholder="Enter previous tenant name..."
                                             value={formData.previousOccupantName ?? ''}
                                             onChange={(e) => setFormData({ ...formData, previousOccupantName: e.currentTarget.value })}
                                             radius="xl"
@@ -306,7 +332,7 @@ export const SpatialResourceForm = ({ initialData, onSubmit, isLoading, onValidi
                                             }}
                                         />
                                         <TextInput
-                                            label="Previous Occupant Company ID"
+                                            label="Previous Occupant ID"
                                             placeholder="e.g. EITP-RES-REN-REG-XXXXX"
                                             value={formData.previousOccupantId ?? ''}
                                             onChange={(e) => setFormData({ ...formData, previousOccupantId: e.currentTarget.value })}
@@ -318,7 +344,7 @@ export const SpatialResourceForm = ({ initialData, onSubmit, isLoading, onValidi
                                             }}
                                         />
                                         <NumberInput
-                                            label="Legacy Measured Area (m²)"
+                                            label="Previous Area (m²)"
                                             placeholder="Previous area record..."
                                             value={formData.previousOccupantArea ?? 0}
                                             onChange={(val) => setFormData({ ...formData, previousOccupantArea: Number(val) || 0 })}
@@ -334,7 +360,7 @@ export const SpatialResourceForm = ({ initialData, onSubmit, isLoading, onValidi
 
                                 {formData.type === 'PLOT' && (
                                     <TextInput
-                                        label="Land Title Reference"
+                                        label="Land Title Ref"
                                         placeholder="e.g. LTR-2025-ETH-001"
                                         value={formData.landTitleRef ?? ''}
                                         onChange={(e) => setFormData({ ...formData, landTitleRef: e.currentTarget.value })}
@@ -356,8 +382,8 @@ export const SpatialResourceForm = ({ initialData, onSubmit, isLoading, onValidi
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 {(formData.type === 'PLOT' || formData.type === 'FLOOR' || formData.type === 'ROOM') && (
                                     <NumberInput
-                                        label="Physical Survey Area (m²)"
-                                        description="Actual measured site dimensions"
+                                        label="Survey Area (m²)"
+                                        description="Actual measured dimensions"
                                         value={formData.area ?? 0}
                                         onChange={(val) => setFormData({ ...formData, area: Number(val) || 0 })}
                                         radius="xl"
@@ -372,8 +398,8 @@ export const SpatialResourceForm = ({ initialData, onSubmit, isLoading, onValidi
                                 )}
                                 {(formData.type === 'PLOT' || formData.type === 'ROOM') && (
                                     <NumberInput
-                                        label="Contract Validated Area (m²)"
-                                        description="Dimensions as per legal agreement"
+                                        label="Contract Area (m²)"
+                                        description="Dimensions as per agreement"
                                         value={formData.contractArea ?? 0}
                                         onChange={(val) => setFormData({ ...formData, contractArea: Number(val) || 0 })}
                                         radius="xl"
@@ -387,8 +413,8 @@ export const SpatialResourceForm = ({ initialData, onSubmit, isLoading, onValidi
                                 )}
                                 {formData.type === 'ROOM' && (
                                     <NumberInput
-                                        label="Human Capacity"
-                                        description="Maximum professional load"
+                                        label="Max Capacity (PAX)"
+                                        description="Maximum occupancy load"
                                         value={formData.capacity ?? 0}
                                         onChange={(val) => setFormData({ ...formData, capacity: Number(val) || 0 })}
                                         radius="xl"
@@ -435,13 +461,13 @@ export const SpatialResourceForm = ({ initialData, onSubmit, isLoading, onValidi
                             <Info size={20} strokeWidth={2.5} />
                         </Box>
                         <div className="flex-1">
-                            <Title order={5} fw={900} lts="-0.5px" c="#16284F">Operational Insights</Title>
-                            <Text size="10px" c="dimmed" fw={800} tt="uppercase" className="tracking-widest">Administrative Context & Remarks</Text>
+                            <Title order={5} fw={900} lts="-0.5px" c="#16284F">Additional Notes</Title>
+                            <Text size="10px" c="dimmed" fw={800} tt="uppercase" className="tracking-widest">Internal context</Text>
                         </div>
                     </Group>
                     <TextInput
-                        label="Internal Description & Scope"
-                        placeholder="Provide high-level context..."
+                        label="Description"
+                        placeholder="Provide internal context..."
                         value={formData.description ?? ''}
                         onChange={(e) => setFormData({ ...formData, description: e.currentTarget.value })}
                         radius="xl"

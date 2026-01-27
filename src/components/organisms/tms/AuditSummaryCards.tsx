@@ -10,10 +10,11 @@ interface Props {
         blocks: number;
         plots: number;
         buildings: number;
+        floors: number;
         rooms: number;
         totalArea: number;
     };
-    onLevelClick?: (level: 'ZONE' | 'BLOCK' | 'PLOT' | 'BUILDING' | 'ROOM') => void;
+    onLevelClick?: (level: 'ZONE' | 'BLOCK' | 'PLOT' | 'BUILDING' | 'FLOOR' | 'ROOM') => void;
 }
 
 export const AuditSummaryCards = ({ structuralMetrics, onLevelClick }: Props) => {
@@ -67,31 +68,45 @@ export const AuditSummaryCards = ({ structuralMetrics, onLevelClick }: Props) =>
                         <Group gap="xs" bg="slate.0" p={8} style={{ borderRadius: '1.25rem', border: '1px solid #f1f5f9' }}>
                             <button
                                 onClick={() => onLevelClick?.('ZONE')}
-                                className="flex flex-col items-center px-3 border-r border-slate-200 hover:bg-gradient-to-br hover:from-teal-50 hover:to-blue-50 transition-all rounded-lg cursor-pointer group"
+                                className="flex items-baseline gap-2 px-3 border-r border-slate-100 hover:bg-slate-50 transition-all rounded-lg group"
                             >
-                                <Text size="10px" fw={900} c="dimmed" className="group-hover:text-teal-700 transition-colors">{structuralMetrics.zones}</Text>
-                                <Text size="8px" fw={700} tt="uppercase" c="dimmed" className="group-hover:text-teal-600 transition-colors">Zones</Text>
+                                <Text size="12px" fw={900} c="#16284F">{structuralMetrics.zones}</Text>
+                                <Text size="8px" fw={800} tt="uppercase" c="dimmed" lts="0.5px">Zones</Text>
                             </button>
                             <button
                                 onClick={() => onLevelClick?.('BLOCK')}
-                                className="flex flex-col items-center px-3 border-r border-slate-200 hover:bg-gradient-to-br hover:from-blue-50 hover:to-indigo-50 transition-all rounded-lg cursor-pointer group"
+                                className="flex items-baseline gap-2 px-3 border-r border-slate-100 hover:bg-slate-50 transition-all rounded-lg group"
                             >
-                                <Text size="10px" fw={900} c="dimmed" className="group-hover:text-blue-700 transition-colors">{structuralMetrics.blocks}</Text>
-                                <Text size="8px" fw={700} tt="uppercase" c="dimmed" className="group-hover:text-blue-600 transition-colors">Blocks</Text>
+                                <Text size="12px" fw={900} c="#16284F">{structuralMetrics.blocks}</Text>
+                                <Text size="8px" fw={800} tt="uppercase" c="dimmed" lts="0.5px">Blocks</Text>
+                            </button>
+                            <button
+                                onClick={() => onLevelClick?.('PLOT')}
+                                className="flex items-baseline gap-2 px-3 border-r border-slate-100 hover:bg-slate-50 transition-all rounded-lg group"
+                            >
+                                <Text size="12px" fw={900} c="#16284F">{structuralMetrics.plots}</Text>
+                                <Text size="8px" fw={800} tt="uppercase" c="dimmed" lts="0.5px">Plots</Text>
                             </button>
                             <button
                                 onClick={() => onLevelClick?.('BUILDING')}
-                                className="flex flex-col items-center px-3 border-r border-slate-200 hover:bg-gradient-to-br hover:from-violet-50 hover:to-purple-50 transition-all rounded-lg cursor-pointer group"
+                                className="flex items-baseline gap-2 px-3 border-r border-slate-100 hover:bg-slate-50 transition-all rounded-lg group"
                             >
-                                <Text size="10px" fw={900} c="dimmed" className="group-hover:text-violet-700 transition-colors">{structuralMetrics.buildings}</Text>
-                                <Text size="8px" fw={700} tt="uppercase" c="dimmed" className="group-hover:text-violet-600 transition-colors">Bldgs</Text>
+                                <Text size="12px" fw={900} c="#16284F">{structuralMetrics.buildings}</Text>
+                                <Text size="8px" fw={800} tt="uppercase" c="dimmed" lts="0.5px">Buildings</Text>
+                            </button>
+                            <button
+                                onClick={() => onLevelClick?.('FLOOR')}
+                                className="flex items-baseline gap-2 px-3 border-r border-slate-100 hover:bg-slate-50 transition-all rounded-lg group"
+                            >
+                                <Text size="12px" fw={900} c="#16284F">{structuralMetrics.floors}</Text>
+                                <Text size="8px" fw={800} tt="uppercase" c="dimmed" lts="0.5px">Floors</Text>
                             </button>
                             <button
                                 onClick={() => onLevelClick?.('ROOM')}
-                                className="flex flex-col items-center px-3 hover:bg-gradient-to-br hover:from-pink-50 hover:to-rose-50 transition-all rounded-lg cursor-pointer group"
+                                className="flex items-baseline gap-2 px-3 hover:bg-slate-50 transition-all rounded-lg group"
                             >
-                                <Text size="10px" fw={900} c="dimmed" className="group-hover:text-pink-700 transition-colors">{structuralMetrics.rooms}</Text>
-                                <Text size="8px" fw={700} tt="uppercase" c="dimmed" className="group-hover:text-pink-600 transition-colors">Units</Text>
+                                <Text size="12px" fw={900} c="#16284F">{structuralMetrics.rooms}</Text>
+                                <Text size="8px" fw={800} tt="uppercase" c="dimmed" lts="0.5px">Rooms</Text>
                             </button>
                         </Group>
                     )}
