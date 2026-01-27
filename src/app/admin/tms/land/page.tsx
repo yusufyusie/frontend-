@@ -227,6 +227,15 @@ export default function LandPage() {
         }
     };
 
+    const handleLevelClick = (level: 'ZONE' | 'BLOCK' | 'PLOT' | 'BUILDING' | 'ROOM') => {
+        // Reset navigation to show all entities of the clicked level
+        setNavigationStack([]);
+
+        // For now, clicking a level badge returns to the Zones view
+        // In the future, this could be expanded to filter by specific entity types
+        toast.info(`Viewing all ${level.toLowerCase()}s`);
+    };
+
     // Professional Contextual Column Definitions (Database-Aligned)
     const columnConfigs: Record<string, GridColumn[]> = {
         'ZONE': [
@@ -265,17 +274,17 @@ export default function LandPage() {
         ],
         'PLOT': [
             {
-                header: 'Code', accessor: 'code', width: '130px', render: (node) => (
+                header: 'Code', accessor: 'code', width: '140px', render: (node) => (
                     <span className="text-[11px] font-mono font-black text-slate-700">{node.meta?.code}</span>
                 )
             },
             {
-                header: 'Name', accessor: 'name', width: '200px', render: (node) => (
+                header: 'Name', accessor: 'name', width: '220px', render: (node) => (
                     <span className="text-[11px] font-bold text-slate-800">{node.meta?.name || node.label}</span>
                 )
             },
             {
-                header: 'Area (m²)', accessor: 'area', width: '140px', align: 'right', render: (node) => (
+                header: 'Area (m²)', accessor: 'area', width: '150px', align: 'right', render: (node) => (
                     <span className="text-[12px] font-mono font-black text-slate-700">
                         {node.meta?.area ? Number(node.meta.area).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '-'}
                     </span>
@@ -283,7 +292,7 @@ export default function LandPage() {
             },
 
             {
-                header: 'Contract Area (m²)', accessor: 'contractArea', width: '170px', align: 'right', render: (node) => (
+                header: 'Contract Area (m²)', accessor: 'contractArea', width: '185px', align: 'right', render: (node) => (
                     <span className="text-[12px] font-mono font-black text-blue-700">
                         {node.meta?.contractArea ? Number(node.meta.contractArea).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '-'}
                     </span>
@@ -291,7 +300,7 @@ export default function LandPage() {
             },
 
             {
-                header: 'Variance (m²)', accessor: 'areaVariance', width: '140px', align: 'right', render: (node) => {
+                header: 'Variance (m²)', accessor: 'areaVariance', width: '150px', align: 'right', render: (node) => {
                     const variance = node.meta?.areaVariance || 0;
                     return (
                         <span className={`text-[12px] font-mono font-black ${variance < 0 ? 'text-rose-600' : variance > 0 ? 'text-amber-600' : 'text-slate-400'}`}>
@@ -301,7 +310,7 @@ export default function LandPage() {
                 }
             },
             {
-                header: 'Buildings', accessor: 'buildingsCount', width: '130px', align: 'center', render: (node) => {
+                header: 'Buildings', accessor: 'buildingsCount', width: '145px', align: 'center', render: (node) => {
                     const count = node.meta?.buildingsCount || node.children?.length || 0;
                     return (
                         <Badge variant="light" color="violet" radius="sm" size="lg" className="font-black">
@@ -311,12 +320,12 @@ export default function LandPage() {
                 }
             },
             {
-                header: 'Master Plan Ref', accessor: 'masterPlanRef', width: '150px', render: (node) => (
+                header: 'Master Plan Ref', accessor: 'masterPlanRef', width: '170px', render: (node) => (
                     <span className="text-[10px] font-mono text-slate-600">{node.meta?.masterPlanRef || '-'}</span>
                 )
             },
             {
-                header: 'Status', accessor: 'isActive', width: '120px', align: 'center', render: (node) => (
+                header: 'Status', accessor: 'isActive', width: '130px', align: 'center', render: (node) => (
                     <Badge variant="dot" color={node.meta?.isActive ? 'teal' : 'gray'} size="sm">
                         {node.meta?.isActive ? 'Active' : 'Inactive'}
                     </Badge>
@@ -398,7 +407,7 @@ export default function LandPage() {
             </div>
 
             {/* Official Audit Intelligence - Unified Single Row Command Center */}
-            <AuditSummaryCards structuralMetrics={metrics} />
+            <AuditSummaryCards structuralMetrics={metrics} onLevelClick={handleLevelClick} />
 
             {/* Integrated Navigation & Search Control Bar */}
             <div className="card p-4 bg-gradient-to-r from-blue-50 to-blue-100/50 border-l-4 border-primary">
@@ -495,6 +504,7 @@ export default function LandPage() {
                         data={convertToTreeNodes(visibleData)}
                         onEdit={handleEdit}
                         onDelete={handleDelete}
+                        onAddChild={handleAddChild}
                         onViewDetail={handleViewDetail}
                         onDrillDown={handleDrillDown}
                         mode="tiered"
