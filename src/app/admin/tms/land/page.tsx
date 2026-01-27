@@ -55,7 +55,7 @@ export default function LandPage() {
                     }
                     if (item.type === 'BUILDING') buildings++;
                     if (item.type === 'FLOOR') floors++;
-                    if (item.type === 'ROOM' || item.type === 'UNIT') {
+                    if (item.type === 'ROOM') {
                         rooms++;
                         totalArea += Number(item.area || 0);
                     }
@@ -377,7 +377,7 @@ export default function LandPage() {
             }
         ],
         'ROOM': [
-            { header: 'Unit Area', accessor: 'areaM2', width: '140px', align: 'right' },
+            { header: 'Room Area', accessor: 'areaM2', width: '140px', align: 'right' },
             {
                 header: 'Tenant', accessor: 'occupantName', width: '200px', render: (node) => (
                     <span className="text-[11px] font-black text-[#0C7C92] uppercase">{node.meta?.occupantName || 'VACANT'}</span>

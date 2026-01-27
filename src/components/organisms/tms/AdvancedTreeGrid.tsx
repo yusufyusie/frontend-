@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useMemo, useEffect, ReactNode } from 'react';
-import { ChevronRight, ChevronDown, Plus, Edit, Trash2, Search as SearchIcon, Eye, MapPin, FileText } from 'lucide-react';
-import { Badge, Text, Progress, Box } from '@mantine/core';
+import { ChevronRight, ChevronDown, Plus, Edit, Trash2, Search as SearchIcon, Eye, MapPin, FileText, Building2, Layers, DoorOpen, Grid3x3, Map, TrendingUp } from 'lucide-react';
+import { Badge, Text, Progress, Box, Button, Group } from '@mantine/core';
 import { SmartPagination } from '@/components/SmartPagination';
 
 export interface GridColumn {
@@ -216,7 +216,7 @@ export function AdvancedTreeGrid({
                                 </span>
                                 <div className="flex items-center gap-2 mt-0.5">
                                     <span className="text-[8px] font-black px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 uppercase tracking-widest border border-slate-200/30 leading-none">
-                                        {meta.usageType || 'UNIT'}
+                                        {meta.usageType || 'ROOM'}
                                     </span>
                                     {meta.code && (
                                         <span className="text-[8px] font-black text-[#0C7C92]/60 font-mono tracking-tighter leading-none">
