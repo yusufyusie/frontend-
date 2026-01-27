@@ -5,6 +5,14 @@ import { ChevronRight, ChevronDown, Plus, Edit, Trash2, Search as SearchIcon, Ey
 import { Badge, Text, Progress, Box } from '@mantine/core';
 import { SmartPagination } from '@/components/SmartPagination';
 
+export interface GridColumn {
+    header: string;
+    accessor: string;
+    width?: string;
+    align?: 'left' | 'right' | 'center';
+    render?: (node: TreeNode) => ReactNode;
+}
+
 export interface TreeNode {
     id: string | number;
     label: string;
@@ -20,13 +28,15 @@ interface AdvancedTreeGridProps {
     onDelete?: (node: TreeNode) => void;
     onAddChild?: (node: TreeNode) => void;
     onViewDetail?: (node: TreeNode) => void;
+    onDrillDown?: (node: TreeNode) => void;
     searchable?: boolean;
     initialExpandLevel?: number;
     searchTerm?: string;
     onSearchChange?: (value: string) => void;
+    mode?: 'recursive' | 'tiered';
+    columns?: GridColumn[];
+    levelLabel?: string;
 }
-
-const GRID_LAYOUT = "grid grid-cols-[1fr_220px_140px_140px_120px_130px_160px]";
 
 export function AdvancedTreeGrid({
     data,
@@ -37,8 +47,20 @@ export function AdvancedTreeGrid({
     searchable = true,
     initialExpandLevel = 1,
     searchTerm: externalSearchTerm,
-    onSearchChange
+    onDrillDown,
+    columns,
+    mode = 'recursive',
+    onSearchChange,
+    levelLabel = 'Asset'
 }: AdvancedTreeGridProps) {
+    const gridStyle = useMemo(() => {
+        if (!columns || columns.length === 0) {
+            return { gridTemplateColumns: '1fr 220px 140px 140px 120px 130px 160px' };
+        }
+        const colWidths = columns.map(c => c.width || '1fr').join(' ');
+        return { gridTemplateColumns: `1fr ${colWidths} 160px` };
+    }, [columns]);
+
     const [internalSearchTerm, setInternalSearchTerm] = useState('');
     const searchTerm = externalSearchTerm !== undefined ? externalSearchTerm : internalSearchTerm;
     const [expandedIds, setExpandedIds] = useState<Set<string | number>>(new Set());
@@ -127,14 +149,20 @@ export function AdvancedTreeGrid({
         return (
             <div key={node.id} className="last:border-0 border-b border-slate-100/50">
                 <div
-                    className={`${GRID_LAYOUT} group items-center hover:bg-slate-50 transition-all duration-300 relative active:bg-slate-100/50`}
+                    onClick={() => {
+                        if (mode === 'tiered' && hasChildren && onDrillDown) {
+                            onDrillDown(node);
+                        }
+                    }}
+                    style={gridStyle}
+                    className={`grid group items-center hover:bg-slate-50 transition-all duration-300 relative active:bg-slate-100/50 ${mode === 'tiered' && hasChildren ? 'cursor-pointer' : ''}`}
                 >
                     {/* Active Selection Indicator */}
-                    <div className="absolute left-0 top-2 bottom-2 w-1 bg-[#0C7C92] opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-r-full" />
+                    <div className={`absolute left-0 top-2 bottom-2 w-1 bg-[#0C7C92] transition-all duration-300 rounded-r-full ${mode === 'tiered' && hasChildren ? 'opacity-0 group-hover:opacity-100' : 'opacity-0'}`} />
 
                     {/* Hierarchy Column */}
                     <div
-                        className="flex items-center gap-4 py-2.5 px-6 relative"
+                        className="flex items-center gap-4 py-2.5 px-6 relative h-full"
                         style={{ paddingLeft: `${level * 42 + 24}px` }}
                     >
                         {level > 0 && (
@@ -151,22 +179,30 @@ export function AdvancedTreeGrid({
                         )}
 
                         <div className="flex items-center gap-3 min-w-0 z-10">
-                            {hasChildren ? (
-                                <div
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        toggleExpand(node.id);
-                                    }}
-                                    className={`
-                                        w-7 h-7 flex items-center justify-center rounded-lg transition-all shadow-sm border cursor-pointer active:scale-90
-                                        ${isExpanded ? 'bg-[#0C7C92] text-white border-[#0C7C92]' : 'bg-white text-slate-600 border-slate-200 group-hover:border-[#0C7C92]'}
-                                    `}
-                                >
-                                    {isExpanded ? <ChevronDown size={14} strokeWidth={3} /> : <ChevronRight size={14} strokeWidth={3} />}
-                                </div>
-                            ) : (
-                                <div className="w-7 flex justify-center">
-                                    <div className="w-2 h-2 rounded-full bg-slate-200 group-hover:bg-[#0C7C92]/30 transition-colors" />
+                            {mode === 'recursive' && (
+                                hasChildren ? (
+                                    <div
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            toggleExpand(node.id);
+                                        }}
+                                        className={`
+                                            w-7 h-7 flex items-center justify-center rounded-lg transition-all shadow-sm border cursor-pointer active:scale-90
+                                            ${isExpanded ? 'bg-[#0C7C92] text-white border-[#0C7C92]' : 'bg-white text-slate-600 border-slate-200 group-hover:border-[#0C7C92]'}
+                                        `}
+                                    >
+                                        {isExpanded ? <ChevronDown size={14} strokeWidth={3} /> : <ChevronRight size={14} strokeWidth={3} />}
+                                    </div>
+                                ) : (
+                                    <div className="w-7 flex justify-center">
+                                        <div className="w-2 h-2 rounded-full bg-slate-200 group-hover:bg-[#0C7C92]/30 transition-colors" />
+                                    </div>
+                                )
+                            )}
+
+                            {mode === 'tiered' && hasChildren && (
+                                <div className="w-7 h-7 flex items-center justify-center rounded-lg bg-[#0C7C92]/5 text-[#0C7C92] transition-all shadow-sm border border-[#0C7C92]/10 group-hover:bg-[#0C7C92] group-hover:text-white">
+                                    <ChevronRight size={14} strokeWidth={3} />
                                 </div>
                             )}
 
@@ -192,88 +228,42 @@ export function AdvancedTreeGrid({
                         </div>
                     </div>
 
-                    {/* Occupant Detail */}
-                    <div className="px-6 py-2 border-l border-slate-100/50 flex flex-col justify-center h-full">
-                        <span className="text-[8px] text-[#64748B] font-black uppercase tracking-[0.1em] mb-1">Entity Occupant</span>
-                        <div className="flex flex-col gap-1.5">
-                            {!meta.occupantName || meta.occupantName === 'v' ? (
-                                <Text size="11px" fw={800} c="slate.4" fs="italic" className="uppercase">Vacant</Text>
-                            ) : (
-                                <Text size="11px" fw={900} className="text-[#0C7C92] uppercase truncate">{meta.occupantName}</Text>
+                    {/* Dynamic Metadata Columns */}
+                    {columns?.map((col, idx) => (
+                        <div
+                            key={idx}
+                            className={`px-6 py-2 border-l border-slate-100/50 h-full flex flex-col justify-center ${col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left'}`}
+                        >
+                            {col.render ? col.render(node) : (
+                                <>
+                                    <span className="text-[8px] text-[#64748B] font-black uppercase tracking-[0.1em] mb-0.5">{col.header}</span>
+                                    <span className="text-[12px] font-bold text-slate-700 truncate block">
+                                        {node.meta?.[col.accessor]?.toString() || '-'}
+                                    </span>
+                                </>
                             )}
-                            <Progress
-                                value={meta.occupancyStatus === 'Occupied' ? 100 : 0}
-                                size="3px"
-                                radius="xl"
-                                color={meta.occupancyStatus === 'Occupied' ? '#0C7C92' : 'slate.2'}
-                            />
                         </div>
-                    </div>
-
-                    {/* Physical m² */}
-                    <div className="px-6 py-2 border-l border-slate-100/50 text-right h-full flex flex-col justify-center">
-                        <span className="text-[8px] text-[#64748B] font-black uppercase tracking-[0.1em] mb-0.5">Gross Area</span>
-                        <span className="text-[12px] font-mono font-black text-slate-700 leading-none">
-                            {meta.areaM2 ? Number(meta.areaM2).toLocaleString() : '-'} <span className="text-[8px] opacity-40">m²</span>
-                        </span>
-                    </div>
-
-                    {/* Contract m² */}
-                    <div className="px-6 py-2 border-l border-slate-100/50 text-right h-full flex flex-col justify-center bg-slate-50/10">
-                        <span className="text-[8px] text-[#64748B] font-black uppercase tracking-[0.1em] mb-0.5">Leased Area</span>
-                        <span className="text-[12px] font-mono font-black text-blue-700 leading-none">
-                            {meta.contractAreaM2 ? Number(meta.contractAreaM2).toLocaleString() : '0'} <span className="text-[8px] opacity-40">m²</span>
-                        </span>
-                    </div>
-
-                    {/* Variance */}
-                    <div className="px-6 py-2 border-l border-slate-100/50 text-right h-full flex flex-col justify-center">
-                        <span className="text-[8px] text-[#64748B] font-black uppercase tracking-[0.1em] mb-0.5">Variance</span>
-                        {(() => {
-                            const variance = meta.areaVarianceM2 || 0;
-                            return (
-                                <span className={`text-[12px] font-mono font-black leading-none ${variance < 0 ? 'text-rose-600' : 'text-slate-400'}`}>
-                                    {variance.toLocaleString()}
-                                </span>
-                            );
-                        })()}
-                    </div>
-
-                    {/* Live Status */}
-                    <div className="px-6 py-2 border-l border-slate-100/50 h-full flex items-center justify-center">
-                        {meta.occupancyStatus && (
-                            <Badge
-                                variant="gradient"
-                                gradient={meta.occupancyStatus === 'Occupied' ? { from: '#0C7C92', to: '#1098AD', deg: 45 } : { from: '#94A3B8', to: '#CBD5E1', deg: 45 }}
-                                size="sm"
-                                radius="xl"
-                                fw={900}
-                                className="text-white"
-                            >
-                                {meta.occupancyStatus.toUpperCase()}
-                            </Badge>
-                        )}
-                    </div>
+                    ))}
 
                     {/* Operations */}
                     <div className="px-6 py-4 border-l border-slate-100/50 h-full flex items-center justify-end gap-2.5 bg-slate-50/20">
                         {onViewDetail && (
-                            <button onClick={(e) => { e.stopPropagation(); onViewDetail(node); }} className="w-8 h-8 flex items-center justify-center text-[#16284F] bg-white border border-slate-200 rounded-xl hover:bg-[#16284F] hover:text-white transition-all">
+                            <button onClick={(e) => { e.stopPropagation(); onViewDetail(node); }} className="w-8 h-8 flex items-center justify-center text-[#16284F] bg-white border border-slate-200 rounded-xl hover:bg-[#16284F] hover:text-white transition-all shadow-sm active:scale-90">
                                 <Eye size={14} />
                             </button>
                         )}
                         {onAddChild && (
-                            <button onClick={(e) => { e.stopPropagation(); onAddChild(node); }} className="w-8 h-8 flex items-center justify-center text-[#0C7C92] bg-white border border-slate-200 rounded-xl hover:bg-[#0C7C92] hover:text-white transition-all">
+                            <button onClick={(e) => { e.stopPropagation(); onAddChild(node); }} className="w-8 h-8 flex items-center justify-center text-[#0C7C92] bg-white border border-slate-200 rounded-xl hover:bg-[#0C7C92] hover:text-white transition-all shadow-sm active:scale-90">
                                 <Plus size={14} />
                             </button>
                         )}
                         {onEdit && (
-                            <button onClick={(e) => { e.stopPropagation(); onEdit(node); }} className="w-8 h-8 flex items-center justify-center text-blue-600 bg-white border border-slate-200 rounded-xl hover:bg-blue-600 hover:text-white transition-all">
+                            <button onClick={(e) => { e.stopPropagation(); onEdit(node); }} className="w-8 h-8 flex items-center justify-center text-blue-600 bg-white border border-slate-200 rounded-xl hover:bg-blue-600 hover:text-white transition-all shadow-sm active:scale-90">
                                 <Edit size={14} />
                             </button>
                         )}
                         {onDelete && (
-                            <button onClick={(e) => { e.stopPropagation(); onDelete(node); }} className="w-8 h-8 flex items-center justify-center text-rose-600 bg-white border border-slate-200 rounded-xl hover:bg-rose-600 hover:text-white transition-all">
+                            <button onClick={(e) => { e.stopPropagation(); onDelete(node); }} className="w-8 h-8 flex items-center justify-center text-rose-600 bg-white border border-slate-200 rounded-xl hover:bg-rose-600 hover:text-white transition-all shadow-sm active:scale-90">
                                 <Trash2 size={14} />
                             </button>
                         )}
@@ -281,7 +271,7 @@ export function AdvancedTreeGrid({
                 </div>
 
                 {/* Recursive Sub-Hierarchy */}
-                {hasChildren && isExpanded && (
+                {mode === 'recursive' && hasChildren && isExpanded && (
                     <SubGridBranch nodes={node.children!} level={level + 1} />
                 )}
             </div>
@@ -289,20 +279,23 @@ export function AdvancedTreeGrid({
     };
 
     return (
-        <div className="w-full max-w-full border border-slate-200 rounded-[2.5rem] overflow-hidden bg-white shadow-2xl">
+        <div className="w-full max-w-full border border-slate-200 rounded-3xl overflow-hidden bg-white shadow-xl">
             <div className="overflow-x-auto custom-scrollbar w-full">
                 <div className="min-w-max">
                     {/* Header */}
-                    <div className={`${GRID_LAYOUT} bg-[#F8FAFC] border-b border-slate-200 py-6 sticky top-0 z-30`}>
+                    <div
+                        style={gridStyle}
+                        className="grid bg-[#F8FAFC] border-b border-slate-200 py-6 sticky top-0 z-30"
+                    >
                         <div className="px-6 flex items-center gap-3">
                             <div className="w-1.5 h-5 bg-[#0C7C92] rounded-full" />
-                            <span className="text-[11px] font-black uppercase tracking-[0.2em] text-[#16284F]">Asset Tree Infrastructure</span>
+                            <span className="text-[11px] font-black uppercase tracking-[0.2em] text-[#16284F]">{levelLabel} Name</span>
                         </div>
-                        <div className="px-6 border-l border-slate-200/60 text-[10px] font-black text-[#64748B] uppercase tracking-[0.15em] flex items-center">Occupancy Detail</div>
-                        <div className="px-6 border-l border-slate-200/60 text-[10px] font-black text-[#64748B] uppercase tracking-[0.15em] flex items-center justify-end">Physical m²</div>
-                        <div className="px-6 border-l border-slate-200/60 text-[10px] font-black text-[#64748B] uppercase tracking-[0.15em] flex items-center justify-end">Contract m²</div>
-                        <div className="px-6 border-l border-slate-200/60 text-[10px] font-black text-[#64748B] uppercase tracking-[0.15em] flex items-center justify-end">Variance</div>
-                        <div className="px-6 border-l border-slate-200/60 text-[10px] font-black text-[#64748B] uppercase tracking-[0.15em] flex items-center justify-center">Live Status</div>
+                        {columns?.map((col, idx) => (
+                            <div key={idx} className={`px-6 border-l border-slate-200/60 text-[10px] font-black text-[#64748B] uppercase tracking-[0.15em] flex items-center ${col.align === 'right' ? 'justify-end' : col.align === 'center' ? 'justify-center' : 'justify-start'}`}>
+                                {col.header}
+                            </div>
+                        ))}
                         <div className="px-6 border-l border-slate-200/60 text-[10px] font-black text-[#0C7C92] uppercase tracking-[0.15em] flex items-center justify-end">Operations</div>
                     </div>
 

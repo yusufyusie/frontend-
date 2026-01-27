@@ -2,16 +2,16 @@
 
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { Button, Group, Stack, Box, Text, Paper, Title, LoadingOverlay } from '@mantine/core';
-import { Plus, RefreshCw, Map, Grid3x3, MapPin, TrendingUp, X as CloseIcon, Save, Search as SearchIcon, Building2, Layers, DoorOpen } from 'lucide-react';
+import { Button, Group, Stack, Box, Text, Paper, Title, LoadingOverlay, Badge, Progress } from '@mantine/core';
+import { Plus, RefreshCw, Map, Grid3x3, MapPin, TrendingUp, X as CloseIcon, Save, Search as SearchIcon, Building2, Layers, DoorOpen, ChevronRight, Home } from 'lucide-react';
 import { locationsService } from '@/services/locations.service';
 import { SpatialResourceForm } from '@/components/organisms/tms/SpatialResourceForm';
 import { AdvancedTreeGrid, TreeNode } from '@/components/organisms/tms/AdvancedTreeGrid';
 import { Modal } from '@/components/Modal';
-import { Badge as MantineBadge } from '@mantine/core';
 import { toast } from '@/components/Toast';
 import { LayoutList } from 'lucide-react';
 import { AuditSummaryCards } from '@/components/organisms/tms/AuditSummaryCards';
+import { GridColumn } from '@/components/organisms/tms/AdvancedTreeGrid';
 
 export default function LandPage() {
     const [treeData, setTreeData] = useState<any[]>([]);
@@ -25,6 +25,7 @@ export default function LandPage() {
     const [isFormValid, setIsFormValid] = useState(false);
     const [activeResource, setActiveResource] = useState<Partial<any> | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const [navigationStack, setNavigationStack] = useState<any[]>([]);
     const [metrics, setMetrics] = useState({
         zones: 0,
         blocks: 0,
@@ -179,8 +180,203 @@ export default function LandPage() {
         const resource = findResourceById(treeData, node.id as any);
         if (resource) {
             toast.info(`Viewing details for ${resource.name}...`);
-            // Future implementation: Open a robust detail drawer or analytics page
         }
+    };
+
+    const handleDrillDown = (node: TreeNode) => {
+        const resource = findResourceById(treeData, node.id as any);
+        if (resource) {
+            setNavigationStack(prev => [...prev, resource]);
+        }
+    };
+
+    const handleGoHome = () => {
+        setNavigationStack([]);
+    };
+
+    const handleGoBack = (index: number) => {
+        setNavigationStack(prev => prev.slice(0, index + 1));
+    };
+
+    // Calculate current visible data
+    const visibleData = navigationStack.length > 0
+        ? (navigationStack[navigationStack.length - 1].children || [])
+        : treeData;
+
+    const currentLevel = navigationStack.length === 0 ? 'ZONE' :
+        navigationStack[navigationStack.length - 1].type === 'ZONE' ? 'BLOCK' :
+            navigationStack[navigationStack.length - 1].type === 'BLOCK' ? 'PLOT' :
+                navigationStack[navigationStack.length - 1].type === 'PLOT' ? 'BUILDING' :
+                    navigationStack[navigationStack.length - 1].type === 'BUILDING' ? 'FLOOR' :
+                        navigationStack[navigationStack.length - 1].type === 'FLOOR' ? 'ROOM' : 'ROOM';
+
+    const currentParent = navigationStack.length > 0 ? navigationStack[navigationStack.length - 1] : null;
+
+    const handleLevelAdd = () => {
+        if (navigationStack.length === 0) {
+            handleCreateNewZone();
+        } else {
+            const parent = navigationStack[navigationStack.length - 1];
+            setActiveResource({
+                parentId: parent.realId || parent.id,
+                type: currentLevel,
+                code: `${parent.code}-`
+            } as any);
+            setOpened(true);
+            setIsFormValid(false);
+        }
+    };
+
+    // Professional Contextual Column Definitions (Database-Aligned)
+    const columnConfigs: Record<string, GridColumn[]> = {
+        'ZONE': [
+            { header: 'Zone Code', accessor: 'code', width: '150px' },
+            { header: 'Description', accessor: 'description', width: '300px' },
+            {
+                header: 'Total Blocks', accessor: 'childrenCount', width: '150px', align: 'center', render: (node) => (
+                    <Badge variant="light" color="blue" radius="sm" size="lg" className="font-black">
+                        {node.children?.length || 0} Blocks
+                    </Badge>
+                )
+            },
+            {
+                header: 'Status', accessor: 'isActive', width: '150px', align: 'center', render: (node) => (
+                    <Badge variant="dot" color={node.meta?.isActive ? 'teal' : 'gray'} size="sm">
+                        {node.meta?.isActive ? 'Active' : 'Inactive'}
+                    </Badge>
+                )
+            }
+        ],
+        'BLOCK': [
+            { header: 'Block Code', accessor: 'code', width: '150px' },
+            { header: 'Description', accessor: 'description', width: '250px' },
+            {
+                header: 'Total Plots', accessor: 'childrenCount', width: '150px', align: 'center', render: (node) => (
+                    <Badge variant="light" color="teal" radius="sm" size="lg" className="font-black">
+                        {node.children?.length || 0} Plots
+                    </Badge>
+                )
+            },
+            {
+                header: 'Parent Zone', accessor: 'zoneCode', width: '200px', render: (node) => (
+                    <span className="text-[11px] font-black text-[#0C7C92] uppercase">{currentParent?.name}</span>
+                )
+            }
+        ],
+        'PLOT': [
+            {
+                header: 'Code', accessor: 'code', width: '130px', render: (node) => (
+                    <span className="text-[11px] font-mono font-black text-slate-700">{node.meta?.code}</span>
+                )
+            },
+            {
+                header: 'Name', accessor: 'name', width: '200px', render: (node) => (
+                    <span className="text-[11px] font-bold text-slate-800">{node.meta?.name || node.label}</span>
+                )
+            },
+            {
+                header: 'Area (m²)', accessor: 'area', width: '140px', align: 'right', render: (node) => (
+                    <span className="text-[12px] font-mono font-black text-slate-700">
+                        {node.meta?.area ? Number(node.meta.area).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '-'}
+                    </span>
+                )
+            },
+
+            {
+                header: 'Contract Area (m²)', accessor: 'contractArea', width: '170px', align: 'right', render: (node) => (
+                    <span className="text-[12px] font-mono font-black text-blue-700">
+                        {node.meta?.contractArea ? Number(node.meta.contractArea).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '-'}
+                    </span>
+                )
+            },
+
+            {
+                header: 'Variance (m²)', accessor: 'areaVariance', width: '140px', align: 'right', render: (node) => {
+                    const variance = node.meta?.areaVariance || 0;
+                    return (
+                        <span className={`text-[12px] font-mono font-black ${variance < 0 ? 'text-rose-600' : variance > 0 ? 'text-amber-600' : 'text-slate-400'}`}>
+                            {variance ? Number(variance).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '-'}
+                        </span>
+                    );
+                }
+            },
+            {
+                header: 'Buildings', accessor: 'buildingsCount', width: '130px', align: 'center', render: (node) => {
+                    const count = node.meta?.buildingsCount || node.children?.length || 0;
+                    return (
+                        <Badge variant="light" color="violet" radius="sm" size="lg" className="font-black">
+                            {count} {count === 1 ? 'Building' : 'Buildings'}
+                        </Badge>
+                    );
+                }
+            },
+            {
+                header: 'Master Plan Ref', accessor: 'masterPlanRef', width: '150px', render: (node) => (
+                    <span className="text-[10px] font-mono text-slate-600">{node.meta?.masterPlanRef || '-'}</span>
+                )
+            },
+            {
+                header: 'Status', accessor: 'isActive', width: '120px', align: 'center', render: (node) => (
+                    <Badge variant="dot" color={node.meta?.isActive ? 'teal' : 'gray'} size="sm">
+                        {node.meta?.isActive ? 'Active' : 'Inactive'}
+                    </Badge>
+                )
+            }
+        ],
+        'BUILDING': [
+            {
+                header: 'Structure Specs', accessor: 'itpcBuildingType', width: '200px', render: (node) => (
+                    <div className="flex flex-col">
+                        <span className="text-[10px] font-black text-slate-700">{node.meta?.itpcBuildingType || 'Standard G+0'}</span>
+                        <div className="flex gap-2 mt-1">
+                            {node.meta?.hasElevator && <Badge size="xs" color="indigo" variant="outline">Elevator</Badge>}
+                            {node.meta?.hasParking && <Badge size="xs" color="teal" variant="outline">Parking</Badge>}
+                        </div>
+                    </div>
+                )
+            },
+            { header: 'Floors', accessor: 'floors', width: '100px', align: 'center' },
+            { header: 'Year Built', accessor: 'yearBuilt', width: '120px', align: 'center' },
+            {
+                header: 'Status', accessor: 'isActive', width: '120px', align: 'center', render: (node) => (
+                    <Badge variant="dot" color={node.meta?.isActive ? 'teal' : 'gray'} size="sm">
+                        {node.meta?.isActive ? 'Operational' : 'Inactive'}
+                    </Badge>
+                )
+            }
+        ],
+        'FLOOR': [
+            { header: 'Floor No', accessor: 'floorNumber', width: '100px', align: 'center' },
+            {
+                header: 'Rentable Area', accessor: 'rentableArea', width: '150px', align: 'right', render: (node) => (
+                    <span className="text-[12px] font-mono font-black">{Number(node.meta?.rentableArea || 0).toLocaleString()} m²</span>
+                )
+            },
+            {
+                header: 'Total Area', accessor: 'totalArea', width: '150px', align: 'right', render: (node) => (
+                    <span className="text-[12px] font-mono font-black">{Number(node.meta?.totalArea || 0).toLocaleString()} m²</span>
+                )
+            }
+        ],
+        'ROOM': [
+            { header: 'Unit Area', accessor: 'areaM2', width: '140px', align: 'right' },
+            {
+                header: 'Tenant', accessor: 'occupantName', width: '200px', render: (node) => (
+                    <span className="text-[11px] font-black text-[#0C7C92] uppercase">{node.meta?.occupantName || 'VACANT'}</span>
+                )
+            },
+            {
+                header: 'Status', accessor: 'occupancyStatus', width: '130px', align: 'center', render: (node) => (
+                    <Badge
+                        variant="gradient"
+                        gradient={node.meta?.occupancyStatus === 'Occupied' ? { from: '#0C7C92', to: '#1098AD', deg: 45 } : { from: '#94A3B8', to: '#CBD5E1', deg: 45 }}
+                        size="sm" radius="xl" fw={900} className="text-white"
+                    >
+                        {(node.meta?.occupancyStatus || 'VACANT').toUpperCase()}
+                    </Badge>
+                )
+            }
+        ]
     };
 
     return (
@@ -192,30 +388,89 @@ export default function LandPage() {
                     <p className="text-gray-500 mt-1">Unified territorial hierarchy: Zone → Block → Plot → Building → Floor → Room</p>
                 </div>
                 <button
-                    onClick={handleCreateNewZone}
+                    onClick={handleLevelAdd}
                     className="flex items-center gap-2 w-full sm:w-auto justify-center px-6 py-2.5 rounded-xl border-none font-bold text-white transition-all shadow-md active:scale-95 hover:shadow-lg hover:brightness-110 cursor-pointer"
                     style={{ backgroundColor: '#0C7C92' }}
                 >
                     <Plus className="w-5 h-5" />
-                    <span>Add New Zone</span>
+                    <span>Add New {currentLevel.charAt(0) + currentLevel.slice(1).toLowerCase()}</span>
                 </button>
             </div>
 
             {/* Official Audit Intelligence - Unified Single Row Command Center */}
             <AuditSummaryCards structuralMetrics={metrics} />
 
-            {/* Info Banner with Integrated Search */}
+            {/* Integrated Navigation & Search Control Bar */}
             <div className="card p-4 bg-gradient-to-r from-blue-50 to-blue-100/50 border-l-4 border-primary">
-                <div className="flex items-center gap-3 justify-between">
-                    <div className="flex items-center gap-3">
-                        <Map size={20} className="text-primary flex-shrink-0" />
-                        <div>
-                            <p className="text-sm font-bold text-gray-900">Spatial Structure Hierarchy Overview</p>
-                            <p className="text-xs text-gray-600 mt-1">
-                                Physical layout: <b>Zone</b> → <b>Block</b> → <b>Plot</b> → <b>Building</b> → <b>Floor</b> → <b>Room</b>.
-                            </p>
-                        </div>
+                <div className="flex items-center gap-4 justify-between flex-wrap">
+                    {/* Navigation Breadcrumbs */}
+                    <div className="flex items-center gap-3 flex-wrap">
+                        {/* Zone Home Button */}
+                        <button
+                            onClick={handleGoHome}
+                            className={`h-9 px-3 rounded-xl transition-all flex items-center gap-2 font-black text-[10px] uppercase tracking-[0.1em] ${navigationStack.length === 0 ? 'bg-[#16284F] text-white shadow-md' : 'bg-white text-[#0C7C92] hover:bg-slate-50 border border-slate-200'}`}
+                        >
+                            <Map size={12} />
+                            <span>Zone</span>
+                        </button>
+
+                        {navigationStack.filter(item => item.type !== 'ZONE').map((item, index) => {
+                            // Map database types to user-friendly level labels
+                            const levelLabels: Record<string, string> = {
+                                'ZONE': 'Zone',
+                                'BLOCK': 'Block',
+                                'PLOT': 'Plot',
+                                'BUILDING': 'Building',
+                                'FLOOR': 'Floor',
+                                'ROOM': 'Room'
+                            };
+
+                            return (
+                                <div key={item.id} className="flex items-center gap-2">
+                                    <ChevronRight size={14} className="text-slate-400" strokeWidth={3} />
+                                    <button
+                                        onClick={() => handleGoBack(navigationStack.indexOf(item))}
+                                        className={`h-9 px-3 rounded-xl transition-all flex items-center gap-2 font-black text-[10px] uppercase tracking-[0.1em] bg-white text-[#0C7C92] hover:bg-slate-50 border border-slate-200`}
+                                    >
+                                        {item.type === 'ZONE' ? <Map size={12} /> :
+                                            item.type === 'BLOCK' ? <Grid3x3 size={12} /> :
+                                                item.type === 'PLOT' ? <MapPin size={12} /> :
+                                                    item.type === 'BUILDING' ? <Building2 size={12} /> :
+                                                        <Layers size={12} />}
+                                        <span>{levelLabels[item.type] || item.type}</span>
+                                    </button>
+                                </div>
+                            );
+                        })}
+
+                        {/* Current Level Indicator */}
+                        {navigationStack.length > 0 && (
+                            <div className="flex items-center gap-2">
+                                <ChevronRight size={14} className="text-slate-400" strokeWidth={3} />
+                                <div className="h-9 px-3 rounded-xl flex items-center gap-2 font-black text-[10px] uppercase tracking-[0.1em] bg-[#16284F] text-white shadow-md">
+                                    {currentLevel === 'ZONE' ? <Map size={12} /> :
+                                        currentLevel === 'BLOCK' ? <Grid3x3 size={12} /> :
+                                            currentLevel === 'PLOT' ? <MapPin size={12} /> :
+                                                currentLevel === 'BUILDING' ? <Building2 size={12} /> :
+                                                    currentLevel === 'FLOOR' ? <Layers size={12} /> :
+                                                        <DoorOpen size={12} />}
+                                    <span>{currentLevel.charAt(0) + currentLevel.slice(1).toLowerCase()}</span>
+                                </div>
+                            </div>
+                        )}
+
+                        {navigationStack.length > 0 && (
+                            <button
+                                onClick={() => handleGoBack(navigationStack.length - 2)}
+                                className="h-9 px-3 rounded-xl bg-white text-slate-600 hover:bg-slate-50 transition-all font-black text-[9px] uppercase tracking-wider flex items-center gap-2 border border-slate-200 shadow-sm"
+                            >
+                                <TrendingUp className="rotate-270 w-3 h-3" />
+                                <span>Back</span>
+                            </button>
+                        )}
                     </div>
+
+                    {/* Search */}
                     <div className="relative w-80 flex-shrink-0">
                         <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                         <input
@@ -235,13 +490,16 @@ export default function LandPage() {
                     <div className="flex items-center justify-center py-12">
                         <div className="spinner spinner-lg text-primary" />
                     </div>
-                ) : treeData.length > 0 ? (
+                ) : visibleData.length > 0 ? (
                     <AdvancedTreeGrid
-                        data={convertToTreeNodes(treeData)}
+                        data={convertToTreeNodes(visibleData)}
                         onEdit={handleEdit}
                         onDelete={handleDelete}
-                        onAddChild={handleAddChild}
                         onViewDetail={handleViewDetail}
+                        onDrillDown={handleDrillDown}
+                        mode="tiered"
+                        levelLabel={currentLevel}
+                        columns={columnConfigs[currentLevel]}
                         searchable={true}
                         initialExpandLevel={0}
                         searchTerm={searchTerm}
