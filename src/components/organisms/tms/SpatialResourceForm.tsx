@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Stack, TextInput, Group, Select, Box, LoadingOverlay, Title, NumberInput, Paper, Text, Checkbox, Badge } from '@mantine/core';
 import { Save, Map, Layers, MapPin, Building2, DoorOpen, HardDrive, Info } from 'lucide-react';
 import { lookupsService, SystemLookup } from '@/services/lookups.service';
+import { AtomicLookupSelector } from '@/components/molecules/tms/AtomicLookupSelector';
 
 interface Props {
     initialData?: Partial<any>;
@@ -29,33 +30,49 @@ export const SpatialResourceForm = ({ initialData, onSubmit, isLoading, onValidi
         }
     }, [initialData]);
 
-    // Lookups state
-    const [lookups, setLookups] = useState<{
-        usageTypes: SystemLookup[];
-        ownershipTypes: SystemLookup[];
-        buildingClasses: SystemLookup[];
-        roomTypes: SystemLookup[];
-        roomStatuses: SystemLookup[];
-    }>({
-        usageTypes: [],
-        ownershipTypes: [],
-        buildingClasses: [],
-        roomTypes: [],
-        roomStatuses: []
-    });
+    // Unified Dynamic Lookups state
+    const [lookups, setLookups] = useState<Record<string, SystemLookup[]>>({});
+    const [catConfigs, setCatConfigs] = useState<Record<string, any>>({});
 
     useEffect(() => {
         const loadLookups = async () => {
-            const types = ['LAND_USAGE', 'LAND_OWNERSHIP', 'BUILDING_CLASS', 'ROOM_TYPE', 'ROOM_STATUS'];
-            const results = await Promise.all(types.map(t => lookupsService.getByCategory(t)));
+            try {
 
-            setLookups({
-                usageTypes: (results[0] as any).data || results[0] || [],
-                ownershipTypes: (results[1] as any).data || results[1] || [],
-                buildingClasses: (results[2] as any).data || results[2] || [],
-                roomTypes: (results[3] as any).data || results[3] || [],
-                roomStatuses: (results[4] as any).data || results[4] || []
-            });
+
+                // 1. Fetch Discovery Registry (CAT_CONFIG) to get labels and categories dynamically
+                const catRes = await lookupsService.getCategories();
+                const allCats = (catRes as any).data || catRes || [];
+
+
+                // Map configs for easy label access
+                const configMap: Record<string, any> = {};
+                allCats.forEach((c: any) => { configMap[c.value] = c; });
+                setCatConfigs(configMap);
+
+
+                // 2. Fetch data for all spatial categories registered in DB
+                const spatialCodes = allCats
+                    .filter((c: any) => c.isSpatial || c.metadata?.isSpatial)
+                    .map((c: any) => c.value as string);
+
+
+
+                const dataResults = await Promise.all(
+                    spatialCodes.map((code: string) => lookupsService.getByCategory(code))
+                );
+
+                const lookupMap: Record<string, SystemLookup[]> = {};
+                spatialCodes.forEach((code: string, idx: number) => {
+                    const items = (dataResults[idx] as any).data || dataResults[idx] || [];
+                    lookupMap[code] = items;
+
+                });
+
+                setLookups(lookupMap);
+
+            } catch (error) {
+                console.error('Error loading spatial lookups:', error);
+            }
         };
         loadLookups();
     }, []);
@@ -168,40 +185,79 @@ export const SpatialResourceForm = ({ initialData, onSubmit, isLoading, onValidi
                                 input: { border: '2px solid #F1F5F9', backgroundColor: '#F8FAFC', fontWeight: 700, height: '48px' }
                             }}
                         />
-                        {/* Conditionals using dense grid placement */}
+
+                        {/* Level-Specific Dynamic Lookups */}
+                        {formData.type === 'ZONE' && (
+                            <>
+                                <AtomicLookupSelector
+                                    label={catConfigs['ZONE_TYPES']?.label || 'Zone Type'}
+                                    items={lookups['ZONE_TYPES'] || []}
+                                    value={formData.zoneTypeId}
+                                    onChange={(val) => setFormData({ ...formData, zoneTypeId: val })}
+                                    variant="form"
+                                />
+                                <AtomicLookupSelector
+                                    label={catConfigs['ZONE_STATUS']?.label || 'Operation Status'}
+                                    items={lookups['ZONE_STATUS'] || []}
+                                    value={formData.zoneStatusId}
+                                    onChange={(val) => setFormData({ ...formData, zoneStatusId: val })}
+                                    variant="form"
+                                />
+                            </>
+                        )}
+
+                        {formData.type === 'BLOCK' && (
+                            <AtomicLookupSelector
+                                label={catConfigs['BLOCK_STATUS']?.label || 'Allocation Status'}
+                                items={lookups['BLOCK_STATUS'] || []}
+                                value={formData.blockStatusId}
+                                onChange={(val) => setFormData({ ...formData, blockStatusId: val })}
+                                variant="form"
+                            />
+                        )}
+
                         {formData.type === 'PLOT' && (
                             <>
-                                <Select
-                                    label="Land Usage"
-                                    placeholder="Select usage type"
-                                    data={lookups.usageTypes.map(l => ({ value: l.id.toString(), label: l.lookupValue.en }))}
-                                    value={formData.usageTypeId?.toString() ?? null}
-                                    onChange={(val) => setFormData({ ...formData, usageTypeId: val ? parseInt(val) : undefined })}
-                                    radius="xl"
-                                    size="md"
-                                    styles={{
-                                        label: { fontWeight: 900, color: '#16284F', fontSize: '11px', marginBottom: '4px' },
-                                        input: { border: '2px solid #F1F5F9', backgroundColor: '#F8FAFC', fontWeight: 700, height: '44px' }
-                                    }}
+                                <AtomicLookupSelector
+                                    label={catConfigs['LAND_USAGE']?.label || 'Land Usage'}
+                                    items={lookups['LAND_USAGE'] || []}
+                                    value={formData.usageTypeId}
+                                    onChange={(val) => setFormData({ ...formData, usageTypeId: val })}
+                                    variant="form"
                                 />
-                                <Select
-                                    label="Ownership Type"
-                                    placeholder="Select ownership model"
-                                    data={lookups.ownershipTypes.map(l => ({ value: l.id.toString(), label: l.lookupValue.en }))}
-                                    value={formData.ownershipTypeId?.toString() ?? null}
-                                    onChange={(val) => setFormData({ ...formData, ownershipTypeId: val ? parseInt(val) : undefined })}
-                                    radius="xl"
-                                    size="md"
-                                    styles={{
-                                        label: { fontWeight: 900, color: '#16284F', fontSize: '11px', marginBottom: '4px' },
-                                        input: { border: '2px solid #F1F5F9', backgroundColor: '#F8FAFC', fontWeight: 700, height: '44px' }
-                                    }}
+                                <AtomicLookupSelector
+                                    label={catConfigs['PLOT_STATUS']?.label || 'Plot Status'}
+                                    items={lookups['PLOT_STATUS'] || []}
+                                    value={formData.plotStatusId}
+                                    onChange={(val) => setFormData({ ...formData, plotStatusId: val })}
+                                    variant="form"
+                                />
+                                <AtomicLookupSelector
+                                    label={catConfigs['LAND_OWNERSHIP']?.label || 'Ownership Model'}
+                                    items={lookups['LAND_OWNERSHIP'] || []}
+                                    value={formData.ownershipTypeId}
+                                    onChange={(val) => setFormData({ ...formData, ownershipTypeId: val })}
+                                    variant="form"
                                 />
                             </>
                         )}
 
                         {formData.type === 'BUILDING' && (
                             <>
+                                <AtomicLookupSelector
+                                    label={catConfigs['BUILDING_CLASS']?.label || 'Building Class'}
+                                    items={lookups['BUILDING_CLASS'] || []}
+                                    value={formData.buildingClassId}
+                                    onChange={(val) => setFormData({ ...formData, buildingClassId: val })}
+                                    variant="form"
+                                />
+                                <AtomicLookupSelector
+                                    label={catConfigs['CONSTRUCTION_STATUS']?.label || 'Construction Progress'}
+                                    items={lookups['CONSTRUCTION_STATUS'] || []}
+                                    value={formData.constructionStatusId}
+                                    onChange={(val) => setFormData({ ...formData, constructionStatusId: val })}
+                                    variant="form"
+                                />
                                 <NumberInput
                                     label="Total Floors"
                                     min={1}
@@ -215,53 +271,46 @@ export const SpatialResourceForm = ({ initialData, onSubmit, isLoading, onValidi
                                         input: { border: '2px solid #F1F5F9', backgroundColor: '#F8FAFC', fontWeight: 700, height: '44px' }
                                     }}
                                 />
-                                <Select
-                                    label="Building Class"
-                                    placeholder="Select class"
-                                    data={lookups.buildingClasses.map(l => ({ value: l.id.toString(), label: l.lookupValue.en }))}
-                                    value={formData.buildingClassId?.toString() ?? null}
-                                    onChange={(val) => setFormData({ ...formData, buildingClassId: val ? parseInt(val) : undefined })}
-                                    radius="xl"
-                                    size="md"
-                                    styles={{
-                                        label: { fontWeight: 900, color: '#16284F', fontSize: '11px', marginBottom: '4px' },
-                                        input: { border: '2px solid #F1F5F9', backgroundColor: '#F8FAFC', fontWeight: 700, height: '44px' }
-                                    }}
-                                />
                             </>
                         )}
 
                         {formData.type === 'ROOM' && (
                             <>
-                                <Select
-                                    label="Room Type"
-                                    placeholder="Select room type"
-                                    data={lookups.roomTypes.map(l => ({ value: l.id.toString(), label: l.lookupValue.en }))}
-                                    value={formData.roomTypeId?.toString() ?? null}
-                                    onChange={(val) => setFormData({ ...formData, roomTypeId: val ? parseInt(val) : undefined })}
-                                    radius="xl"
-                                    size="md"
-                                    styles={{
-                                        label: { fontWeight: 900, color: '#16284F', fontSize: '11px', marginBottom: '4px' },
-                                        input: { border: '2px solid #F1F5F9', backgroundColor: '#F8FAFC', fontWeight: 700, height: '44px' }
-                                    }}
+                                <AtomicLookupSelector
+                                    label={catConfigs['ROOM_TYPE']?.label || 'Facility Usage'}
+                                    items={lookups['ROOM_TYPE'] || []}
+                                    value={formData.roomTypeId}
+                                    onChange={(val) => setFormData({ ...formData, roomTypeId: val })}
+                                    variant="form"
                                 />
-                                <Select
-                                    label="Room Status"
-                                    placeholder="Select room status"
-                                    data={lookups.roomStatuses.map(l => ({ value: l.id.toString(), label: l.lookupValue.en }))}
-                                    value={formData.roomStatusId?.toString() ?? null}
-                                    onChange={(val) => setFormData({ ...formData, roomStatusId: val ? parseInt(val) : undefined })}
-                                    radius="xl"
-                                    size="md"
-                                    styles={{
-                                        label: { fontWeight: 900, color: '#16284F', fontSize: '11px', marginBottom: '4px' },
-                                        input: { border: '2px solid #F1F5F9', backgroundColor: '#F8FAFC', fontWeight: 700, height: '44px' }
-                                    }}
+                                <AtomicLookupSelector
+                                    label={catConfigs['ROOM_STATUS']?.label || 'Occupancy Status'}
+                                    items={lookups['ROOM_STATUS'] || []}
+                                    value={formData.roomStatusId}
+                                    onChange={(val) => setFormData({ ...formData, roomStatusId: val })}
+                                    variant="form"
                                 />
                             </>
                         )}
+
+                        {/* Special case for structural type integration (Plot metadata) */}
+                        {formData.type === 'PLOT' && (
+                            <AtomicLookupSelector
+                                label={catConfigs['BUILDING_TYPES']?.label || 'Structural Standard'}
+                                items={lookups['BUILDING_TYPES'] || []}
+                                value={formData.itpcBuildingType}
+                                onChange={(val) => setFormData({ ...formData, itpcBuildingType: val.toString() })}
+                                variant="form"
+                            />
+                        )}
                     </div>
+
+                    {/* Conditionals using dense grid placement (Removed old standard Selects) */}
+                    {false && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8 relative z-10">
+                        </div>
+                    )}
+
 
                     {/* ITPC Enterprise Metadata Section (Phase 22 Compliance) */}
                     {(formData.type === 'PLOT' || formData.type === 'BUILDING' || formData.type === 'ROOM') && (
@@ -288,17 +337,12 @@ export const SpatialResourceForm = ({ initialData, onSubmit, isLoading, onValidi
                                 )}
 
                                 {formData.type === 'PLOT' && (
-                                    <TextInput
-                                        label="Building Type"
-                                        placeholder="e.g. G+7"
-                                        value={formData.itpcBuildingType || ''}
-                                        onChange={(e) => setFormData({ ...formData, itpcBuildingType: e.currentTarget.value })}
-                                        radius="xl"
-                                        size="md"
-                                        styles={{
-                                            label: { fontWeight: 900, color: '#16284F', fontSize: '11px', marginBottom: '4px' },
-                                            input: { border: '1px solid #E2E8F0', backgroundColor: '#F8FAFC' }
-                                        }}
+                                    <AtomicLookupSelector
+                                        label={catConfigs['BUILDING_TYPES']?.label || 'Structural Standard'}
+                                        items={lookups['BUILDING_TYPES'] || []}
+                                        value={formData.itpcBuildingType}
+                                        onChange={(val) => setFormData({ ...formData, itpcBuildingType: val.toString() })}
+                                        variant="form"
                                     />
                                 )}
 

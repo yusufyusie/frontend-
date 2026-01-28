@@ -9,9 +9,10 @@ import { SpatialResourceForm } from '@/components/organisms/tms/SpatialResourceF
 import { AdvancedTreeGrid, TreeNode } from '@/components/organisms/tms/AdvancedTreeGrid';
 import { Modal } from '@/components/Modal';
 import { toast } from '@/components/Toast';
-import { LayoutList } from 'lucide-react';
-import { AuditSummaryCards } from '@/components/organisms/tms/AuditSummaryCards';
 import { GridColumn } from '@/components/organisms/tms/AdvancedTreeGrid';
+import { AuditSummaryCards } from '@/components/organisms/tms/AuditSummaryCards';
+import { AtomicLookupSelector } from '@/components/molecules/tms/AtomicLookupSelector';
+import { lookupsService } from '@/services/lookups.service';
 
 export default function LandPage() {
     const [treeData, setTreeData] = useState<any[]>([]);
@@ -22,7 +23,36 @@ export default function LandPage() {
     const [activeResource, setActiveResource] = useState<Partial<any> | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [discoveryMode, setDiscoveryMode] = useState<string | null>(null);
+    const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
     const [navigationStack, setNavigationStack] = useState<any[]>([]);
+    const [allCategories, setAllCategories] = useState<any[]>([]);
+
+    useEffect(() => {
+        const fetchCats = async () => {
+            const res = await lookupsService.getCategories();
+            const allCats = (res as any).data || res || [];
+
+            // Dynamically discover spatial categories based on DB metadata
+            const filtered = allCats
+                .filter((cat: any) => cat.isSpatial || cat.metadata?.isSpatial)
+                .sort((a: any, b: any) => (a.order || 99) - (b.order || 99))
+                .map((cat: any, idx: number) => ({
+                    // Transform category config to SystemLookup structure
+                    id: idx + 1,
+                    lookupCode: cat.value,
+                    lookupValue: { en: cat.label, am: cat.label },
+                    lookupCategory: 'SPATIAL_DISCOVERY',
+                    level: 1,
+                    displayOrder: cat.order || idx,
+                    metadata: { icon: cat.icon, color: cat.color, isSpatial: true },
+                    isSystem: true,
+                    isActive: true
+                }));
+
+            setAllCategories(filtered);
+        };
+        fetchCats();
+    }, []);
 
     const [metrics, setMetrics] = useState({
         zones: 0,
@@ -182,6 +212,7 @@ export default function LandPage() {
 
     const handleGoHome = () => {
         setDiscoveryMode(null);
+        setSelectedCategory(null);
         setNavigationStack([]);
     };
 
@@ -195,6 +226,30 @@ export default function LandPage() {
         setNavigationStack([]);
         const labelMap: any = { 'ZONE': 'Zones', 'BLOCK': 'Blocks', 'PLOT': 'Plots', 'BUILDING': 'Buildings', 'FLOOR': 'Floors', 'ROOM': 'Rooms' };
         toast.info(`Discovery Mode: Listing all ${labelMap[level].toLowerCase()} across the system.`);
+    };
+
+    const handleDiscoverySelect = (category: string) => {
+        const mapping: any = {
+            'ZONE_TYPES': 'ZONE',
+            'ZONE_STATUS': 'ZONE',
+            'BLOCK_STATUS': 'BLOCK',
+            'PLOT_STATUS': 'PLOT',
+            'CONSTRUCTION_STATUS': 'BUILDING',
+            'BUILDING_CLASS': 'BUILDING',
+            'BUILDING_TYPES': 'BUILDING',
+            'ROOM_STATUS': 'ROOM',
+            'ROOM_TYPE': 'ROOM',
+            'LAND_USAGE': 'PLOT',
+            'TENANT_STATUS': 'ROOM'
+        };
+
+        const level = mapping[category];
+        if (level) {
+            setSelectedCategory(category);
+            handleLevelClick(level);
+        } else {
+            toast.warning('This category is not yet mapped to a spatial level.');
+        }
     };
 
     // Calculate dynamic state logic
@@ -393,6 +448,14 @@ export default function LandPage() {
 
             <AuditSummaryCards structuralMetrics={metrics} onLevelClick={handleLevelClick} />
 
+            <AtomicLookupSelector
+                label="Territorial Discovery Baseline"
+                items={allCategories}
+                value={selectedCategory}
+                onChange={handleDiscoverySelect}
+                variant="discovery"
+            />
+
             <div className="card p-4 bg-gradient-to-r from-blue-50 to-blue-100/50 border-l-4 border-primary">
                 <div className="flex items-center gap-4 justify-between flex-wrap">
                     <div className="flex items-center gap-3 flex-wrap">
@@ -476,25 +539,27 @@ export default function LandPage() {
                 />
             </div>
 
-            {mounted && createPortal(
-                <Modal
-                    isOpen={opened}
-                    onClose={() => setOpened(false)}
-                    mode="modal"
-                    size="lg"
-                    title={activeResource?.realId || activeResource?.id ? `Edit ${activeResource?.type?.charAt(0) + activeResource?.type?.slice(1).toLowerCase()}` : `Register ${activeResource?.type?.charAt(0) + activeResource?.type?.slice(1).toLowerCase()}`}
-                    description="Spatial Structure Management"
-                    footer={
-                        <Group justify="flex-end" gap="md">
-                            <Button variant="subtle" color="gray" onClick={() => setOpened(false)} radius="xl">Cancel</Button>
-                            <Button variant="filled" bg="#0C7C92" onClick={() => document.getElementById('spatial-form')?.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }))} disabled={!isFormValid} radius="xl">Save Changes</Button>
-                        </Group>
-                    }
-                >
-                    <SpatialResourceForm initialData={activeResource || {}} onSubmit={handleSubmit} isLoading={isLoading} onValidityChange={setIsFormValid} />
-                </Modal>,
-                document.body
-            )}
-        </div>
+            {
+                mounted && createPortal(
+                    <Modal
+                        isOpen={opened}
+                        onClose={() => setOpened(false)}
+                        mode="modal"
+                        size="lg"
+                        title={activeResource?.realId || activeResource?.id ? `Edit ${activeResource?.type?.charAt(0) + activeResource?.type?.slice(1).toLowerCase()}` : `Register ${activeResource?.type?.charAt(0) + activeResource?.type?.slice(1).toLowerCase()}`}
+                        description="Spatial Structure Management"
+                        footer={
+                            <Group justify="flex-end" gap="md">
+                                <Button variant="subtle" color="gray" onClick={() => setOpened(false)} radius="xl">Cancel</Button>
+                                <Button variant="filled" bg="#0C7C92" onClick={() => document.getElementById('spatial-form')?.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }))} disabled={!isFormValid} radius="xl">Save Changes</Button>
+                            </Group>
+                        }
+                    >
+                        <SpatialResourceForm initialData={activeResource || {}} onSubmit={handleSubmit} isLoading={isLoading} onValidityChange={setIsFormValid} />
+                    </Modal>,
+                    document.body
+                )
+            }
+        </div >
     );
 }
