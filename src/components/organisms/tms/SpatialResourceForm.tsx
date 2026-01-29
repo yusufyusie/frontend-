@@ -163,8 +163,8 @@ export const SpatialResourceForm = ({ initialData, onSubmit, isLoading, onValidi
                             radius="xl"
                             size="md"
                             styles={{
-                                label: { fontWeight: 900, color: '#16284F', fontSize: '12px', marginBottom: '6px' },
-                                input: { border: '2px solid #F1F5F9', backgroundColor: '#F8FAFC', fontWeight: 700, height: '48px' }
+                                label: { fontWeight: 900, color: '#16284F', fontSize: '12px', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '1px' },
+                                input: { border: '2px solid #F1F5F9', backgroundColor: '#F8FAFC', fontWeight: 700, height: '48px', borderRadius: '16px', fontSize: '14px' }
                             }}
                         />
 
@@ -181,8 +181,8 @@ export const SpatialResourceForm = ({ initialData, onSubmit, isLoading, onValidi
                             radius="xl"
                             size="md"
                             styles={{
-                                label: { fontWeight: 900, color: '#16284F', fontSize: '12px', marginBottom: '6px' },
-                                input: { border: '2px solid #F1F5F9', backgroundColor: '#F8FAFC', fontWeight: 700, height: '48px' }
+                                label: { fontWeight: 900, color: '#16284F', fontSize: '12px', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '1px' },
+                                input: { border: '2px solid #F1F5F9', backgroundColor: '#F8FAFC', fontWeight: 700, height: '48px', borderRadius: '16px', fontSize: '14px' }
                             }}
                         />
 
@@ -192,14 +192,14 @@ export const SpatialResourceForm = ({ initialData, onSubmit, isLoading, onValidi
                                 <AtomicLookupSelector
                                     label={catConfigs['ZONE_TYPES']?.label || 'Zone Type'}
                                     items={lookups['ZONE_TYPES'] || []}
-                                    value={formData.zoneTypeId}
+                                    value={formData.zoneTypeId ?? null}
                                     onChange={(val) => setFormData({ ...formData, zoneTypeId: val })}
                                     variant="form"
                                 />
                                 <AtomicLookupSelector
                                     label={catConfigs['ZONE_STATUS']?.label || 'Operation Status'}
                                     items={lookups['ZONE_STATUS'] || []}
-                                    value={formData.zoneStatusId}
+                                    value={formData.zoneStatusId ?? null}
                                     onChange={(val) => setFormData({ ...formData, zoneStatusId: val })}
                                     variant="form"
                                 />
@@ -210,7 +210,7 @@ export const SpatialResourceForm = ({ initialData, onSubmit, isLoading, onValidi
                             <AtomicLookupSelector
                                 label={catConfigs['BLOCK_STATUS']?.label || 'Allocation Status'}
                                 items={lookups['BLOCK_STATUS'] || []}
-                                value={formData.blockStatusId}
+                                value={formData.blockStatusId ?? null}
                                 onChange={(val) => setFormData({ ...formData, blockStatusId: val })}
                                 variant="form"
                             />
@@ -228,7 +228,7 @@ export const SpatialResourceForm = ({ initialData, onSubmit, isLoading, onValidi
                                 <AtomicLookupSelector
                                     label={catConfigs['PLOT_STATUS']?.label || 'Plot Status'}
                                     items={lookups['PLOT_STATUS'] || []}
-                                    value={formData.plotStatusId}
+                                    value={formData.plotStatusId ?? null}
                                     onChange={(val) => setFormData({ ...formData, plotStatusId: val })}
                                     variant="form"
                                 />
@@ -267,8 +267,8 @@ export const SpatialResourceForm = ({ initialData, onSubmit, isLoading, onValidi
                                     radius="xl"
                                     size="md"
                                     styles={{
-                                        label: { fontWeight: 900, color: '#16284F', fontSize: '11px', marginBottom: '4px' },
-                                        input: { border: '2px solid #F1F5F9', backgroundColor: '#F8FAFC', fontWeight: 700, height: '44px' }
+                                        label: { fontWeight: 900, color: '#16284F', fontSize: '11px', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.5px' },
+                                        input: { border: '2px solid #F1F5F9', backgroundColor: '#F8FAFC', fontWeight: 700, height: '44px', borderRadius: '12px' }
                                     }}
                                 />
                             </>
@@ -371,8 +371,8 @@ export const SpatialResourceForm = ({ initialData, onSubmit, isLoading, onValidi
                                             radius="xl"
                                             size="md"
                                             styles={{
-                                                label: { fontWeight: 900, color: '#16284F', fontSize: '11px', marginBottom: '4px' },
-                                                input: { border: '1px solid #E2E8F0', backgroundColor: '#F8FAFC' }
+                                                label: { fontWeight: 900, color: '#16284F', fontSize: '11px', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.5px' },
+                                                input: { border: '1px solid #E2E8F0', backgroundColor: '#F8FAFC', borderRadius: '12px' }
                                             }}
                                         />
                                         <TextInput
@@ -383,8 +383,8 @@ export const SpatialResourceForm = ({ initialData, onSubmit, isLoading, onValidi
                                             radius="xl"
                                             size="md"
                                             styles={{
-                                                label: { fontWeight: 900, color: '#16284F', fontSize: '11px', marginBottom: '4px' },
-                                                input: { border: '1px solid #E2E8F0', backgroundColor: '#F8FAFC' }
+                                                label: { fontWeight: 900, color: '#16284F', fontSize: '11px', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.5px' },
+                                                input: { border: '1px solid #E2E8F0', backgroundColor: '#F8FAFC', borderRadius: '12px' }
                                             }}
                                         />
                                         <NumberInput
@@ -517,8 +517,8 @@ export const SpatialResourceForm = ({ initialData, onSubmit, isLoading, onValidi
                         radius="xl"
                         size="md"
                         styles={{
-                            label: { fontWeight: 900, color: '#16284F', fontSize: '12px', marginBottom: '4px' },
-                            input: { border: '2px solid #E2E8F0', backgroundColor: 'white', fontWeight: 600, height: '48px' }
+                            label: { fontWeight: 900, color: '#16284F', fontSize: '12px', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '1px' },
+                            input: { border: '2px solid #E2E8F0', backgroundColor: 'white', fontWeight: 600, height: '48px', borderRadius: '16px', fontSize: '14px' }
                         }}
                     />
                 </Paper>

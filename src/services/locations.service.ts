@@ -19,6 +19,8 @@ export interface LocationOption {
     area?: number;
     floorNumber?: number;
     isActive?: boolean;
+    gpsLat?: number;
+    gpsLng?: number;
     children?: any[];
 }
 
@@ -78,6 +80,21 @@ class LocationsService {
         const params = blockId ? { blockId } : {};
         const response = await api.get(`${this.baseUrl}/plots`, { params });
         return response.data;
+    }
+
+    /**
+     * Get individual resource details by type and ID
+     */
+    async getOne(type: string, id: number) {
+        const t = type.toLowerCase();
+        // Backend now supports /locations/zones/:id, /locations/rooms/:id etc.
+        const endpoint = t === 'zone' ? 'zones' :
+            t === 'block' ? 'blocks' :
+                t === 'plot' ? 'plots' :
+                    t === 'building' ? 'buildings' :
+                        t === 'room' ? 'rooms' : 'unknown';
+
+        return api.get<any>(`${this.baseUrl}/${endpoint}/${id}`);
     }
 
     /**

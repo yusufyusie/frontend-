@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Paper, Group, Text, Stack, ThemeIcon, Box, Badge, Divider } from '@mantine/core';
-import { Map, MapPin, Building2, Trees, Landmark, Gauge, AlertCircle, Grid3x3, Layers, DoorOpen, TrendingUp } from 'lucide-react';
-import { leasesService } from '@/services/leases.service';
-import { Title } from '@mantine/core';
+import { Paper, Group, Text, Stack, ThemeIcon, Box, Badge, Divider, Title } from '@mantine/core';
+import { Map as MapIcon, MapPin, Building2, Trees, Landmark, Gauge, AlertCircle, Grid3x3, Layers, DoorOpen, TrendingUp } from 'lucide-react';
+import { leasesService } from '../../../services/leases.service';
 
 interface Props {
     structuralMetrics?: {
@@ -29,112 +28,80 @@ export const AuditSummaryCards = ({ structuralMetrics, onLevelClick }: Props) =>
     const { reportSummary, summary } = stats;
 
     return (
-        <Stack gap="xs" mb="lg" className="animate-fade-in">
-            <Paper p="md" radius="2rem" withBorder className="bg-white border-slate-100 shadow-sm">
-                <Group justify="space-between" align="center" wrap="nowrap">
-                    {/* Primary Audit Metrics */}
-                    <Group gap="xl" wrap="nowrap">
-                        <Box>
-                            <Text size="10px" fw={900} c="dimmed" tt="uppercase" lts="1px" mb={4}>Sub-Leased</Text>
-                            <Group gap="xs">
-                                <ThemeIcon size="sm" variant="light" color="teal" radius="xl"><Landmark size={14} /></ThemeIcon>
-                                <Text size="md" fw={900} c="teal">{reportSummary.subLeasedArea.toLocaleString()} m²</Text>
+        <Stack gap={4} mb="md" className="animate-fade-in">
+            <Paper px="md" py={8} radius="1.5rem" withBorder className="bg-white border-slate-100 shadow-sm">
+                <Stack gap={4}>
+                    {/* Line 1: Primary Metrics & Total Area */}
+                    <Group justify="space-between" align="center" wrap="nowrap">
+                        <Group gap="lg" wrap="nowrap">
+                            <Group gap={6}>
+                                <ThemeIcon size="xs" variant="light" color="teal" radius="xl"><Landmark size={10} /></ThemeIcon>
+                                <Text size="11px" fw={700} c="dimmed" tt="uppercase">Leased:</Text>
+                                <Text size="11px" fw={900} c="teal.8">{reportSummary.subLeasedArea.toLocaleString()} m²</Text>
                             </Group>
-                        </Box>
 
-                        <Divider orientation="vertical" />
-
-                        <Box>
-                            <Text size="10px" fw={900} c="dimmed" tt="uppercase" lts="1px" mb={4}>Vacant Space</Text>
-                            <Group gap="xs">
-                                <ThemeIcon size="sm" variant="light" color="blue" radius="xl"><Map size={14} /></ThemeIcon>
-                                <Text size="md" fw={900} c="blue">{reportSummary.vacantSpace.toLocaleString()} m²</Text>
+                            <Group gap={6}>
+                                <ThemeIcon size="xs" variant="light" color="blue" radius="xl"><MapIcon size={10} /></ThemeIcon>
+                                <Text size="11px" fw={700} c="dimmed" tt="uppercase">Vacant:</Text>
+                                <Text size="11px" fw={900} c="blue.8">{reportSummary.vacantSpace.toLocaleString()} m²</Text>
                             </Group>
-                        </Box>
 
-                        <Divider orientation="vertical" />
-
-                        <Box>
-                            <Text size="10px" fw={900} c="dimmed" tt="uppercase" lts="1px" mb={4}>Infrastructure</Text>
-                            <Group gap="xs">
-                                <ThemeIcon size="sm" variant="light" color="green" radius="xl"><Trees size={14} /></ThemeIcon>
-                                <Text size="md" fw={900} c="green">{(reportSummary.roads + reportSummary.greenArea + reportSummary.utilities).toLocaleString()} m²</Text>
+                            <Group gap={6}>
+                                <ThemeIcon size="xs" variant="light" color="green" radius="xl"><Trees size={10} /></ThemeIcon>
+                                <Text size="11px" fw={700} c="dimmed" tt="uppercase">Infra:</Text>
+                                <Text size="11px" fw={900} c="green.8">{(reportSummary.roads + reportSummary.greenArea + reportSummary.utilities).toLocaleString()} m²</Text>
                             </Group>
-                        </Box>
-                    </Group>
-
-                    {/* Structural Counts (Compact & Clickable) */}
-                    {structuralMetrics && (
-                        <Group gap="xs" bg="slate.0" p={8} style={{ borderRadius: '1.25rem', border: '1px solid #f1f5f9' }}>
-                            <button
-                                onClick={() => onLevelClick?.('ZONE')}
-                                className="flex items-baseline gap-2 px-3 border-r border-slate-100 hover:bg-slate-50 transition-all rounded-lg group"
-                            >
-                                <Text size="12px" fw={900} c="#16284F">{structuralMetrics.zones}</Text>
-                                <Text size="8px" fw={800} tt="uppercase" c="dimmed" lts="0.5px">Zones</Text>
-                            </button>
-                            <button
-                                onClick={() => onLevelClick?.('BLOCK')}
-                                className="flex items-baseline gap-2 px-3 border-r border-slate-100 hover:bg-slate-50 transition-all rounded-lg group"
-                            >
-                                <Text size="12px" fw={900} c="#16284F">{structuralMetrics.blocks}</Text>
-                                <Text size="8px" fw={800} tt="uppercase" c="dimmed" lts="0.5px">Blocks</Text>
-                            </button>
-                            <button
-                                onClick={() => onLevelClick?.('PLOT')}
-                                className="flex items-baseline gap-2 px-3 border-r border-slate-100 hover:bg-slate-50 transition-all rounded-lg group"
-                            >
-                                <Text size="12px" fw={900} c="#16284F">{structuralMetrics.plots}</Text>
-                                <Text size="8px" fw={800} tt="uppercase" c="dimmed" lts="0.5px">Plots</Text>
-                            </button>
-                            <button
-                                onClick={() => onLevelClick?.('BUILDING')}
-                                className="flex items-baseline gap-2 px-3 border-r border-slate-100 hover:bg-slate-50 transition-all rounded-lg group"
-                            >
-                                <Text size="12px" fw={900} c="#16284F">{structuralMetrics.buildings}</Text>
-                                <Text size="8px" fw={800} tt="uppercase" c="dimmed" lts="0.5px">Buildings</Text>
-                            </button>
-                            <button
-                                onClick={() => onLevelClick?.('FLOOR')}
-                                className="flex items-baseline gap-2 px-3 border-r border-slate-100 hover:bg-slate-50 transition-all rounded-lg group"
-                            >
-                                <Text size="12px" fw={900} c="#16284F">{structuralMetrics.floors}</Text>
-                                <Text size="8px" fw={800} tt="uppercase" c="dimmed" lts="0.5px">Floors</Text>
-                            </button>
-                            <button
-                                onClick={() => onLevelClick?.('ROOM')}
-                                className="flex items-baseline gap-2 px-3 hover:bg-slate-50 transition-all rounded-lg group"
-                            >
-                                <Text size="12px" fw={900} c="#16284F">{structuralMetrics.rooms}</Text>
-                                <Text size="8px" fw={800} tt="uppercase" c="dimmed" lts="0.5px">Rooms</Text>
-                            </button>
                         </Group>
-                    )}
 
-                    {/* Total Area / Compliance Baseline */}
-                    <Box ta="right">
-                        <Badge variant="light" color="gray" size="xs" radius="xl" mb={4}>Sept 2025 Baseline</Badge>
-                        <Group gap="xs" justify="flex-end">
-                            <Text size="xs" fw={900} c="#16284F">
+                        <Group gap={6}>
+                            <Badge variant="outline" color="gray" size="xs" radius="sm">Baseline</Badge>
+                            <Text size="13px" fw={900} c="#16284F">
                                 {structuralMetrics?.totalArea.toLocaleString() || reportSummary.totalArea.toLocaleString()} m²
                             </Text>
-                            <TrendingUp size={14} className="text-slate-400" />
+                            <TrendingUp size={12} className="text-slate-400" />
                         </Group>
-                    </Box>
-                </Group>
-            </Paper>
-
-            {summary.variance !== 0 && (
-                <Paper p="xs" radius="1rem" bg="orange.0" className="border border-orange-100">
-                    <Group gap="xs">
-                        <AlertCircle size={16} className="text-orange-600" />
-                        <Text size="10px" fw={700} c="orange.9">
-                            System Alert: Spatial Variance of <span className="font-black underline">{summary.variance.toFixed(2)} m²</span> detected.
-                            <span className="ml-1 opacity-75 font-semibold">(Physical Survey ≠ Legal Contract)</span>
-                        </Text>
                     </Group>
-                </Paper>
-            )}
+
+                    <Divider color="slate.0" opacity={0.3} />
+
+                    {/* Line 2: Structural Counts & Integrated Alert */}
+                    <Group justify="space-between" align="center" wrap="nowrap">
+                        <Group gap={4}>
+                            {[
+                                { count: structuralMetrics?.zones, label: 'Zones', key: 'ZONE' },
+                                { count: structuralMetrics?.blocks, label: 'Blocks', key: 'BLOCK' },
+                                { count: structuralMetrics?.plots, label: 'Plots', key: 'PLOT' },
+                                { count: structuralMetrics?.buildings, label: 'Buildings', key: 'BUILDING' },
+                                { count: structuralMetrics?.floors, label: 'Floors', key: 'FLOOR' },
+                                { count: structuralMetrics?.rooms, label: 'Rooms', key: 'ROOM' },
+                            ].map((item, idx) => (
+                                <React.Fragment key={item.label}>
+                                    <button
+                                        onClick={() => onLevelClick?.(item.key as any)}
+                                        className="flex items-center gap-1.5 px-2 py-0.5 hover:bg-slate-50 transition-all rounded-md group"
+                                    >
+                                        <Text size="11px" fw={900} c="#16284F">{item.count}</Text>
+                                        <Text size="9px" fw={800} tt="uppercase" c="dimmed" lts="0.2px">{item.label}</Text>
+                                    </button>
+                                    {idx < 5 && <div className="w-[1px] h-3 bg-slate-100" />}
+                                </React.Fragment>
+                            ))}
+                        </Group>
+
+                        {summary.variance !== 0 ? (
+                            <Group gap={6} px={10} py={2} bg="orange.0" style={{ borderRadius: '10px', border: '1px solid #ffedd5' }}>
+                                <AlertCircle size={10} className="text-orange-600" />
+                                <Text size="9px" fw={800} c="orange.9" tt="uppercase">
+                                    Variance: {summary.variance.toFixed(2)} m²
+                                </Text>
+                            </Group>
+                        ) : (
+                            <Badge variant="dot" color="teal" size="xs">Data Synchronized</Badge>
+                        )}
+                    </Group>
+                </Stack>
+            </Paper>
         </Stack>
+
     );
 };

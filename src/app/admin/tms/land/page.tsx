@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { createPortal } from 'react-dom';
 import { Button, Group, Stack, Box, Text, Paper, Title, LoadingOverlay, Badge, Progress } from '@mantine/core';
 import { Plus, RefreshCw, Map, Grid3x3, MapPin, TrendingUp, X as CloseIcon, Save, Search as SearchIcon, Building2, Layers, DoorOpen, ChevronRight, Home, ArrowLeft } from 'lucide-react';
@@ -12,9 +13,12 @@ import { toast } from '@/components/Toast';
 import { GridColumn } from '@/components/organisms/tms/AdvancedTreeGrid';
 import { AuditSummaryCards } from '@/components/organisms/tms/AuditSummaryCards';
 import { AtomicLookupSelector } from '@/components/molecules/tms/AtomicLookupSelector';
-import { lookupsService } from '@/services/lookups.service';
+import { SpatialMapDashboard } from '@/components/organisms/tms/SpatialMapDashboard';
+import { lookupsService, SystemLookup } from '@/services/lookups.service';
+import { LayoutGrid, Map as MapIcon } from 'lucide-react';
 
 export default function LandPage() {
+    const router = useRouter();
     const [treeData, setTreeData] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [opened, setOpened] = useState(false);
@@ -25,7 +29,8 @@ export default function LandPage() {
     const [discoveryMode, setDiscoveryMode] = useState<string | null>(null);
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
     const [navigationStack, setNavigationStack] = useState<any[]>([]);
-    const [allCategories, setAllCategories] = useState<any[]>([]);
+    const [allCategories, setAllCategories] = useState<SystemLookup[]>([]);
+    const [viewMode, setViewMode] = useState<'grid' | 'map'>('grid');
 
     useEffect(() => {
         const fetchCats = async () => {
@@ -196,10 +201,7 @@ export default function LandPage() {
     };
 
     const handleViewDetail = (node: TreeNode) => {
-        const resource = findResourceById(treeData, node.id as any);
-        if (resource) {
-            toast.info(`Viewing details for ${resource.name}...`);
-        }
+        router.push(`/admin/tms/resources/${node.meta?.type}/${node.id}`);
     };
 
     const handleDrillDown = (node: TreeNode) => {
@@ -448,15 +450,8 @@ export default function LandPage() {
 
             <AuditSummaryCards structuralMetrics={metrics} onLevelClick={handleLevelClick} />
 
-            <AtomicLookupSelector
-                label="Territorial Discovery Baseline"
-                items={allCategories}
-                value={selectedCategory}
-                onChange={handleDiscoverySelect}
-                variant="discovery"
-            />
 
-            <div className="card p-4 bg-gradient-to-r from-blue-50 to-blue-100/50 border-l-4 border-primary">
+            <div className="card p-3 bg-gradient-to-r from-blue-50/50 to-blue-100/30 border-l-4 border-primary shadow-md">
                 <div className="flex items-center gap-4 justify-between flex-wrap">
                     <div className="flex items-center gap-3 flex-wrap">
                         {(navigationStack.length > 0 || discoveryMode) && (
@@ -505,38 +500,85 @@ export default function LandPage() {
                         )}
                     </div>
 
-                    <div className="relative w-80 flex-shrink-0">
-                        <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                        <input
-                            type="text"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            placeholder="Search by Name or Occupant..."
-                            className="w-full pl-9 pr-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all text-xs font-medium"
-                        />
+                    <div className="flex items-center gap-3 flex-1 min-w-[300px]">
+                        <div className="relative flex-1">
+                            <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                            <input
+                                type="text"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                placeholder="Search by Name or Occupant..."
+                                className="w-full pl-9 pr-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all text-xs font-medium h-[44px]"
+                            />
+                        </div>
+
+                        <div className="w-64">
+                            <AtomicLookupSelector
+                                label=""
+                                items={allCategories}
+                                value={selectedCategory}
+                                onChange={handleDiscoverySelect}
+                                variant="form"
+                                placeholder="Global Type Discovery..."
+                            />
+                        </div>
                     </div>
+
+                    <Button.Group ml="auto">
+                        <Button
+                            variant={viewMode === 'grid' ? 'filled' : 'light'}
+                            color="primary"
+                            size="sm"
+                            leftSection={<LayoutGrid size={16} />}
+                            onClick={() => setViewMode('grid')}
+                            className="transition-all duration-300"
+                        >
+                            Grid View
+                        </Button>
+                        <Button
+                            variant={viewMode === 'map' ? 'filled' : 'light'}
+                            color="primary"
+                            size="sm"
+                            leftSection={<MapIcon size={16} />}
+                            onClick={() => setViewMode('map')}
+                            className="transition-all duration-300"
+                        >
+                            Map View
+                        </Button>
+                    </Button.Group>
                 </div>
             </div>
 
-            <div className="card p-6">
-                <AdvancedTreeGrid
-                    data={convertToTreeNodes(
-                        visibleData,
-                        navigationStack.length > 0 ? (navigationStack[navigationStack.length - 1].name || navigationStack[navigationStack.length - 1].code) : undefined
-                    )}
-                    onEdit={handleEdit}
-                    onDelete={handleDelete}
-                    onAddChild={handleAddChild}
-                    onViewDetail={handleViewDetail}
-                    onDrillDown={handleDrillDown}
-                    mode="tiered"
-                    levelLabel={activeViewLevel}
-                    columns={columnConfigs[activeViewLevel] || columnConfigs['ROOM']}
-                    searchable={true}
-                    initialExpandLevel={0}
-                    searchTerm={searchTerm}
-                    onSearchChange={setSearchTerm}
-                />
+            <div className="card p-6 min-h-[600px] relative">
+                {viewMode === 'grid' ? (
+                    <AdvancedTreeGrid
+                        data={convertToTreeNodes(
+                            visibleData,
+                            navigationStack.length > 0 ? (navigationStack[navigationStack.length - 1].name || navigationStack[navigationStack.length - 1].code) : undefined
+                        )}
+                        onEdit={handleEdit}
+                        onDelete={handleDelete}
+                        onAddChild={handleAddChild}
+                        onViewDetail={handleViewDetail}
+                        onDrillDown={handleDrillDown}
+                        mode="tiered"
+                        levelLabel={activeViewLevel}
+                        columns={columnConfigs[activeViewLevel] || columnConfigs['ROOM']}
+                        searchable={true}
+                        initialExpandLevel={0}
+                        searchTerm={searchTerm}
+                        onSearchChange={setSearchTerm}
+                    />
+                ) : (
+                    <SpatialMapDashboard
+                        data={treeData}
+                        onResourceClick={(res) => {
+                            // Marker clicked - resource detail handling could be added here
+
+                            // Future: handle drill down from map
+                        }}
+                    />
+                )}
             </div>
 
             {

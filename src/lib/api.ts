@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Professional API Configuration - Industry Standard with /api prefix
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001/api';
 
 export const api = axios.create({
     baseURL: API_URL,

@@ -17,7 +17,10 @@ import { SmartPagination } from '@/components/SmartPagination';
 import { Modal } from '@/components/Modal';
 import { toast } from '@/components/Toast';
 
+import { useRouter } from 'next/navigation';
+
 export default function BuildingsCatalogPage() {
+    const router = useRouter();
     const [buildings, setBuildings] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [opened, setOpened] = useState(false);
@@ -262,6 +265,7 @@ export default function BuildingsCatalogPage() {
                                                 </button>
                                             </div>
                                             <button
+                                                onClick={() => router.push(`/admin/tms/resources/building/${building.id}`)}
                                                 className="h-10 px-5 bg-[#16284F] text-white rounded-xl font-bold text-xs flex items-center gap-2 hover:brightness-125 transition-all shadow-md active:scale-95"
                                             >
                                                 <Eye size={14} />
