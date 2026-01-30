@@ -60,7 +60,7 @@ export default function LeasesPage() {
                 <Box>
                     <Group gap="md" mb={4}>
                         <ThemeIcon size={48} radius="xl" variant="gradient" gradient={{ from: '#0C7C92', to: '#1098AD', deg: 45 }}>
-                            <FileText size={24} weight="bold" />
+                            <FileText size={24} strokeWidth={2.5} />
                         </ThemeIcon>
                         <div>
                             <Title order={1} className="text-3xl md:text-4xl font-black text-slate-800 tracking-tight">

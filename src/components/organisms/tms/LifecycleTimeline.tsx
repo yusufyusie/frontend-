@@ -1,92 +1,98 @@
 'use client';
 
-import { Timeline, Text, Paper, Title, Group, Badge, ScrollArea } from '@mantine/core';
-import { FileText, CheckCircle2, Send, ShieldAlert, History, LogOut } from 'lucide-react';
+import { Timeline, Text, Group, Paper, Badge, Stack, ThemeIcon } from '@mantine/core';
+import {
+    FileText,
+    Search,
+    CheckCircle2,
+    Send,
+    ThumbsUp,
+    FileSignature,
+    Home,
+    LogOut,
+    Clock,
+    XCircle
+} from 'lucide-react';
+import { InquiryTimeline } from '@/services/inquiries.service';
+import { format } from 'date-fns';
 
 interface LifecycleTimelineProps {
-    metadata: any;
+    timeline?: InquiryTimeline[];
+    currentStatus?: string;
+    metadata?: any;
     status?: string;
 }
 
-export function LifecycleTimeline({ metadata, status }: LifecycleTimelineProps) {
-    const p = metadata?.pipeline || {};
-    const l = metadata?.legal_permits || {};
-    const o = metadata?.operational || {};
-    const e = metadata?.exit || {};
+const STAGE_CONFIG: Record<string, { icon: any, color: string, label: string }> = {
+    'LOI': { icon: FileText, color: 'blue', label: 'Inquiry Received' },
+    'PROPOSAL_PENDING': { icon: Search, color: 'yellow', label: 'Proposal Review' },
+    'PROPOSAL_APPROVED': { icon: CheckCircle2, color: 'green', label: 'Proposal Approved' },
+    'PROPOSAL_REJECTED': { icon: XCircle, color: 'red', label: 'Proposal Rejected' },
+    'OFFER_SENT': { icon: Send, color: 'blue', label: 'Offer Sent' },
+    'OFFER_ACCEPTED': { icon: ThumbsUp, color: 'green', label: 'Offer Accepted' },
+    'CONTRACT_DRAFT': { icon: FileSignature, color: 'orange', label: 'Contract Prep' },
+    'ACTIVE': { icon: Home, color: 'teal', label: 'Active Lease' },
+    'EXIT_PENDING': { icon: LogOut, color: 'orange', label: 'Exiting' },
+    'EXITED': { icon: LogOut, color: 'gray', label: 'Exited' },
+    'STATUS_UPDATE': { icon: Clock, color: 'gray', label: 'Status Update' }
+};
+
+export function LifecycleTimeline({ timeline, currentStatus, metadata, status }: LifecycleTimelineProps) {
+    if (!timeline || timeline.length === 0) {
+        return (
+            <Paper p="xl" radius="xl" withBorder className="bg-slate-50/50 border-dashed border-2 flex items-center justify-center min-h-[200px]">
+                <Stack gap="xs" align="center">
+                    <Clock className="text-slate-300" size={32} />
+                    <Text c="dimmed" fw={700} size="sm">No timeline records found</Text>
+                </Stack>
+            </Paper>
+        );
+    }
 
     return (
-        <Paper withBorder p="xl" radius="xl" className="glass shadow-md h-full">
-            <Group justify="space-between" mb="xl">
-                <Title order={4} className="text-[#16284F]">Milestone Registry</Title>
-                <Badge variant="dot" color={e.status ? 'red' : 'teal'}>
-                    {e.status ? 'Status: Exit Protocol' : 'Health: Stable'}
-                </Badge>
-            </Group>
+        <Timeline active={0} bulletSize={36} lineWidth={3} color="teal">
+            {timeline.map((entry, index) => {
+                const config = STAGE_CONFIG[entry.stage] || STAGE_CONFIG['STATUS_UPDATE'];
+                const Icon = config.icon;
 
-            <ScrollArea h={400} offsetScrollbars>
-                <Timeline active={e.status ? 5 : 4} bulletSize={32} lineWidth={2}>
-                    {/* LOI Stage */}
+                return (
                     <Timeline.Item
-                        bullet={<FileText size={16} />}
-                        title="Letter of Intent (LoI)"
-                        lineVariant="dashed"
+                        key={entry.id}
+                        bullet={
+                            <ThemeIcon size={36} radius="xl" color={config.color} variant={index === 0 ? 'filled' : 'light'}>
+                                <Icon size={18} />
+                            </ThemeIcon>
+                        }
+                        title={
+                            <Group justify="space-between">
+                                <Text fw={900} size="sm" className="text-slate-800 uppercase tracking-tight">
+                                    {config.label}
+                                </Text>
+                                <Badge variant="light" color="gray" size="xs">
+                                    {format(new Date(entry.createdAt), 'MMM dd, yyyy HH:mm')}
+                                </Badge>
+                            </Group>
+                        }
                     >
-                        <Text c="dimmed" size="xs">Submitted on {p.loiDate ? new Date(p.loiDate).toLocaleDateString() : 'TBD'}</Text>
-                        <Text size="sm" mt={4} fw={500}>System initialized for engagement.</Text>
+                        <Stack gap={4} mt={4}>
+                            <Text size="xs" fw={700} className="text-slate-600">
+                                Action: <span className="text-slate-900">{entry.action}</span>
+                            </Text>
+                            {entry.remarks && (
+                                <Paper p="xs" radius="md" className="bg-slate-50 border border-slate-100 italic">
+                                    <Text size="xs" c="dimmed" fw={600}>"{entry.remarks}"</Text>
+                                </Paper>
+                            )}
+                            <Group gap="xs" mt={2}>
+                                <Text size="xs" c="dimmed" fw={800}>Performed by:</Text>
+                                <Badge variant="transparent" p={0} size="xs" color="blue" fw={900}>
+                                    {entry.user?.username || 'System Administrator'}
+                                </Badge>
+                            </Group>
+                        </Stack>
                     </Timeline.Item>
-
-                    {/* Proposal Stage */}
-                    <Timeline.Item
-                        bullet={<Send size={16} />}
-                        title="Technical Proposal"
-                    >
-                        <Text c="dimmed" size="xs">Evaluated {p.decisionDate ? new Date(p.decisionDate).toLocaleDateString() : 'N/A'}</Text>
-                        <Text size="sm" mt={4} fw={600} c="blue.7">Result: {p.decision || 'Pending'}</Text>
-                        {p.remark && <Text size="xs" fs="italic" mt={2}>"{p.remark}"</Text>}
-                    </Timeline.Item>
-
-                    {/* Offer Stage */}
-                    <Timeline.Item
-                        bullet={<CheckCircle2 size={16} />}
-                        title="Official Offer Disposition"
-                    >
-                        <Text c="dimmed" size="xs">Reference: {p.offerNo || 'N/A'}</Text>
-                        <Text size="sm" mt={4}>Offer extended on {p.offerDate ? new Date(p.offerDate).toLocaleDateString() : 'TBD'}.</Text>
-                    </Timeline.Item>
-
-                    {/* Operational Readiness */}
-                    <Timeline.Item
-                        bullet={<ShieldAlert size={16} />}
-                        title="Project Handover & Readiness"
-                    >
-                        <Text c="dimmed" size="xs">Handover checklist: {o.handoverChecklist ? 'COMPLETE' : 'PENDING'}</Text>
-                        <Text size="sm" mt={4} fw={700}>Grace Period: {o.gracePeriod || 'N/A'}</Text>
-                        <Text size="xs" c="blue.6" fw={600}>Agreement Signature: {o.agreementDate ? new Date(o.agreementDate).toLocaleDateString() : 'TBD'}</Text>
-                    </Timeline.Item>
-
-                    {/* Active Milestone */}
-                    {!e.status ? (
-                        <Timeline.Item
-                            bullet={<History size={16} />}
-                            title="Active Operations"
-                        >
-                            <Text size="sm" mt={4} fw={600}>{status || 'Operational'}</Text>
-                            <Text size="xs" c="dimmed">Payment Start: {o.paymentStartDate ? new Date(o.paymentStartDate).toLocaleDateString() : 'TBD'}</Text>
-                            {l.permissionNo && <Text size="xs" bg="blue.0" p={6} mt={6} style={{ borderRadius: '8px' }}>Permit No: {l.permissionNo} ({l.permissionStatus})</Text>}
-                        </Timeline.Item>
-                    ) : (
-                        <Timeline.Item
-                            bullet={<LogOut size={16} />}
-                            title="Exit & Final Settlement"
-                            color="red"
-                        >
-                            <Text size="sm" mt={4} fw={600} c="red.7">Reason: {e.reason || 'Contract End'}</Text>
-                            <Text size="xs" c="dimmed">Final departure on {e.exitDate ? new Date(e.exitDate).toLocaleDateString() : 'N/A'}</Text>
-                            <Text size="xs" fs="italic" mt={4}>Remark: "{e.remark}"</Text>
-                        </Timeline.Item>
-                    )}
-                </Timeline>
-            </ScrollArea>
-        </Paper>
+                );
+            })}
+        </Timeline>
     );
 }

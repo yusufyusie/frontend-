@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Group, Stack, Text, Box, Paper, Title, Button, TextInput, Select, NumberInput, Textarea, DateInput } from '@mantine/core';
+import { Group, Stack, Text, Box, Paper, Title, Button, TextInput, Select, NumberInput, Textarea } from '@mantine/core';
+import { DateInput } from '@mantine/dates';
 import { Mail, Calendar, MapPin, Building2, LayoutGrid, DollarSign, Clock, Send, Sparkles } from 'lucide-react';
 import { lookupsService, SystemLookup } from '@/services/lookups.service';
 import { tenantsService, Tenant } from '@/services/tenants.service';

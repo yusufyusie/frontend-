@@ -30,6 +30,7 @@ export interface Tenant {
     contacts?: TenantContact[];
     documents?: any[];
     leases?: any[];
+    inquiries?: any[];
     status?: any;
     businessCategory?: any;
     _count?: {

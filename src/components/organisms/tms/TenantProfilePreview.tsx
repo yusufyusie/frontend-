@@ -1,6 +1,6 @@
 import React from 'react';
 import { Paper, Stack, Group, Box, Text, Avatar, Badge, Divider, ThemeIcon, rem, RingProgress } from '@mantine/core';
-import { Building2, Globe, Mail, Phone, MapPin, ShieldCheck, CheckCircle2, QrCode, Award, Zap } from 'lucide-react';
+import { Building2, Globe, Mail, Phone, MapPin, ShieldCheck, CheckCircle2, QrCode, Award, Zap, Landmark, Rocket } from 'lucide-react';
 import { Tenant } from '@/services/tenants.service';
 
 interface TenantProfilePreviewProps {
@@ -94,12 +94,23 @@ export const TenantProfilePreview = ({ data, bizCategoryLabel, statusLabel }: Te
                 {/* Main Content */}
                 <Stack gap="xl">
                     <Box>
-                        <Text size={rem(32)} fw={900} c="#16284F" lts="-1.5px" style={{ lineHeight: 1.1 }}>
-                            {data.name || 'Corporate Identity'}
+                        <Text size="xs" fw={900} c="#0C7C92" tt="uppercase" lts="2.5px" mb={4}>Entity Identification</Text>
+                        <Text size={rem(36)} fw={900} c="#16284F" lts="-1.5px" style={{ lineHeight: 1.05 }}>
+                            {data.name || 'Account Identity'}
                         </Text>
-                        <Group gap="xs" mt={8}>
-                            <Badge color="blue" variant="dot" size="sm" fw={700}>Registered Entity</Badge>
-                            <Text size="xs" c="dimmed" fw={600}>SINCE 2026</Text>
+                        <Group gap="xs" mt="lg">
+                            <Badge color="#16284F" variant="filled" size="sm" radius="xs" fw={900} className="tracking-widest">CERTIFIED</Badge>
+                            <Badge color="blue" variant="dot" size="sm" fw={800}>{bizCategoryLabel || 'GENERAL SECTOR'}</Badge>
+                            {data.metadata?.originId && (
+                                <Badge color="indigo" variant="light" size="sm" fw={800} leftSection={<Globe size={10} />}>
+                                    INVESTMENT ORIGIN
+                                </Badge>
+                            )}
+                            {data.metadata?.isStartup && (
+                                <Badge color="orange" variant="light" size="sm" fw={800} leftSection={<Rocket size={10} />}>
+                                    STARTUP
+                                </Badge>
+                            )}
                         </Group>
                     </Box>
 
@@ -118,56 +129,50 @@ export const TenantProfilePreview = ({ data, bizCategoryLabel, statusLabel }: Te
                         </Paper>
                         <Paper p="lg" radius="1.5rem" bg="slate.50" style={{ border: '1px solid #f1f5f9' }}>
                             <Group gap="xs" mb={4}>
-                                <MapPin size={14} className="text-orange-600" />
-                                <Text size="xs" c="dimmed" fw={800} tt="uppercase" lts="1px">Assignment</Text>
+                                <Landmark size={14} className="text-purple-600" />
+                                <Text size="xs" c="dimmed" fw={800} tt="uppercase" lts="1px">Financial</Text>
                             </Group>
                             <Text size="sm" fw={800} c="#16284F" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                {(data as any).metadata?.spatial?.contractNumber || 'NOT BOUND'}
+                                {data.metadata?.bankName || 'BANK PENDING'}
                             </Text>
                         </Paper>
                     </div>
 
-                    <Stack gap="md">
-                        <Group justify="space-between">
-                            <Group gap="md">
-                                <ThemeIcon size="xl" radius="xl" variant="light" color="blue">
-                                    <Mail size={18} />
-                                </ThemeIcon>
-                                <Box>
-                                    <Text size="xs" c="dimmed" fw={800} tt="uppercase" lts="1px">Communications</Text>
-                                    <Text size="sm" fw={700}>{data.email || 'awaiting_contact@tms.com'}</Text>
-                                </Box>
+                    <Stack gap="sm">
+                        <Text size="xs" fw={900} c="dimmed" tt="uppercase" lts="1.5px" mb={4}>Digital Credentials</Text>
+                        <Paper p="md" radius="md" bg="#F8FAFC" style={{ border: '1px solid #E2E8F0' }}>
+                            <Group justify="space-between" mb="xs">
+                                <Group gap="md">
+                                    <Mail size={16} className="text-[#0C7C92]" />
+                                    <Text size="sm" fw={800} c="#16284F">{data.email || 'not-assigned@tms.com'}</Text>
+                                </Group>
+                                <CheckCircle2 size={14} className="text-teal-500" />
                             </Group>
-                            <CheckCircle2 size={16} className="text-teal-500" />
-                        </Group>
-
-                        <Group justify="space-between">
-                            <Group gap="md">
-                                <ThemeIcon size="xl" radius="xl" variant="light" color="indigo">
-                                    <Globe size={18} />
-                                </ThemeIcon>
-                                <Box>
-                                    <Text size="xs" c="dimmed" fw={800} tt="uppercase" lts="1px">Digital Presence</Text>
-                                    <Text size="sm" fw={700}>{data.website || 'corporate-portal.com'}</Text>
-                                </Box>
+                            <Divider color="gray.2" my="xs" />
+                            <Group justify="space-between">
+                                <Group gap="md">
+                                    <Globe size={16} className="text-[#0C7C92]" />
+                                    <Text size="sm" fw={800} c="#16284F">{data.website || 'corporate-portal.com'}</Text>
+                                </Group>
+                                <CheckCircle2 size={14} className="text-teal-500" />
                             </Group>
-                            <CheckCircle2 size={16} className="text-teal-500" />
-                        </Group>
+                        </Paper>
                     </Stack>
 
                     {/* Bottom Security Section */}
-                    <Box mt="auto" p="xl" bg="#F1F5F9" style={{ borderRadius: '2rem', position: 'relative' }}>
+                    <Box mt="auto" p="1.5rem" bg="#F8FAFC" style={{ borderRadius: '1.5rem', border: '1px solid #E2E8F0', position: 'relative', overflow: 'hidden' }}>
+                        <Box pos="absolute" top={0} left={0} w="100%" h={4} style={{ background: 'linear-gradient(90deg, #16284F 0%, #0C7C92 100%)' }} />
                         <Group justify="space-between">
-                            <Stack gap={4}>
-                                <Text size="xs" fw={900} c="#16284F" tt="uppercase" lts="2px">System QR Auth</Text>
-                                <Text size="xs" c="dimmed" fw={600}>Unique Identifier: TMS-2026-XP01</Text>
+                            <Stack gap={2}>
+                                <Text size="10px" fw={900} c="#16284F" tt="uppercase" lts="2.5px">Encrypted System ID</Text>
+                                <Text size="11px" c="dimmed" fw={700}>HASH: {data.companyRegNumber ? `XP-${data.companyRegNumber}` : 'XP-TEMP-001'}</Text>
                             </Stack>
                             <Box
-                                p={8}
+                                p={10}
                                 bg="white"
-                                style={{ borderRadius: '1rem', border: '1px solid #e2e8f0', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
+                                style={{ borderRadius: '1rem', border: '1px solid #e2e8f0', boxShadow: '0 8px 20px rgba(0,0,0,0.04)' }}
                             >
-                                <QrCode size={40} className="text-slate-800" />
+                                <QrCode size={36} className="text-[#16284F]" />
                             </Box>
                         </Group>
                     </Box>

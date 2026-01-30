@@ -29,6 +29,7 @@ export interface TenantDocument {
     size: number;
     file?: File;
     uploadProgress?: number;
+    status?: 'PENDING' | 'VERIFIED' | 'REJECTED';
 }
 
 interface DocumentsStepProps {
@@ -54,6 +55,7 @@ export const DocumentsStep = ({ documents, onChange }: DocumentsStepProps) => {
             size: file.size,
             file,
             uploadProgress: 100,
+            status: 'PENDING',
         }));
         onChange([...documents, ...newDocs]);
     };
@@ -66,48 +68,60 @@ export const DocumentsStep = ({ documents, onChange }: DocumentsStepProps) => {
         <Stack gap="3rem">
             {/* COMPLIANCE VAULT: High-Fidelity Dropzone */}
             <Box>
-                <Group gap="sm" mb="xl">
-                    <Box p={8} bg="blue.0" style={{ borderRadius: '50%' }}>
-                        <CloudUpload size={18} className="text-blue-600" />
+                <Group gap="md" mb="2.5rem">
+                    <Box p={10} bg="#16284F" style={{ borderRadius: '1rem' }}>
+                        <CloudUpload size={20} className="text-white" />
                     </Box>
-                    <Text size="sm" fw={900} c="#16284F" tt="uppercase" lts="2px">Compliance Vault</Text>
+                    <div>
+                        <Badge color="blue" variant="light" size="sm" radius="sm" fw={900} mb={4} className="tracking-widest">OFFICIAL DOCS</Badge>
+                        <Title order={3} fw={900} c="#16284F">Registration Documents</Title>
+                    </div>
                 </Group>
 
                 <Paper
-                    p="4rem 2rem"
+                    p="5rem 2rem"
                     radius="3rem"
-                    className="border-2 border-dashed border-slate-200 bg-slate-50/50 hover:bg-white hover:border-[#0C7C92] transition-all cursor-pointer group"
+                    className="border-2 border-dashed border-slate-200 bg-white hover:border-[#0C7C92] transition-all cursor-pointer group relative"
                     onClick={() => document.getElementById('masterpiece-upload')?.click()}
-                    style={{ position: 'relative', overflow: 'hidden' }}
+                    style={{
+                        boxShadow: '0 20px 40px -10px rgba(0,0,0,0.02)',
+                        overflow: 'hidden'
+                    }}
                 >
                     <Box
                         pos="absolute"
                         inset={0}
                         style={{
-                            opacity: 0.03,
+                            opacity: 0.02,
                             backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'20\' height=\'20\' viewBox=\'0 0 20 20\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%23000000\' fill-opacity=\'1\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'3\'/%3E%3C/g%3E%3C/svg%3E")',
-                            backgroundSize: '20px 20px'
+                            backgroundSize: '30px 30px'
                         }}
                     />
 
                     <Stack align="center" gap="xl" pos="relative">
                         <Box
-                            w={80}
-                            h={80}
-                            bg="#F1F5F9"
-                            style={{ borderRadius: '2.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                            className="group-hover:scale-110 transition-transform group-hover:bg-[#0C7C9210]"
+                            w={100}
+                            h={100}
+                            bg="#F8FAFC"
+                            style={{
+                                borderRadius: '3rem',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                border: '1px solid #E2E8F0'
+                            }}
+                            className="group-hover:scale-110 transition-transform group-hover:bg-[#0C7C9210] group-hover:border-[#0C7C9240]"
                         >
-                            <Upload size={32} className="text-slate-400 group-hover:text-[#0C7C92]" />
+                            <Upload size={40} className="text-slate-400 group-hover:text-[#0C7C92]" />
                         </Box>
                         <Box ta="center">
-                            <Title order={3} fw={900} c="#16284F" lts="-1px">Secure Repository Upload</Title>
-                            <Text size="sm" c="dimmed" fw={600} mt={8}>
-                                Drag and drop official compliance artifacts here.
+                            <Title order={3} fw={900} c="#16284F" lts="-1px">Secure Vault Upload</Title>
+                            <Text size="md" c="dimmed" fw={600} mt={8} maw={400}>
+                                Deposit official corporate registration and tax artifacts into our secure encrypted storage.
                             </Text>
-                            <Group gap="xs" justify="center" mt="xl">
-                                <Badge color="gray" variant="dot" size="sm" fw={800}>PDF PREFERRED</Badge>
-                                <Badge color="gray" variant="dot" size="sm" fw={800}>MAX 15MB</Badge>
+                            <Group gap="md" justify="center" mt="2rem">
+                                <Badge color="gray" variant="dot" size="md" fw={900} p="md">PDF FORMAT ONLY</Badge>
+                                <Badge color="gray" variant="dot" size="md" fw={900} p="md">MAX 15.0 MB</Badge>
                             </Group>
                         </Box>
                     </Stack>
@@ -125,37 +139,43 @@ export const DocumentsStep = ({ documents, onChange }: DocumentsStepProps) => {
 
             {/* ARTIFACT LIST: Masterpiece Grid */}
             {documents.length > 0 && (
-                <Stack gap="lg">
+                <Stack gap="xl">
                     <Group justify="space-between">
-                        <Group gap="sm">
-                            <FileCheck size={18} className="text-teal-600" />
-                            <Text size="sm" fw={900} c="#16284F" tt="uppercase" lts="2px">Verifiable Artifacts</Text>
+                        <Group gap="md">
+                            <Box p={10} bg="#0C7C92" style={{ borderRadius: '0.75rem' }}>
+                                <FileCheck size={18} className="text-white" />
+                            </Box>
+                            <Title order={4} fw={900} c="#16284F">Verifiable Artifact Registry</Title>
                         </Group>
-                        <Badge variant="filled" color="#16284F" size="lg" radius="md">{documents.length} FILES</Badge>
+                        <Badge variant="filled" color="#16284F" size="xl" radius="md" p="md" fw={900}>{documents.length} FILES PREPARED</Badge>
                     </Group>
 
-                    <div className="grid grid-cols-1 gap-3">
+                    <div className="grid grid-cols-1 gap-4">
                         {documents.map((doc, index) => (
                             <Card
                                 key={doc.id || index}
-                                p="lg"
+                                p="1.5rem"
                                 radius="1.5rem"
-                                style={{ border: '1px solid #f1f5f9', background: 'white' }}
+                                style={{ border: '1px solid #E2E8F0', background: 'white', boxShadow: '0 4px 12px rgba(0,0,0,0.02)' }}
+                                className="group hover:border-[#0C7C9240] transition-colors"
                             >
                                 <Group justify="space-between">
-                                    <Group gap="md">
-                                        <Box p={10} bg="slate.50" style={{ borderRadius: '1rem' }}>
-                                            <FileText size={22} className="text-slate-500" />
+                                    <Group gap="xl">
+                                        <Box p={14} bg="#F8FAFC" style={{ borderRadius: '1.25rem' }} className="group-hover:bg-[#0C7C9210] transition-colors">
+                                            <FileText size={24} className="text-[#16284F] group-hover:text-[#0C7C92]" />
                                         </Box>
                                         <Box>
-                                            <Text size="sm" fw={800} c="#16284F">{doc.name}</Text>
-                                            <Text size="xs" c="dimmed" fw={700} tt="uppercase" lts="1px">
-                                                {formatFileSize(doc.size)} • ENCRYPTED STORAGE
-                                            </Text>
+                                            <Text size="md" fw={800} c="#16284F" mb={2}>{doc.name}</Text>
+                                            <Group gap="xs">
+                                                <Badge size="xs" variant="outline" color="gray" fw={800}>{formatFileSize(doc.size)}</Badge>
+                                                {doc.status === 'PENDING' && <Badge size="xs" variant="filled" color="orange.8" fw={900}>PENDING VERIFICATION</Badge>}
+                                                {doc.status === 'VERIFIED' && <Badge size="xs" variant="filled" color="teal.8" fw={900}>SECURELY VERIFIED</Badge>}
+                                                {doc.status === 'REJECTED' && <Badge size="xs" variant="filled" color="red.8" fw={900}>REJECTED / INVALID</Badge>}
+                                            </Group>
                                         </Box>
                                     </Group>
-                                    <ActionIcon variant="subtle" color="red" size="lg" radius="md" onClick={() => removeDocument(index)}>
-                                        <Trash2 size={18} />
+                                    <ActionIcon variant="subtle" color="red" size="xl" radius="xl" onClick={() => removeDocument(index)}>
+                                        <Trash2 size={20} />
                                     </ActionIcon>
                                 </Group>
                             </Card>
@@ -165,15 +185,16 @@ export const DocumentsStep = ({ documents, onChange }: DocumentsStepProps) => {
             )}
 
             {/* COMPLIANCE GUIDANCE: Masterpiece Alert */}
-            <Paper p="2rem" radius="2rem" bg="indigo.0" style={{ border: '1px solid #e0e7ff' }}>
-                <Group align="flex-start" gap="xl">
-                    <Box p={12} bg="indigo.1" style={{ borderRadius: '1.25rem' }}>
-                        <ShieldCheck size={24} className="text-indigo-600" />
+            <Paper p="2.5rem" radius="2.5rem" bg="#F1F5F9" style={{ border: '1px solid #E2E8F0' }}>
+                <Group align="flex-start" gap="2rem" wrap="nowrap">
+                    <Box p={16} bg="#16284F" style={{ borderRadius: '1.5rem' }} className="shadow-lg">
+                        <ShieldCheck size={28} className="text-white" />
                     </Box>
                     <Box style={{ flex: 1 }}>
-                        <Text size="sm" fw={900} c="indigo.9" tt="uppercase" lts="2px">Security & Authority Guidelines</Text>
-                        <Text size="sm" c="indigo.8" fw={500} mt={8} style={{ lineHeight: 1.6 }}>
-                            All documents are processed through our secure encryption layer. Once submitted, artifacts cannot be deleted without Authority approval. Ensure all scans are high-resolution and include official government stamps.
+                        <Badge variant="outline" color="#16284F" size="sm" radius="sm" fw={900} mb="xs" className="tracking-widest">SUBMISSION POLICY</Badge>
+                        <Title order={4} fw={900} c="#16284F" mb="xs">Mandatory Document Verification</Title>
+                        <Text size="sm" c="slate.8" fw={600} style={{ lineHeight: 1.7 }}>
+                            All uploaded certificates are stored in an encrypted environment. Ensure documents are high-resolution scans of original licenses or certificates.
                         </Text>
                     </Box>
                 </Group>

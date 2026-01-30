@@ -34,7 +34,6 @@ import {
     HelpCircle,
     Lightbulb,
     ShieldCheck,
-    Briefcase,
     MapPin,
 } from 'lucide-react';
 import { Tenant } from '@/services/tenants.service';
@@ -73,6 +72,8 @@ export const TenantOnboardingWizard = ({
     const [tenantData, setTenantData] = useState<Partial<Tenant>>({});
     const [contacts, setContacts] = useState<TenantContact[]>([]);
     const [documents, setDocuments] = useState<TenantDocument[]>([]);
+    const [isSubmitted, setIsSubmitted] = useState(false);
+    const [submissionError, setSubmissionError] = useState<string | null>(null);
     const [stepValidity, setStepValidity] = useState({
         0: false,  // Company info
         1: true,   // Contacts (optional)
@@ -83,46 +84,46 @@ export const TenantOnboardingWizard = ({
     const wizardSteps: WizardStep[] = [
         {
             step: 0,
-            label: 'Company Info',
-            description: 'Legal & registration',
-            icon: <Building2 size={20} />,
+            label: 'Business Identity',
+            description: 'Legal name & tax info',
+            icon: <Building2 size={18} />,
             help: {
-                title: 'Corporate Registration',
-                content: 'Accurate legal information is required for contract generation and system access.',
-                tips: ['Use official company name', 'TIN must be 10 digits', 'Enter valid physical address']
+                title: 'Business Registry',
+                content: 'Accurate registration data is vital for valid contract generation and regulatory compliance.',
+                tips: ['Match official documents', 'Verify TIN digits', 'Check physical address']
             }
         },
         {
             step: 1,
-            label: 'Contact Points',
-            description: 'Personnel & liaisons',
-            icon: <Users size={20} />,
+            label: 'Key Personnel',
+            description: 'Focal persons & liaisons',
+            icon: <Users size={18} />,
             help: {
-                title: 'Administrative Liaison',
-                content: 'Identify the key individuals who will manage this account and handle technical queries.',
-                tips: ['Designate a primary contact', 'Ensure email accuracy', 'Add multiple roles']
+                title: 'Operational Contacts',
+                content: 'Designate the primary individuals responsible for administrative and technical communication.',
+                tips: ['Assign a head contact', 'Check email syntax', 'Define specific roles']
             }
         },
         {
             step: 2,
-            label: 'Documents',
-            description: 'Legal docs & certs',
-            icon: <FileText size={20} />,
+            label: 'Verification Docs',
+            description: 'Certificates & licenses',
+            icon: <FileText size={18} />,
             help: {
-                title: 'Compliance Vault',
-                content: 'Securely upload verification documents. These will be reviewed by the IT Park Authority.',
-                tips: ['Prefer PDF format', 'Scan both sides of ID', 'Clear legibility required']
+                title: 'Document Submission',
+                content: 'Upload high-resolution scans of your trade license and relevant registration certificates.',
+                tips: ['Clear PDF scans', 'Include all pages', 'Verify expiration dates']
             }
         },
         {
             step: 3,
-            label: 'Review',
-            description: 'Final verification',
-            icon: <CheckCircle2 size={20} />,
+            label: 'Summary & Finish',
+            description: 'Final profile review',
+            icon: <CheckCircle2 size={18} />,
             help: {
-                title: 'Final Audit',
-                content: 'Carefully review the generated digital profile before submitting to the system.',
-                tips: ['Verify contact emails', 'Check registration syntax', 'Confirm document links']
+                title: 'Profile Confirmation',
+                content: 'Perform a final audit of the electronic profile before committing to the system registry.',
+                tips: ['Check contact typos', 'Verify TIN consistency', 'Confirm file previews']
             }
         },
     ];
@@ -136,10 +137,42 @@ export const TenantOnboardingWizard = ({
     const prevStep = useCallback(() => setActive((current) => (current > 0 ? current - 1 : current)), []);
 
     const handleSubmit = useCallback(async () => {
-        await onSubmit({
-            ...tenantData,
+        setSubmissionError(null);
+        // Map wizard contacts to backend schema
+        const mappedContacts = contacts.map(c => {
+            const parts = (c.name || '').trim().split(' ');
+            return {
+                firstName: parts[0] || 'Member',
+                lastName: parts.slice(1).join(' ') || 'User',
+                email: c.email,
+                phone: c.phone,
+                position: c.position,
+                isPrimary: c.isPrimary,
+                metadata: { department: c.department }
+            };
         });
-    }, [onSubmit, tenantData]);
+
+        const submissionData = {
+            ...tenantData,
+            metadata: {
+                ...(tenantData.metadata as any || {}),
+                contacts: mappedContacts,
+                documents: documents.map(d => ({
+                    name: d.name,
+                    type: d.type,
+                    size: d.size,
+                    status: d.status || 'PENDING'
+                })),
+            }
+        };
+
+        try {
+            await onSubmit(submissionData);
+            setIsSubmitted(true);
+        } catch (error: any) {
+            setSubmissionError(error.response?.data?.message || error.message || 'System registry handshake failed');
+        }
+    }, [onSubmit, tenantData, contacts, documents]);
 
     const handleCompanyInfoChange = useCallback((isValid: boolean) => {
         setStepValidity(prev => ({ ...prev, 0: isValid }));
@@ -148,6 +181,16 @@ export const TenantOnboardingWizard = ({
     const handleTenantFormSubmit = useCallback(async (data: Partial<Tenant>) => {
         setTenantData(prev => ({ ...prev, ...data }));
         return Promise.resolve();
+    }, []);
+
+    const handleDataChange = useCallback((data: Partial<Tenant>) => {
+        setTenantData(prev => {
+            const newMetadata = {
+                ...(prev.metadata as any || {}),
+                ...(data.metadata as any || {})
+            };
+            return { ...prev, ...data, metadata: newMetadata };
+        });
     }, []);
 
     const canProceed = stepValidity[active as keyof typeof stepValidity];
@@ -162,6 +205,7 @@ export const TenantOnboardingWizard = ({
                         <TenantForm
                             initialData={tenantData}
                             onSubmit={handleTenantFormSubmit}
+                            onChange={handleDataChange}
                             isLoading={false}
                             onValidityChange={handleCompanyInfoChange}
                         />
@@ -175,8 +219,8 @@ export const TenantOnboardingWizard = ({
                 return (
                     <Stack gap="xl">
                         <Box>
-                            <Text size="lg" fw={900} c="#16284F" mb="xs">Review & Submit</Text>
-                            <Text size="sm" c="dimmed" fw={600}>Please verify all information is accurate.</Text>
+                            <Text size="lg" fw={900} c="#16284F" mb="xs">Final Confirmation</Text>
+                            <Text size="sm" c="dimmed" fw={600}>Please verify all business details before submission.</Text>
                         </Box>
 
                         <Paper withBorder p="2rem" radius="2rem" shadow="sm">
@@ -198,6 +242,22 @@ export const TenantOnboardingWizard = ({
                                         <Text size="md" fw={700} c="#16284F">{tenantData.companyRegNumber || 'N/A'}</Text>
                                     </Box>
                                     <Box>
+                                        <Text size="xs" c="dimmed" fw={800} tt="uppercase" lts="1px">Investment Origin</Text>
+                                        <Text size="md" fw={700} c="#16284F">{(tenantData as any).metadata?.originId ? 'REGISTERED' : 'NOT SPECIFIED'}</Text>
+                                    </Box>
+                                    <Box>
+                                        <Text size="xs" c="dimmed" fw={800} tt="uppercase" lts="1px">Business Scale</Text>
+                                        <Text size="md" fw={700} c="#16284F">{(tenantData as any).metadata?.isStartup ? 'STARTUP VENTURE' : 'ESTABLISHED ENTITY'}</Text>
+                                    </Box>
+                                    <Box>
+                                        <Text size="xs" c="dimmed" fw={800} tt="uppercase" lts="1px">Bank Entity</Text>
+                                        <Text size="md" fw={700} c="#16284F">{(tenantData as any).metadata?.bankName || 'N/A'}</Text>
+                                    </Box>
+                                    <Box>
+                                        <Text size="xs" c="dimmed" fw={800} tt="uppercase" lts="1px">Account Number</Text>
+                                        <Text size="md" fw={700} c="#16284F">{(tenantData as any).metadata?.bankAccount || 'N/A'}</Text>
+                                    </Box>
+                                    <Box>
                                         <Text size="xs" c="dimmed" fw={800} tt="uppercase" lts="1px">Email</Text>
                                         <Text size="md" fw={700} c="#16284F">{tenantData.email || 'N/A'}</Text>
                                     </Box>
@@ -209,11 +269,23 @@ export const TenantOnboardingWizard = ({
                             </Stack>
                         </Paper>
 
-                        {!tenantData.name && (
-                            <Paper p="md" radius="xl" bg="red.0" className="border border-red-200">
+                        {submissionError && (
+                            <Paper p="md" radius="xl" bg="red.0" className="border border-red-200 animate-pulse">
+                                <Stack gap="xs">
+                                    <Group gap="sm">
+                                        <AlertCircle size={20} className="text-red-800" />
+                                        <Text size="sm" c="red.9" fw={900}>REGISTRY REJECTION</Text>
+                                    </Group>
+                                    <Text size="xs" c="red.8" fw={600} ml={28}>{submissionError}</Text>
+                                </Stack>
+                            </Paper>
+                        )}
+
+                        {!tenantData.name && !submissionError && (
+                            <Paper p="md" radius="xl" bg="orange.0" className="border border-orange-200">
                                 <Group gap="sm">
-                                    <AlertCircle size={20} className="text-red-600" />
-                                    <Text size="sm" c="red.9" fw={700}>Incomplete Profile Detected</Text>
+                                    <Info size={20} className="text-orange-600" />
+                                    <Text size="sm" c="orange.9" fw={700}>Draft Profile Detected</Text>
                                 </Group>
                             </Paper>
                         )}
@@ -223,6 +295,64 @@ export const TenantOnboardingWizard = ({
                 return null;
         }
     };
+
+    const renderSuccessState = () => (
+        <Stack align="center" gap="2.5rem" py="5rem" className="animate-fade-in-up">
+            <Box pos="relative">
+                <Box
+                    w={140}
+                    h={140}
+                    bg="#F0FDF4"
+                    style={{
+                        borderRadius: '4rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        border: '2px solid #DCFCE7'
+                    }}
+                >
+                    <CheckCircle2 size={80} className="text-teal-600" />
+                </Box>
+                <div className="absolute -top-4 -right-4 animate-bounce">
+                    <Badge size="xl" variant="filled" color="teal" radius="xl" p="md" style={{ boxShadow: '0 8px 16px rgba(0,0,0,0.1)' }}>DONE</Badge>
+                </div>
+            </Box>
+
+            <Box ta="center">
+                <Title order={1} fw={900} c="#16284F" mb="md" lts="-2px" className="text-4xl">System Registry Updated</Title>
+                <Text size="lg" c="dimmed" fw={600} maw={500} mx="auto" style={{ lineHeight: 1.6 }}>
+                    Organization <Text span fw={900} c="#16284F">{tenantData.name}</Text> has been successfully integrated into the ITPC Tenant Management System.
+                </Text>
+            </Box>
+
+            <Group gap="xl">
+                <Button
+                    variant="outline"
+                    color="gray"
+                    size="xl"
+                    radius="xl"
+                    onClick={onClose}
+                    fw={900}
+                    px="3rem"
+                >
+                    RETURN TO DIRECTORY
+                </Button>
+                <Button
+                    variant="filled"
+                    size="xl"
+                    radius="xl"
+                    onClick={() => {
+                        window.location.reload(); // Refresh to show new tenant
+                    }}
+                    fw={900}
+                    px="3rem"
+                    style={{ background: '#16284F' }}
+                >
+                    VIEW DASHBOARD
+                </Button>
+            </Group>
+        </Stack>
+    );
 
     return (
         <Modal
@@ -250,7 +380,7 @@ export const TenantOnboardingWizard = ({
             <div className="flex w-full h-full overflow-hidden">
                 {/* LEFT SIDEBAR: "The Hub" */}
                 <Box
-                    w={{ base: 0, md: 400 }}
+                    w={{ base: 0, md: 320 }}
                     style={{
                         background: '#16284F',
                         display: 'flex',
@@ -281,8 +411,8 @@ export const TenantOnboardingWizard = ({
                                     <LayoutDashboard size={24} className="text-white" />
                                 </Box>
                                 <Box>
-                                    <Text c="white" fw={900} size="xl" lts="-1px">TMS PORTAL</Text>
-                                    <Text c="rgba(255,255,255,0.4)" fw={800} size="10px" tt="uppercase" lts="2px">Auth Version 4.0</Text>
+                                    <Text c="white" fw={900} size="lg" lts="-0.5px">TMS PORTAL</Text>
+                                    <Text c="rgba(255,255,255,0.4)" fw={800} size="9px" tt="uppercase" lts="1px">Business Registry</Text>
                                 </Box>
                             </Group>
 
@@ -293,21 +423,23 @@ export const TenantOnboardingWizard = ({
                                 iconSize={44}
                                 color="#6EC9C4"
                                 styles={{
-                                    step: { marginBottom: rem(30) },
+                                    step: { marginBottom: rem(40) },
                                     stepIcon: {
                                         borderWidth: 2,
                                         background: 'rgba(255,255,255,0.03)',
                                         color: 'white',
                                         borderColor: 'rgba(255,255,255,0.15)',
-                                        transition: 'all 0.3s ease'
+                                        transition: 'all 0.3s ease',
+                                        width: rem(48),
+                                        height: rem(48),
                                     },
                                     stepCompletedIcon: {
                                         background: '#6EC9C4',
                                         color: '#16284F'
                                     },
-                                    stepLabel: { color: 'white', fontWeight: 900, fontSize: rem(16), lts: '-0.3px' },
-                                    stepDescription: { color: 'rgba(255,255,255,0.4)', fontWeight: 600, fontSize: rem(12) },
-                                    separator: { backgroundColor: 'rgba(255,255,255,0.05)', minHeight: rem(25) }
+                                    stepLabel: { color: 'white', fontWeight: 900, fontSize: rem(15), lts: '-0.2px', textTransform: 'uppercase' },
+                                    stepDescription: { color: 'rgba(255,255,255,0.35)', fontWeight: 700, fontSize: rem(11), marginTop: rem(4) },
+                                    separator: { backgroundColor: 'rgba(255,255,255,0.08)', minHeight: rem(30), marginInlineStart: rem(23) }
                                 }}
                             >
                                 {wizardSteps.map((s) => (
@@ -316,38 +448,14 @@ export const TenantOnboardingWizard = ({
                             </Stepper>
                         </Stack>
 
-                        <Stack gap="md">
-                            <Paper
-                                p="1.5rem"
-                                radius="2rem"
-                                style={{
-                                    background: 'rgba(255,255,255,0.03)',
-                                    border: '1px solid rgba(255,255,255,0.08)',
-                                }}
-                            >
-                                <Group wrap="nowrap" gap="md">
-                                    <Box p={10} bg="rgba(255,255,255,0.05)" style={{ borderRadius: '1rem' }}>
-                                        <Briefcase size={20} className="text-[#6EC9C4]" />
-                                    </Box>
-                                    <Box>
-                                        <Text c="white" fw={800} size="sm">B2B Integration</Text>
-                                        <Text c="rgba(255,255,255,0.4)" size="xs" fw={500}>System ready for data sync</Text>
-                                    </Box>
-                                </Group>
-                            </Paper>
-
-                            <Group justify="space-between" px="md">
-                                <Text c="rgba(255,255,255,0.3)" size="xs" fw={700}>POLICIES: v2.1</Text>
-                                <Text c="rgba(255,255,255,0.3)" size="xs" fw={700}>BUILD: XP-2026</Text>
-                            </Group>
-                        </Stack>
+                        <Box />
                     </Stack>
                 </Box>
 
                 {/* MAIN CONTENT: "The Interactive Stage" */}
-                <div className="flex-1 flex flex-col bg-white">
+                <div className="flex-1 flex flex-col bg-slate-50/30">
                     {/* Stage Header */}
-                    <Box px="2rem" py="1.25rem" style={{ borderBottom: '1px solid #f1f5f9' }}>
+                    <Box px="3rem" py="1.75rem" bg="white" style={{ borderBottom: '1px solid #f1f5f9' }}>
                         <Group justify="space-between">
                             <Group gap="xl">
                                 <Box className="md:hidden" w={80}>
@@ -363,8 +471,8 @@ export const TenantOnboardingWizard = ({
                                 </Box>
                                 <div>
                                     <Group gap="xs">
-                                        <Text size="10px" fw={900} c="#0C7C92" tt="uppercase" lts="1.5px">Onboarding Step {active + 1}</Text>
-                                        <Badge size="xs" variant="light" color="blue">Enterprise</Badge>
+                                        <Text size="10px" fw={900} c="#0C7C92" tt="uppercase" lts="1.5px">REGISTRATION PROGRESS</Text>
+                                        <Badge size="xs" variant="light" color="blue" radius="xs">LVL {active + 1}</Badge>
                                     </Group>
                                     <Title order={3} fw={900} c="#16284F" lts="-1px" mt={2}>
                                         {wizardSteps[active].label}
@@ -396,7 +504,11 @@ export const TenantOnboardingWizard = ({
                         <ScrollArea className="flex-1 scrollbar-custom" viewportProps={{ style: { padding: '2.5rem 2rem' } }} scrollbarSize={12}>
                             <div className="max-w-[750px] mx-auto">
                                 <Transition mounted transition="slide-up" duration={400} timingFunction="ease">
-                                    {(styles) => <div style={styles}>{renderStepContent()}</div>}
+                                    {(styles) => (
+                                        <div style={styles}>
+                                            {isSubmitted ? renderSuccessState() : renderStepContent()}
+                                        </div>
+                                    )}
                                 </Transition>
                             </div>
                         </ScrollArea>
@@ -408,7 +520,7 @@ export const TenantOnboardingWizard = ({
                                     <Stack gap="2.5rem">
                                         {/* Digital Certificate Preview */}
                                         <Box>
-                                            <Text size="xs" fw={900} c="dimmed" tt="uppercase" lts="2px" mb="lg">Identity Artifact Preview</Text>
+                                            <Text size="xs" fw={900} c="dimmed" tt="uppercase" lts="1.5px" mb="lg">Electronic Profile Proxy</Text>
                                             <TenantProfilePreview data={tenantData} />
                                         </Box>
 
@@ -450,68 +562,70 @@ export const TenantOnboardingWizard = ({
                     </div>
 
                     {/* Stage Controls */}
-                    <Box px="2rem" py="1.25rem" style={{ background: 'white', borderTop: '1px solid #f1f5f9' }}>
-                        <div className="max-w-[1200px] mx-auto flex justify-between items-center">
-                            <Button
-                                variant="subtle"
-                                color="gray"
-                                size="lg"
-                                radius="xl"
-                                leftSection={<ArrowLeft size={20} />}
-                                onClick={prevStep}
-                                disabled={active === 0 || isLoading}
-                                fw={900}
-                                px="xl"
-                            >
-                                REVERT <Text span visibleFrom="sm" ml={4}>STEP</Text>
-                            </Button>
+                    {!isSubmitted && (
+                        <Box px="3rem" py="1.5rem" style={{ background: 'white', borderTop: '1px solid #f8fafc', boxShadow: '0 -10px 40px rgba(0,0,0,0.02)' }}>
+                            <div className="max-w-[1200px] mx-auto flex justify-between items-center">
+                                <Button
+                                    variant="subtle"
+                                    color="gray"
+                                    size="lg"
+                                    radius="xl"
+                                    leftSection={<ArrowLeft size={20} />}
+                                    onClick={prevStep}
+                                    disabled={active === 0 || isLoading}
+                                    fw={900}
+                                    px="xl"
+                                >
+                                    REVERT <Text span visibleFrom="sm" ml={4}>STEP</Text>
+                                </Button>
 
-                            <Group gap="xl">
-                                <Box visibleFrom="sm">
-                                    <Text size="xs" fw={900} c="dimmed" ta="right">SYSTEM COMPLIANCE</Text>
-                                    <Text size="xs" fw={900} c="#16284F" ta="right">VERIFIED PROGRESS: {Math.round(progress)}%</Text>
-                                </Box>
+                                <Group gap="xl">
+                                    <Box visibleFrom="sm">
+                                        <Text size="xs" fw={900} c="dimmed" ta="right">SYSTEM COMPLIANCE</Text>
+                                        <Text size="xs" fw={900} c="#16284F" ta="right">VERIFIED PROGRESS: {Math.round(progress)}%</Text>
+                                    </Box>
 
-                                {!isLastStep ? (
-                                    <Button
-                                        variant="filled"
-                                        size="xl"
-                                        radius="xl"
-                                        rightSection={<ArrowRight size={22} />}
-                                        onClick={nextStep}
-                                        disabled={!canProceed || isLoading}
-                                        fw={900}
-                                        style={{
-                                            background: '#16284F',
-                                            minWidth: rem(240),
-                                            boxShadow: '0 10px 30px rgba(22, 40, 79, 0.2)'
-                                        }}
-                                        className={canProceed ? 'pulse-nav' : ''}
-                                    >
-                                        AUTORIZE & CONTINUE
-                                    </Button>
-                                ) : (
-                                    <Button
-                                        variant="filled"
-                                        size="xl"
-                                        radius="xl"
-                                        rightSection={<Sparkles size={22} />}
-                                        onClick={handleSubmit}
-                                        loading={isLoading}
-                                        disabled={!canProceed}
-                                        fw={900}
-                                        style={{
-                                            background: 'linear-gradient(135deg, #0C7C92 0%, #16284F 100%)',
-                                            minWidth: rem(260),
-                                            boxShadow: '0 10px 30px rgba(12, 124, 146, 0.3)'
-                                        }}
-                                    >
-                                        FINALIZE ENTRY
-                                    </Button>
-                                )}
-                            </Group>
-                        </div>
-                    </Box>
+                                    {!isLastStep ? (
+                                        <Button
+                                            variant="filled"
+                                            size="xl"
+                                            radius="xl"
+                                            rightSection={<ArrowRight size={22} />}
+                                            onClick={nextStep}
+                                            disabled={!canProceed || isLoading}
+                                            fw={900}
+                                            style={{
+                                                background: '#16284F',
+                                                minWidth: rem(240),
+                                                boxShadow: '0 10px 30px rgba(22, 40, 79, 0.2)'
+                                            }}
+                                            className={canProceed ? 'pulse-nav' : ''}
+                                        >
+                                            PROCEED TO NEXT STEP
+                                        </Button>
+                                    ) : (
+                                        <Button
+                                            variant="filled"
+                                            size="xl"
+                                            radius="xl"
+                                            rightSection={<Sparkles size={22} />}
+                                            onClick={handleSubmit}
+                                            loading={isLoading}
+                                            disabled={!canProceed}
+                                            fw={900}
+                                            style={{
+                                                background: 'linear-gradient(135deg, #0C7C92 0%, #16284F 100%)',
+                                                minWidth: rem(260),
+                                                boxShadow: '0 10px 30px rgba(12, 124, 146, 0.3)'
+                                            }}
+                                        >
+                                            FINALIZE ENTRY
+                                        </Button>
+                                    )}
+                                </Group>
+                            </div>
+                        </Box>
+                    )}
                 </div>
             </div>
         </Modal>

@@ -62,7 +62,7 @@ export default function TenantDirectoryPage() {
         try {
             await tenantsService.create(data);
             toast.success('✅ Tenant onboarded successfully');
-            setOpened(false);
+            // setOpened(false); // DEFERRED TO WIZARD SUCCESS SCREEN
             fetchTenants();
         } catch (error: any) {
             toast.error(error.response?.data?.message || 'Onboarding failed');

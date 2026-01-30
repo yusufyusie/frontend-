@@ -49,8 +49,8 @@ export default function TenantDetailPage() {
     if (!tenant) return <Container py="xl"><Text>Tenant not found</Text></Container>;
 
     // Area Calculations
-    const totalLeasedArea = tenant.leases?.reduce((acc: number, l: any) => acc + Number(l.actualAreaM2), 0) || 0;
-    const totalVariance = tenant.leases?.reduce((acc: number, l: any) => acc + (Number(l.actualAreaM2) - Number(l.contractAreaM2)), 0) || 0;
+    const totalLeasedArea = tenant.leases?.reduce((acc: number, l: any) => acc + Number(l.actualArea), 0) || 0;
+    const totalVariance = tenant.leases?.reduce((acc: number, l: any) => acc + (Number(l.actualArea) - Number(l.contractArea)), 0) || 0;
 
     return (
         <Container size="xl" py="xl" className="animate-fade-in">
