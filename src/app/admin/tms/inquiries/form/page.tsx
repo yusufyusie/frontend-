@@ -27,6 +27,7 @@ export default function InquiryFormPage() {
         preferredMoveIn: '',
         furnitureStatusId: '',
         officeSpreadId: '',
+        inquiryType: 'OFFICE',
         leaseTermMonths: 12,
         note: '',
     });
@@ -48,6 +49,7 @@ export default function InquiryFormPage() {
                 propertyTypeId: formData.propertyTypeId ? Number(formData.propertyTypeId) : undefined,
                 furnitureStatusId: formData.furnitureStatusId ? Number(formData.furnitureStatusId) : undefined,
                 officeSpreadId: formData.officeSpreadId ? Number(formData.officeSpreadId) : undefined,
+                preferredMoveIn: formData.preferredMoveIn || undefined,
             });
             toast.success('🚀 Inquiry submitted successfully! Moving to analysis.');
             router.push('/admin/tms/inquiries');
@@ -89,6 +91,19 @@ export default function InquiryFormPage() {
                                 required
                                 styles={inputStyles}
                                 searchable
+                            />
+                            <Select
+                                label="Inquiry Type / Contract Nature"
+                                placeholder="Select institutional category"
+                                data={[
+                                    { value: 'OFFICE', label: 'Office Lease (Standard)' },
+                                    { value: 'LAND_SUBLEASE', label: 'Land Sublease (Industrial)' },
+                                    { value: 'PROJECT_OFFICE', label: 'Project Office' },
+                                ]}
+                                value={formData.inquiryType}
+                                onChange={(val) => setFormData({ ...formData, inquiryType: val || 'OFFICE' })}
+                                required
+                                styles={inputStyles}
                             />
                             <Select
                                 label="Intended Property Class"

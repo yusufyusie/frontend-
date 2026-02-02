@@ -140,8 +140,8 @@ export const SpatialResourceForm = ({ initialData, onSubmit, isLoading, onValidi
                                 {formData.id ? 'Edit' : 'Register'} {formData.type === 'ZONE' ? 'Zone' :
                                     formData.type === 'BLOCK' ? 'Block' :
                                         formData.type === 'PLOT' ? 'Plot' :
-                                            formData.type === 'BUILDING' ? 'Complex' :
-                                                formData.type === 'FLOOR' ? 'Level' : 'Unit'}
+                                            formData.type === 'BUILDING' ? 'Building' :
+                                                formData.type === 'FLOOR' ? 'Floor' : 'Room'}
                             </Title>
                             <Text size="xs" c="dimmed" fw={700} className="mt-1 max-w-sm leading-relaxed">
                                 {formData.parentName ? `Registering under ${formData.parentName}` : `Define essential attributes for the ${formData.type?.toLowerCase()}.`}
@@ -154,8 +154,8 @@ export const SpatialResourceForm = ({ initialData, onSubmit, isLoading, onValidi
                             label={formData.type === 'ZONE' ? 'Zone Code' :
                                 formData.type === 'BLOCK' ? 'Block Code' :
                                     formData.type === 'PLOT' ? 'Plot Code' :
-                                        formData.type === 'BUILDING' ? 'Complex Code' :
-                                            formData.type === 'FLOOR' ? 'Level Code' : 'Unit Code'}
+                                        formData.type === 'BUILDING' ? 'Building Code' :
+                                            formData.type === 'FLOOR' ? 'Floor Code' : 'Room Code'}
                             placeholder="e.g. F-100"
                             value={formData.code ?? ''}
                             onChange={(e) => setFormData({ ...formData, code: e.currentTarget.value })}
@@ -172,8 +172,8 @@ export const SpatialResourceForm = ({ initialData, onSubmit, isLoading, onValidi
                             label={formData.type === 'ZONE' ? 'Zone Name' :
                                 formData.type === 'BLOCK' ? 'Block Name' :
                                     formData.type === 'PLOT' ? 'Plot Name' :
-                                        formData.type === 'BUILDING' ? 'Complex Name' :
-                                            formData.type === 'FLOOR' ? 'Level Name' : 'Unit Name'}
+                                        formData.type === 'BUILDING' ? 'Building Name' :
+                                            formData.type === 'FLOOR' ? 'Floor Name' : 'Room Name'}
                             placeholder={`Enter ${formData.type?.toLowerCase()} name...`}
                             value={formData.name ?? ''}
                             onChange={(e) => setFormData({ ...formData, name: e.currentTarget.value })}
@@ -245,7 +245,7 @@ export const SpatialResourceForm = ({ initialData, onSubmit, isLoading, onValidi
                         {formData.type === 'BUILDING' && (
                             <>
                                 <AtomicLookupSelector
-                                    label={catConfigs['BUILDING_CLASS']?.label || 'Complex Class'}
+                                    label={catConfigs['BUILDING_CLASS']?.label || 'Building Class'}
                                     items={lookups['BUILDING_CLASS'] || []}
                                     value={formData.buildingClassId}
                                     onChange={(val) => setFormData({ ...formData, buildingClassId: val })}
@@ -259,7 +259,7 @@ export const SpatialResourceForm = ({ initialData, onSubmit, isLoading, onValidi
                                     variant="form"
                                 />
                                 <NumberInput
-                                    label="Total Levels"
+                                    label="Total Floors"
                                     min={1}
                                     value={formData.floors}
                                     onChange={(val) => setFormData({ ...formData, floors: Number(val) || 0 })}

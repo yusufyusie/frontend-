@@ -71,9 +71,9 @@ export const AuditSummaryCards = ({ structuralMetrics, onLevelClick }: Props) =>
                                 { count: structuralMetrics?.zones, label: 'Zones', key: 'ZONE' },
                                 { count: structuralMetrics?.blocks, label: 'Blocks', key: 'BLOCK' },
                                 { count: structuralMetrics?.plots, label: 'Plots', key: 'PLOT' },
-                                { count: structuralMetrics?.buildings, label: 'Complexes', key: 'BUILDING' },
-                                { count: structuralMetrics?.floors, label: 'Levels', key: 'FLOOR' },
-                                { count: structuralMetrics?.rooms, label: 'Units', key: 'ROOM' },
+                                { count: structuralMetrics?.buildings, label: 'Buildings', key: 'BUILDING' },
+                                { count: structuralMetrics?.floors, label: 'Floors', key: 'FLOOR' },
+                                { count: structuralMetrics?.rooms, label: 'Rooms', key: 'ROOM' },
                             ].map((item, idx) => (
                                 <React.Fragment key={item.label}>
                                     <button

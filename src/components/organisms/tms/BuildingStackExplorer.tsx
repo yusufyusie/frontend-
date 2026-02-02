@@ -37,11 +37,11 @@ export const BuildingStackExplorer = ({ buildingName, floors }: BuildingStackExp
                         <TitleWithIcon
                             icon={<Building2 size={24} className="text-[#0C7C92]" />}
                             title={`${buildingName} - Elevation Stack`}
-                            subtitle="Level-by-level occupancy and asset distribution"
+                            subtitle="Floor-by-floor occupancy and asset distribution"
                         />
                     </Box>
                     <Badge variant="light" color="blue" size="xl" radius="md">
-                        {floors.length} LEVELS
+                        {floors.length} FLOORS
                     </Badge>
                 </Group>
 
@@ -74,7 +74,7 @@ const FloorRow = ({ floor }: { floor: Floor }) => {
                 radius="md"
                 className="flex flex-col items-center justify-center text-white shrink-0"
             >
-                <Text size="xs" fw={900} opacity={0.7} tracking="1px">LVL</Text>
+                <Text size="xs" fw={900} opacity={0.7} tracking="1px">FLR</Text>
                 <Text size="xl" fw={900}>{floor.floorNumber}</Text>
             </Paper>
 
@@ -97,7 +97,7 @@ const RoomNode = ({ room }: { room: Room }) => {
             label={
                 <Stack gap={4} p={4}>
                     <Text fw={900} size="sm">{room.name || room.code}</Text>
-                    <Text size="xs">{room.roomType?.name || 'Unit'}</Text>
+                    <Text size="xs">{room.roomType?.name || 'Room'}</Text>
                     {isOccupied && (
                         <Group gap={4}>
                             <Users size={10} />

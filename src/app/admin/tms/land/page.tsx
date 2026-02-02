@@ -226,7 +226,7 @@ export default function LandPage() {
     const handleLevelClick = (level: 'ZONE' | 'BLOCK' | 'PLOT' | 'BUILDING' | 'FLOOR' | 'ROOM') => {
         setDiscoveryMode(level);
         setNavigationStack([]);
-        const labelMap: any = { 'ZONE': 'Zones', 'BLOCK': 'Blocks', 'PLOT': 'Plots', 'BUILDING': 'Complexes', 'FLOOR': 'Levels', 'ROOM': 'Units' };
+        const labelMap: any = { 'ZONE': 'Zones', 'BLOCK': 'Blocks', 'PLOT': 'Plots', 'BUILDING': 'Buildings', 'FLOOR': 'Floors', 'ROOM': 'Rooms' };
         toast.info(`Discovery Mode: Listing all ${labelMap[level].toLowerCase()} across the system.`);
     };
 
@@ -372,7 +372,7 @@ export default function LandPage() {
             }
         ],
         'BUILDING': [
-            { header: 'Complex Code', accessor: 'code', width: '120px' },
+            { header: 'Building Code', accessor: 'code', width: '120px' },
             {
                 header: 'Specs', accessor: 'itpcBuildingType', width: '180px', render: (node) => (
                     <Badge variant="light" color="gray" size="sm" radius="sm" className="font-black">{node.meta?.itpcBuildingType || 'Standard G+0'}</Badge>
@@ -391,7 +391,7 @@ export default function LandPage() {
             }
         ],
         'FLOOR': [
-            { header: 'Level Code', accessor: 'code', width: '120px' },
+            { header: 'Floor Code', accessor: 'code', width: '120px' },
             { header: 'No.', accessor: 'floorNumber', width: '80px', align: 'center' },
             {
                 header: 'Assignable (m²)', accessor: 'rentableArea', width: '140px', align: 'right', render: (node) => (
@@ -399,13 +399,13 @@ export default function LandPage() {
                 )
             },
             {
-                header: 'Parent Complex', accessor: 'parentRefName', width: '160px', render: (node) => (
+                header: 'Parent Building', accessor: 'parentRefName', width: '160px', render: (node) => (
                     node.meta?.parentRefName && <Badge variant="outline" color="violet" size="xs" radius="sm" className="font-black uppercase">{node.meta?.parentRefName}</Badge>
                 )
             }
         ],
         'ROOM': [
-            { header: 'Unit Code', accessor: 'code', width: '120px' },
+            { header: 'Room Code', accessor: 'code', width: '120px' },
             { header: 'Area (m²)', accessor: 'areaM2', width: '120px', align: 'right' },
             {
                 header: 'Resident', accessor: 'occupantName', width: '180px', render: (node) => (
@@ -420,7 +420,7 @@ export default function LandPage() {
                 )
             },
             {
-                header: 'Parent Level', accessor: 'parentRefName', width: '160px', render: (node) => (
+                header: 'Parent Floor', accessor: 'parentRefName', width: '160px', render: (node) => (
                     node.meta?.parentRefName && <Badge variant="outline" color="amber" size="xs" radius="sm" className="font-black uppercase">{node.meta?.parentRefName}</Badge>
                 )
             }
@@ -434,7 +434,7 @@ export default function LandPage() {
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                     <h1 className="text-3xl md:text-4xl font-bold text-primary">Territorial Registry</h1>
-                    <p className="text-gray-500 mt-1">Unified strategic hierarchy: Zone → Block → Plot → Complex → Level → Unit</p>
+                    <p className="text-gray-500 mt-1">Unified strategic hierarchy: Zone → Block → Plot → Building → Floor → Room</p>
                 </div>
                 {!discoveryMode && (
                     <button

@@ -67,7 +67,11 @@ export function PipelineUpdateModal({ opened, onClose, inquiry, onSuccess, tenan
     const [gracePeriodRemarks, setGracePeriodRemarks] = useState<string>(targetInquiry?.gracePeriodRemarks || '');
     const [remarks, setRemarks] = useState<string>('');
     const [currencies, setCurrencies] = useState<SystemLookup[]>([]);
-    const [initialSync, setInitialSync] = useState(false);
+    const [constructionStatuses, setConstructionStatuses] = useState<SystemLookup[]>([]);
+
+    // Land Specific
+    const [landTitleRef, setLandTitleRef] = useState<string>(targetInquiry?.landTitleRef || '');
+    const [constructionStatusId, setConstructionStatusId] = useState<number | string>(targetInquiry?.constructionStatusId || '');
 
     useEffect(() => {
         loadLookups();
@@ -75,10 +79,14 @@ export function PipelineUpdateModal({ opened, onClose, inquiry, onSuccess, tenan
 
     const loadLookups = async () => {
         try {
-            const res = await lookupsService.getByCategory('CURRENCY_TYPES');
-            setCurrencies((res as any).data || res);
+            const [curRes, constRes] = await Promise.all([
+                lookupsService.getByCategory('CURRENCY_TYPES'),
+                lookupsService.getByCategory('LEASE_CONSTRUCTION_STATUS')
+            ]);
+            setCurrencies((curRes as any).data || curRes);
+            setConstructionStatuses((constRes as any).data || constRes);
         } catch (e) {
-            console.error('Failed to load currencies');
+            console.error('Failed to load specialized lookups');
         }
     };
 
@@ -98,6 +106,8 @@ export function PipelineUpdateModal({ opened, onClose, inquiry, onSuccess, tenan
             setGracePeriod(targetInquiry.gracePeriod || 0);
             setGracePeriodOffset(targetInquiry.gracePeriodOffset || 0);
             setGracePeriodRemarks(targetInquiry.gracePeriodRemarks || '');
+            setLandTitleRef(targetInquiry.landTitleRef || '');
+            setConstructionStatusId(targetInquiry.constructionStatusId || '');
             setRemarks(''); // Reset remarks on inquiry change
         }
     }, [targetInquiry?.id, targetInquiry?.status]);
@@ -174,7 +184,7 @@ export function PipelineUpdateModal({ opened, onClose, inquiry, onSuccess, tenan
         setLoading(true);
         try {
             await inquiriesService.fulfillContract(targetInquiry.id, {
-                duration: Number(duration),
+                duration: targetInquiry.inquiryType === 'LAND_SUBLEASE' ? Number(duration) * 12 : Number(duration),
                 startDate: startDate?.toISOString(),
                 securityDeposit: Number(securityDeposit),
                 advancePayment: Number(advancePayment),
@@ -182,7 +192,9 @@ export function PipelineUpdateModal({ opened, onClose, inquiry, onSuccess, tenan
                 residencyDate: residencyDate?.toISOString(),
                 gracePeriod: Number(gracePeriod),
                 gracePeriodOffset: Number(gracePeriodOffset),
-                gracePeriodRemarks: gracePeriodRemarks
+                gracePeriodRemarks: gracePeriodRemarks,
+                landTitleRef,
+                constructionStatusId: constructionStatusId ? Number(constructionStatusId) : undefined
             });
             toast.success('Contract fulfilled & lease activated');
             handleSuccess && handleSuccess();
@@ -303,6 +315,30 @@ export function PipelineUpdateModal({ opened, onClose, inquiry, onSuccess, tenan
 
                         <Paper withBorder p="xl" radius="2rem" className="bg-slate-50/50">
                             <Stack gap="xl">
+                                {/* Institutional Space Guardian */}
+                                {(targetInquiry as any).availableArea !== undefined && (
+                                    <Paper p="md" radius="lg" withBorder style={{ borderStyle: 'dashed', backgroundColor: (targetInquiry as any).isSingleTenantOccupied || ((offeredSpace || 0) > (targetInquiry as any).availableArea) ? '#fef2f2' : '#f0fdf4' }}>
+                                        <Group justify="space-between" align="start">
+                                            <Stack gap={2}>
+                                                <Group gap="xs">
+                                                    <Info size={14} className="text-slate-500" />
+                                                    <Text size="xs" fw={900} c="dimmed" tt="uppercase" lts="1px">Spatial Capacity Monitoring</Text>
+                                                </Group>
+                                                <Text size="sm" fw={700} c={(targetInquiry as any).isSingleTenantOccupied || ((offeredSpace || 0) > (targetInquiry as any).availableArea) ? 'red.9' : 'teal.9'}>
+                                                    {(targetInquiry as any).isSingleTenantOccupied
+                                                        ? "RESOURCE FULLY OCCUPIED: Single-tenant unit"
+                                                        : `FREE SPACE: ${(targetInquiry as any).availableArea} m² available for new tenancy`}
+                                                </Text>
+                                            </Stack>
+                                            {(targetInquiry as any).totalResourceArea && (
+                                                <Text size="xs" fw={600} c="dimmed">
+                                                    Total Unit: {(targetInquiry as any).totalResourceArea} m²
+                                                </Text>
+                                            )}
+                                        </Group>
+                                    </Paper>
+                                )}
+
                                 <Group grow>
                                     <NumberInput
                                         label="Allocated Area (sqm)"
@@ -314,8 +350,8 @@ export function PipelineUpdateModal({ opened, onClose, inquiry, onSuccess, tenan
                                         leftSection={<Maximize size={16} />}
                                     />
                                     <NumberInput
-                                        label="Lease Rate (USD/sqm)"
-                                        description="Standard commercial rate"
+                                        label={targetInquiry.inquiryType === 'LAND_SUBLEASE' ? "Annual Rent / m² (USD)" : "Lease Rate (USD/sqm)"}
+                                        description={targetInquiry.inquiryType === 'LAND_SUBLEASE' ? "Institutional annual rate" : "Standard commercial rate"}
                                         value={offeredRate}
                                         onChange={setOfferedRate}
                                         radius="md"
@@ -408,8 +444,8 @@ export function PipelineUpdateModal({ opened, onClose, inquiry, onSuccess, tenan
                             <Stack gap="xl">
                                 <Group grow>
                                     <NumberInput
-                                        label="Contract Term (Months)"
-                                        description="Duration of the residency"
+                                        label={targetInquiry.inquiryType === 'LAND_SUBLEASE' ? "Contract Term (Years)" : "Contract Term (Months)"}
+                                        description={targetInquiry.inquiryType === 'LAND_SUBLEASE' ? "Duration of land lease" : "Duration of the residency"}
                                         value={duration}
                                         onChange={setDuration}
                                         radius="md"
@@ -459,6 +495,33 @@ export function PipelineUpdateModal({ opened, onClose, inquiry, onSuccess, tenan
                                     </Badge>
                                 </Group>
                             </Stack>
+
+                            {targetInquiry.inquiryType === 'LAND_SUBLEASE' && (
+                                <Stack gap="xs" mt="md" className="p-4 bg-orange-50/50 rounded-2xl border border-orange-100">
+                                    <Group gap="xs">
+                                        <Info size={16} className="text-orange-600" />
+                                        <Text size="xs" fw={900} className="text-orange-800 uppercase tracking-widest">Specialized Land Assets</Text>
+                                    </Group>
+                                    <Group grow>
+                                        <TextInput
+                                            label="Land Title Reference"
+                                            placeholder="Enter Title Certificate #"
+                                            value={landTitleRef}
+                                            onChange={(e) => setLandTitleRef(e.currentTarget.value)}
+                                            radius="md"
+                                        />
+                                        <Select
+                                            label="Construction Milestone"
+                                            description="Current physical progress"
+                                            placeholder="Select status"
+                                            data={constructionStatuses.map(s => ({ value: s.id.toString(), label: s.lookupValue.en }))}
+                                            value={constructionStatusId.toString()}
+                                            onChange={(val) => setConstructionStatusId(val || '')}
+                                            radius="md"
+                                        />
+                                    </Group>
+                                </Stack>
+                            )}
                         </Paper>
 
                         <Paper withBorder p="xl" radius="2rem" className="bg-teal-50/30 border-teal-100">
