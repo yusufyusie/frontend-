@@ -30,7 +30,7 @@ export const TenantProfilePreview = ({ data, bizCategoryLabel, statusLabel }: Te
             <Box h={120} style={{ background: 'linear-gradient(135deg, #16284F 0%, #0C7C92 100%)', position: 'relative' }}>
                 <Box pos="absolute" top={20} right={20}>
                     <Badge variant="white" size="lg" radius="xl" color="teal" fw={900}>
-                        OFFICIAL PARTNER
+                        STRATEGIC RESIDENT
                     </Badge>
                 </Box>
                 {/* Abstract pattern overlay */}
@@ -83,10 +83,10 @@ export const TenantProfilePreview = ({ data, bizCategoryLabel, statusLabel }: Te
                     </Box>
 
                     <Stack align="flex-end" gap={4}>
-                        <Text size="xs" c="dimmed" fw={800} tt="uppercase" lts="2px">Verification Rank</Text>
+                        <Text size="xs" c="dimmed" fw={800} tt="uppercase" lts="2px">Verification Status</Text>
                         <Group gap={8}>
                             <Award size={18} className="text-yellow-500" />
-                            <Text size="md" fw={900} c="#16284F">ELITE TIER</Text>
+                            <Text size="md" fw={900} c="#16284F">INSTITUTIONAL GRADE</Text>
                         </Group>
                     </Stack>
                 </Group>
@@ -94,9 +94,9 @@ export const TenantProfilePreview = ({ data, bizCategoryLabel, statusLabel }: Te
                 {/* Main Content */}
                 <Stack gap="xl">
                     <Box>
-                        <Text size="xs" fw={900} c="#0C7C92" tt="uppercase" lts="2.5px" mb={4}>Entity Identification</Text>
+                        <Text size="xs" fw={900} c="#0C7C92" tt="uppercase" lts="2.5px" mb={4}>Authoritative Identity</Text>
                         <Text size={rem(36)} fw={900} c="#16284F" lts="-1.5px" style={{ lineHeight: 1.05 }}>
-                            {data.name || 'Account Identity'}
+                            {data.name || 'Resident Authorization'}
                         </Text>
                         <Group gap="xs" mt="lg">
                             <Badge color="#16284F" variant="filled" size="sm" radius="xs" fw={900} className="tracking-widest">CERTIFIED</Badge>

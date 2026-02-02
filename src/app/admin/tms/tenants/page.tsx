@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, Search, Filter, RefreshCw, Eye, Edit, Trash2, MoreVertical, Users, Building2, FileText, TrendingUp, Mail, Phone, ExternalLink } from 'lucide-react';
+import { Plus, Search, Filter, RefreshCw, Eye, Edit, Trash2, MoreVertical, Users, Building2, FileText, TrendingUp, Mail, Phone, ExternalLink, Sparkles } from 'lucide-react';
 import { tenantsService, Tenant } from '@/services/tenants.service';
 import { lookupsService } from '@/services/lookups.service';
 import { TenantOnboardingWizard } from '@/components/organisms/tms/TenantOnboardingWizardMaster';
@@ -15,8 +15,14 @@ export default function TenantDirectoryPage() {
     const [tenants, setTenants] = useState<Tenant[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [opened, setOpened] = useState(false);
+    const [industries, setIndustries] = useState<any[]>([]);
     const [sectors, setSectors] = useState<any[]>([]);
-    const [filters, setFilters] = useState({ search: '', statusId: '', businessCategoryId: '' });
+    const [filters, setFilters] = useState({
+        search: '',
+        statusId: '',
+        industryId: '',
+        sectorId: ''
+    });
     const [activeTab, setActiveTab] = useState('all');
     const [page, setPage] = useState(1);
     const pageSize = 10;
@@ -50,7 +56,8 @@ export default function TenantDirectoryPage() {
     };
 
     useEffect(() => {
-        lookupsService.getByCategory('BUSINESS_CATEGORIES').then(res => setSectors((res as any).data || res));
+        lookupsService.getByCategory('INDUSTRY').then(res => setIndustries((res as any).data || res));
+        lookupsService.getByCategory('SECTOR').then(res => setSectors((res as any).data || res));
     }, []);
 
     useEffect(() => {
@@ -131,8 +138,23 @@ export default function TenantDirectoryPage() {
                     <div className="card p-0 overflow-hidden shadow-sm h-full flex items-center bg-white">
                         <Filter className="ml-4 w-4 h-4 text-gray-400" />
                         <select
-                            value={filters.businessCategoryId}
-                            onChange={(e) => setFilters({ ...filters, businessCategoryId: e.target.value })}
+                            value={filters.industryId}
+                            onChange={(e) => setFilters({ ...filters, industryId: e.target.value })}
+                            className="w-full py-4 px-3 border-none outline-none focus:ring-0 text-sm font-bold text-gray-600 bg-transparent cursor-pointer"
+                        >
+                            <option value="">All Industries</option>
+                            {industries.map(i => (
+                                <option key={i.id} value={i.id}>{i.lookupValue.en}</option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
+                <div className="w-full md:w-64">
+                    <div className="card p-0 overflow-hidden shadow-sm h-full flex items-center bg-white">
+                        <Filter className="ml-4 w-4 h-4 text-gray-400" />
+                        <select
+                            value={filters.sectorId}
+                            onChange={(e) => setFilters({ ...filters, sectorId: e.target.value })}
                             className="w-full py-4 px-3 border-none outline-none focus:ring-0 text-sm font-bold text-gray-600 bg-transparent cursor-pointer"
                         >
                             <option value="">All Sectors</option>
@@ -171,10 +193,11 @@ export default function TenantDirectoryPage() {
                     <table className="w-full text-left border-collapse">
                         <thead>
                             <tr className="bg-[#F8FAFC] border-b border-slate-200">
-                                <th className="px-6 py-5 text-[10px] font-black text-[#64748B] uppercase tracking-[0.15em] w-[30%]">Organization Entity</th>
+                                <th className="px-6 py-5 text-[10px] font-black text-[#64748B] uppercase tracking-[0.15em] w-[25%]">Organization Entity</th>
+                                <th className="px-6 py-5 text-[10px] font-black text-[#64748B] uppercase tracking-[0.15em] w-[15%]">Institutional Industry</th>
                                 <th className="px-6 py-5 text-[10px] font-black text-[#64748B] uppercase tracking-[0.15em] w-[15%]">Business Sector</th>
-                                <th className="px-6 py-5 text-[10px] font-black text-[#64748B] uppercase tracking-[0.15em] w-[20%]">Contact Interface</th>
-                                <th className="px-6 py-5 text-[10px] font-black text-[#64748B] uppercase tracking-[0.15em] w-[15%]">Resource Stack</th>
+                                <th className="px-6 py-5 text-[10px] font-black text-[#64748B] uppercase tracking-[0.15em] w-[15%]">Interface</th>
+                                <th className="px-6 py-5 text-[10px] font-black text-[#64748B] uppercase tracking-[0.15em] w-[15%]">Resources</th>
                                 <th className="px-6 py-5 text-[10px] font-black text-[#64748B] uppercase tracking-[0.15em] text-center w-[10%]">Status</th>
                                 <th className="px-6 py-5 text-[10px] font-black text-[#0C7C92] uppercase tracking-[0.15em] text-right w-[10%]">Operations</th>
                             </tr>
@@ -209,9 +232,17 @@ export default function TenantDirectoryPage() {
                                         </td>
                                         <td className="px-6 py-5">
                                             <div className="flex items-center gap-2">
+                                                <Sparkles size={14} className="text-teal-400" />
+                                                <span className="text-[11px] font-black text-slate-600 uppercase tracking-tight">
+                                                    {(tenant as any).industry?.lookupValue?.en || 'UNSPECIFIED'}
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-5">
+                                            <div className="flex items-center gap-2">
                                                 <Building2 size={14} className="text-blue-400" />
                                                 <span className="text-[11px] font-black text-slate-600 uppercase tracking-tight">
-                                                    {(tenant as any).businessCategory?.lookupValue?.en || 'UNSPECIFIED'}
+                                                    {(tenant as any).sector?.lookupValue?.en || (tenant as any).businessCategory?.lookupValue?.en || 'UNSPECIFIED'}
                                                 </span>
                                             </div>
                                         </td>

@@ -84,8 +84,8 @@ export const TenantOnboardingWizard = ({
     const wizardSteps: WizardStep[] = [
         {
             step: 0,
-            label: 'Business Identity',
-            description: 'Legal name & tax info',
+            label: 'Strategic Entity Profile',
+            description: 'Registry and Tax identification',
             icon: <Building2 size={18} />,
             help: {
                 title: 'Business Registry',
@@ -95,33 +95,33 @@ export const TenantOnboardingWizard = ({
         },
         {
             step: 1,
-            label: 'Key Personnel',
-            description: 'Focal persons & liaisons',
+            label: 'Operational Liaisons',
+            description: 'Key focal persons & contacts',
             icon: <Users size={18} />,
             help: {
-                title: 'Operational Contacts',
+                title: 'Designated Contacts',
                 content: 'Designate the primary individuals responsible for administrative and technical communication.',
                 tips: ['Assign a head contact', 'Check email syntax', 'Define specific roles']
             }
         },
         {
             step: 2,
-            label: 'Verification Docs',
-            description: 'Certificates & licenses',
+            label: 'Compliance Artifacts',
+            description: 'Official licenses & certificates',
             icon: <FileText size={18} />,
             help: {
-                title: 'Document Submission',
+                title: 'Artifact Submission',
                 content: 'Upload high-resolution scans of your trade license and relevant registration certificates.',
                 tips: ['Clear PDF scans', 'Include all pages', 'Verify expiration dates']
             }
         },
         {
             step: 3,
-            label: 'Summary & Finish',
-            description: 'Final profile review',
+            label: 'Final Compliance Audit',
+            description: 'Data verification & finish',
             icon: <CheckCircle2 size={18} />,
             help: {
-                title: 'Profile Confirmation',
+                title: 'Audit Confirmation',
                 content: 'Perform a final audit of the electronic profile before committing to the system registry.',
                 tips: ['Check contact typos', 'Verify TIN consistency', 'Confirm file previews']
             }
@@ -227,7 +227,7 @@ export const TenantOnboardingWizard = ({
                             <Stack gap="lg">
                                 <Group justify="space-between">
                                     <Group gap="md">
-                                        <Badge size="xl" variant="dot" color="teal">Digital Certificate Generated</Badge>
+                                        <Badge size="xl" variant="dot" color="teal">System Authorization Generated</Badge>
                                     </Group>
                                     <ShieldCheck size={28} className="text-teal-600" />
                                 </Group>
@@ -319,7 +319,7 @@ export const TenantOnboardingWizard = ({
             </Box>
 
             <Box ta="center">
-                <Title order={1} fw={900} c="#16284F" mb="md" lts="-2px" className="text-4xl">System Registry Updated</Title>
+                <Title order={1} fw={900} c="#16284F" mb="md" lts="-2px" className="text-4xl">System Integration Confirmed</Title>
                 <Text size="lg" c="dimmed" fw={600} maw={500} mx="auto" style={{ lineHeight: 1.6 }}>
                     Organization <Text span fw={900} c="#16284F">{tenantData.name}</Text> has been successfully integrated into the ITPC Tenant Management System.
                 </Text>
@@ -335,7 +335,7 @@ export const TenantOnboardingWizard = ({
                     fw={900}
                     px="3rem"
                 >
-                    RETURN TO DIRECTORY
+                    BACK TO REGISTRY
                 </Button>
                 <Button
                     variant="filled"
@@ -348,7 +348,7 @@ export const TenantOnboardingWizard = ({
                     px="3rem"
                     style={{ background: '#16284F' }}
                 >
-                    VIEW DASHBOARD
+                    ENTER SYSTEM PULSE
                 </Button>
             </Group>
         </Stack>
@@ -576,7 +576,7 @@ export const TenantOnboardingWizard = ({
                                     fw={900}
                                     px="xl"
                                 >
-                                    REVERT <Text span visibleFrom="sm" ml={4}>STEP</Text>
+                                    PREVIOUS STAGE
                                 </Button>
 
                                 <Group gap="xl">
@@ -601,7 +601,7 @@ export const TenantOnboardingWizard = ({
                                             }}
                                             className={canProceed ? 'pulse-nav' : ''}
                                         >
-                                            PROCEED TO NEXT STEP
+                                            ADVANCE WORKFLOW
                                         </Button>
                                     ) : (
                                         <Button
@@ -619,7 +619,7 @@ export const TenantOnboardingWizard = ({
                                                 boxShadow: '0 10px 30px rgba(12, 124, 146, 0.3)'
                                             }}
                                         >
-                                            FINALIZE ENTRY
+                                            AUTHORIZE INTEGRATION
                                         </Button>
                                     )}
                                 </Group>

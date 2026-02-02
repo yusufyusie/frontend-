@@ -5,14 +5,16 @@ import { settingsService, type Configuration, type FeatureFlag } from '@/service
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { toast } from '@/components/Toast';
 import { PermissionGate } from '@/components/PermissionGate';
+import { Switch, NumberInput, TextInput, Textarea, Tooltip, ActionIcon, Group as MantineGroup, Stack as MantineStack, Text as MantineText, Paper as MantinePaper, Badge } from '@mantine/core';
 
 import { SecurityPolicyEditor } from '@/components/settings/SecurityPolicyEditor';
 import { PolicyEditor } from '@/components/settings/PolicyEditor';
+import { ExchangeRateEditor } from '@/components/settings/ExchangeRateEditor';
 
-import { Settings, Shield, ShieldCheck, Flag, Palette, RefreshCcw } from 'lucide-react';
+import { Settings, Shield, ShieldCheck, Flag, Palette, RefreshCcw, Coins } from 'lucide-react';
 
 export default function SettingsPage() {
-    const [activeTab, setActiveTab] = useState<'general' | 'security' | 'access' | 'features' | 'ui'>('general');
+    const [activeTab, setActiveTab] = useState<'general' | 'security' | 'access' | 'features' | 'ui' | 'exchange'>('general');
     const [configs, setConfigs] = useState<Configuration[]>([]);
     const [flags, setFlags] = useState<FeatureFlag[]>([]);
     const [securityPolicy, setSecurityPolicy] = useState<any>(null);
@@ -103,6 +105,7 @@ export default function SettingsPage() {
                     { id: 'access', label: 'Access', icon: ShieldCheck },
                     { id: 'features', label: 'Features', icon: Flag },
                     { id: 'ui', label: 'Theme', icon: Palette },
+                    { id: 'exchange', label: 'Exchange Rates', icon: Coins },
                 ].map(tab => {
                     const Icon = tab.icon;
                     return (
@@ -213,6 +216,10 @@ export default function SettingsPage() {
                         </div>
                     </div>
                 )}
+
+                {activeTab === 'exchange' && (
+                    <ExchangeRateEditor />
+                )}
             </main>
         </div>
     );
@@ -221,34 +228,85 @@ export default function SettingsPage() {
 function ConfigItem({ cfg, onUpdate, isSaving }: { cfg: Configuration, onUpdate: (k: string, v: any) => void, isSaving: boolean }) {
     const [val, setVal] = useState(cfg.value);
 
+    const inputStyles = {
+        label: { fontWeight: 900, color: '#16284F', fontSize: '11px', textTransform: 'uppercase' as const, letterSpacing: '0.05em' },
+        input: { borderRadius: '12px', borderColor: '#F1F5F9', backgroundColor: '#F8FAFC', fontWeight: 700 }
+    };
+
     return (
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 py-2">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 py-6 group hover:bg-slate-50/50 px-4 -mx-4 rounded-2xl transition-all">
             <div className="flex-1">
-                <label className="block text-sm font-bold text-gray-700">{cfg.key}</label>
-                <p className="text-xs text-gray-500">{cfg.description}</p>
+                <MantineGroup gap="xs">
+                    <label className="block text-sm font-black text-[#16284F] tracking-tight">{cfg.key}</label>
+                    {!cfg.isEditable && (
+                        <Badge size="xs" color="gray" variant="light" radius="sm">Read Only</Badge>
+                    )}
+                </MantineGroup>
+                <p className="text-xs font-bold text-slate-500 mt-0.5 leading-relaxed">{cfg.description}</p>
             </div>
-            <div className="flex items-center gap-2 w-full md:w-auto">
+
+            <div className="flex items-center gap-4 w-full md:w-auto">
                 {cfg.type === 'boolean' ? (
-                    <button
-                        onClick={() => onUpdate(cfg.key, !val)}
+                    <Switch
+                        checked={val === true || val === 'true'}
+                        onChange={(event) => {
+                            const next = event.currentTarget.checked;
+                            setVal(next);
+                            onUpdate(cfg.key, next);
+                        }}
                         disabled={!cfg.isEditable || isSaving}
-                        className={`relative inline-flex h-5 w-10 items-center rounded-full transition-colors ${val ? 'bg-primary' : 'bg-gray-200'
-                            }`}
-                    >
-                        <span className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${val ? 'translate-x-6' : 'translate-x-1'
-                            }`} />
-                    </button>
-                ) : (
-                    <input
-                        type={cfg.type === 'number' ? 'number' : 'text'}
-                        value={typeof val === 'object' ? JSON.stringify(val) : val}
-                        onChange={(e) => setVal(cfg.type === 'number' ? Number(e.target.value) : e.target.value)}
+                        color="#0C7C92"
+                        size="md"
+                        thumbIcon={isSaving ? <LoadingSpinner size="sm" /> : undefined}
+                    />
+                ) : cfg.type === 'number' ? (
+                    <NumberInput
+                        value={Number(val)}
+                        onChange={(v) => setVal(v)}
                         onBlur={() => onUpdate(cfg.key, val)}
                         disabled={!cfg.isEditable || isSaving}
-                        className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:border-primary w-full md:w-48 disabled:bg-gray-50 disabled:text-gray-400"
+                        size="md"
+                        radius="xl"
+                        className="w-full md:w-32"
+                        styles={inputStyles}
+                        decimalScale={cfg.key.toLowerCase().includes('rate') ? 4 : 2}
+                    />
+                ) : cfg.type === 'json' ? (
+                    <Textarea
+                        value={typeof val === 'object' ? JSON.stringify(val, null, 2) : val}
+                        onChange={(e) => setVal(e.target.value)}
+                        onBlur={() => {
+                            try {
+                                const parsed = JSON.parse(val);
+                                onUpdate(cfg.key, parsed);
+                            } catch (e) {
+                                toast.error('Invalid JSON format');
+                            }
+                        }}
+                        disabled={!cfg.isEditable || isSaving}
+                        size="sm"
+                        radius="md"
+                        autosize
+                        minRows={2}
+                        className="w-full md:w-64"
+                        styles={inputStyles}
+                    />
+                ) : (
+                    <TextInput
+                        value={val}
+                        onChange={(e) => setVal(e.target.value)}
+                        onBlur={() => onUpdate(cfg.key, val)}
+                        disabled={!cfg.isEditable || isSaving}
+                        size="md"
+                        radius="xl"
+                        className="w-full md:w-48"
+                        styles={inputStyles}
                     />
                 )}
-                {isSaving && <LoadingSpinner size="sm" />}
+
+                {isSaving && cfg.type !== 'boolean' && (
+                    <div className="animate-spin text-[#0C7C92]"><RefreshCcw size={16} /></div>
+                )}
             </div>
         </div>
     );

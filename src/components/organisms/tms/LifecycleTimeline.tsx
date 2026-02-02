@@ -24,14 +24,14 @@ interface LifecycleTimelineProps {
 }
 
 const STAGE_CONFIG: Record<string, { icon: any, color: string, label: string }> = {
-    'LOI': { icon: FileText, color: 'blue', label: 'Inquiry Received' },
-    'PROPOSAL_PENDING': { icon: Search, color: 'yellow', label: 'Proposal Review' },
-    'PROPOSAL_APPROVED': { icon: CheckCircle2, color: 'green', label: 'Proposal Approved' },
-    'PROPOSAL_REJECTED': { icon: XCircle, color: 'red', label: 'Proposal Rejected' },
-    'OFFER_SENT': { icon: Send, color: 'blue', label: 'Offer Sent' },
-    'OFFER_ACCEPTED': { icon: ThumbsUp, color: 'green', label: 'Offer Accepted' },
-    'CONTRACT_DRAFT': { icon: FileSignature, color: 'orange', label: 'Contract Prep' },
-    'ACTIVE': { icon: Home, color: 'teal', label: 'Active Lease' },
+    'LOI': { icon: FileText, color: 'blue', label: 'Intake Assessment' },
+    'PROPOSAL_PENDING': { icon: Search, color: 'yellow', label: 'Strategic Review' },
+    'PROPOSAL_APPROVED': { icon: CheckCircle2, color: 'green', label: 'Eligibility Authorized' },
+    'PROPOSAL_REJECTED': { icon: XCircle, color: 'red', label: 'Application Declined' },
+    'OFFER_SENT': { icon: Send, color: 'blue', label: 'Offer Dispatched' },
+    'OFFER_ACCEPTED': { icon: ThumbsUp, color: 'green', label: 'Acceptance Recorded' },
+    'CONTRACT_DRAFT': { icon: FileSignature, color: 'orange', label: 'Legal Preparation' },
+    'ACTIVE': { icon: Home, color: 'teal', label: 'Operational Activation' },
     'EXIT_PENDING': { icon: LogOut, color: 'orange', label: 'Exiting' },
     'EXITED': { icon: LogOut, color: 'gray', label: 'Exited' },
     'STATUS_UPDATE': { icon: Clock, color: 'gray', label: 'Status Update' }

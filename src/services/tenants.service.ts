@@ -16,7 +16,9 @@ export interface Tenant {
     name: string;
     companyRegNumber: string;
     tinNumber?: string;
-    businessCategoryId?: number;
+    businessCategoryId?: number; // Legacy
+    industryId?: number; // New: Top-level classification
+    sectorId?: number; // New: Sub-classification
     statusId?: number;
     email?: string;
     phone?: string;
@@ -32,7 +34,9 @@ export interface Tenant {
     leases?: any[];
     inquiries?: any[];
     status?: any;
-    businessCategory?: any;
+    businessCategory?: any; // Legacy
+    industry?: any; // New
+    sector?: any; // New
     _count?: {
         contacts: number;
         documents: number;

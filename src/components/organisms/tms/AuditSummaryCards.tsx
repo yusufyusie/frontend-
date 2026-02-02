@@ -48,7 +48,7 @@ export const AuditSummaryCards = ({ structuralMetrics, onLevelClick }: Props) =>
 
                             <Group gap={6}>
                                 <ThemeIcon size="xs" variant="light" color="green" radius="xl"><Trees size={10} /></ThemeIcon>
-                                <Text size="11px" fw={700} c="dimmed" tt="uppercase">Infra:</Text>
+                                <Text size="11px" fw={700} c="dimmed" tt="uppercase">Utility Space:</Text>
                                 <Text size="11px" fw={900} c="green.8">{(reportSummary.roads + reportSummary.greenArea + reportSummary.utilities).toLocaleString()} m²</Text>
                             </Group>
                         </Group>
@@ -71,9 +71,9 @@ export const AuditSummaryCards = ({ structuralMetrics, onLevelClick }: Props) =>
                                 { count: structuralMetrics?.zones, label: 'Zones', key: 'ZONE' },
                                 { count: structuralMetrics?.blocks, label: 'Blocks', key: 'BLOCK' },
                                 { count: structuralMetrics?.plots, label: 'Plots', key: 'PLOT' },
-                                { count: structuralMetrics?.buildings, label: 'Buildings', key: 'BUILDING' },
-                                { count: structuralMetrics?.floors, label: 'Floors', key: 'FLOOR' },
-                                { count: structuralMetrics?.rooms, label: 'Rooms', key: 'ROOM' },
+                                { count: structuralMetrics?.buildings, label: 'Complexes', key: 'BUILDING' },
+                                { count: structuralMetrics?.floors, label: 'Levels', key: 'FLOOR' },
+                                { count: structuralMetrics?.rooms, label: 'Units', key: 'ROOM' },
                             ].map((item, idx) => (
                                 <React.Fragment key={item.label}>
                                     <button

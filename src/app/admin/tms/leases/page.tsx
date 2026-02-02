@@ -10,6 +10,7 @@ import { LeaseForm } from '@/components/organisms/tms/LeaseForm';
 import { Modal } from '@/components/Modal';
 import { leasesService } from '@/services/leases.service';
 import { toast } from '@/components/Toast';
+import { DynamicStatusBadge } from '@/components/atoms/tms/DynamicStatusBadge';
 import { createPortal } from 'react-dom';
 
 export default function LeasesPage() {
@@ -18,10 +19,24 @@ export default function LeasesPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [mounted, setMounted] = useState(false);
+    const [leases, setLeases] = useState<Lease[]>([]);
 
     useEffect(() => {
         setMounted(true);
+        loadLeases();
     }, []);
+
+    const loadLeases = async () => {
+        setIsLoading(true);
+        try {
+            const res: any = await leasesService.getAll();
+            setLeases(res.data || res || []);
+        } catch (e) {
+            toast.error('Failed to load lease agreements');
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     const handleExecuteLease = async (data: any) => {
         setIsLoading(true);
@@ -29,13 +44,15 @@ export default function LeasesPage() {
             await leasesService.create(data);
             toast.success('Lease agreement executed successfully!');
             setIsModalOpen(false);
-            // In a real app, refresh data here
+            loadLeases();
         } catch (e: any) {
             toast.error(e.response?.data?.message || 'Failed to execute lease');
         } finally {
             setIsLoading(false);
         }
     };
+
+    const paginatedLeases = leases.slice((page - 1) * pageSize, page * pageSize);
 
     // Mock Intelligence Data for Executive Review
     const metrics = [
@@ -151,6 +168,7 @@ export default function LeasesPage() {
                             <tr className="bg-[#F8FAFC] border-b border-slate-200">
                                 <th className="px-8 py-5 text-left text-[10px] font-black uppercase tracking-widest text-slate-500">Contract #</th>
                                 <th className="px-6 py-5 text-left text-[10px] font-black uppercase tracking-widest text-slate-500">Corporate Tenant</th>
+                                <th className="px-6 py-5 text-left text-[10px] font-black uppercase tracking-widest text-slate-500">Agreement Type</th>
                                 <th className="px-6 py-5 text-left text-[10px] font-black uppercase tracking-widest text-slate-500">Allocation (m²)</th>
                                 <th className="px-6 py-5 text-left text-[10px] font-black uppercase tracking-widest text-slate-500">Base Rent / Mo</th>
                                 <th className="px-6 py-5 text-center text-[10px] font-black uppercase tracking-widest text-slate-500">Status</th>
@@ -159,49 +177,54 @@ export default function LeasesPage() {
                             </tr>
                         </thead>
                         <tbody>
-                            {mockLeases.map((lease) => (
+                            {paginatedLeases.length === 0 ? (
+                                <tr>
+                                    <td colSpan={8} className="text-center py-20 bg-slate-50/50">
+                                        <Text fw={700} c="dimmed">No active lease agreements found in the registry.</Text>
+                                    </td>
+                                </tr>
+                            ) : paginatedLeases.map((lease: any) => (
                                 <tr key={lease.id} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors group cursor-default">
                                     <td className="px-8 py-5">
-                                        <Text size="sm" fw={900} className="text-[#16284F] tracking-tight">{lease.contract}</Text>
+                                        <Text size="sm" fw={900} className="text-[#16284F] tracking-tight">{lease.contractNumber}</Text>
                                         <Text size="10px" fw={800} className="text-slate-400 font-mono mt-0.5 uppercase tracking-tighter">Verified Terms</Text>
                                     </td>
                                     <td className="px-6 py-5">
                                         <Group gap="sm">
                                             <Box className="w-8 h-8 rounded-lg bg-teal-50 flex items-center justify-center text-[#0C7C92] font-black text-xs">
-                                                {lease.tenant.charAt(0)}
+                                                {lease.tenant?.name?.charAt(0) || 'T'}
                                             </Box>
-                                            <Text size="sm" fw={800} className="text-slate-700">{lease.tenant}</Text>
+                                            <Text size="sm" fw={800} className="text-slate-700">{lease.tenant?.name || 'Unknown Tenant'}</Text>
                                         </Group>
                                     </td>
                                     <td className="px-6 py-5">
-                                        <Text size="sm" fw={900} className="text-slate-800 font-mono">{lease.area} <span className="text-[10px] text-slate-400">m²</span></Text>
+                                        <Badge variant="outline" color="indigo" radius="sm" size="xs" fw={900}>
+                                            {lease.contractType?.lookupValue?.en || 'Standard Facility'}
+                                        </Badge>
+                                    </td>
+                                    <td className="px-6 py-5">
+                                        <Text size="sm" fw={900} className="text-slate-800 font-mono">{lease.contractArea} <span className="text-[10px] text-slate-400">m²</span></Text>
                                         <Progress value={85} size="xs" radius="xl" color="teal" className="w-20 mt-2" />
                                     </td>
                                     <td className="px-6 py-5">
                                         <Text size="sm" fw={900} className="text-blue-700 font-mono tracking-tighter">
-                                            {lease.rent} <span className="text-[10px] text-slate-400">ETB</span>
+                                            {Number(lease.baseRent).toLocaleString()} <span className="text-[10px] text-slate-400">{lease.currency}</span>
                                         </Text>
-                                        <Text size="9px" fw={900} className="text-emerald-500 uppercase mt-0.5 tracking-widest">{lease.payment}</Text>
+                                        <Text size="9px" fw={900} className="text-emerald-500 uppercase mt-0.5 tracking-widest">{lease.paymentStatus}</Text>
                                     </td>
                                     <td className="px-6 py-5">
                                         <div className="flex justify-center">
-                                            <Badge
-                                                variant="light"
-                                                color={lease.status === 'Active' ? 'teal' : lease.status === 'Expiring' ? 'orange' : 'gray'}
-                                                radius="sm"
-                                                size="sm"
-                                                fw={900}
-                                                className="uppercase tracking-widest text-[9px]"
-                                            >
-                                                {lease.status}
-                                            </Badge>
+                                            <DynamicStatusBadge
+                                                category="LEASE_STATUS"
+                                                code={lease.status?.lookupCode || (lease.statusId ? 'UNKNOWN' : 'DRAFT')}
+                                            />
                                         </div>
                                     </td>
                                     <td className="px-6 py-5">
-                                        <Text size="sm" fw={800} className={lease.status === 'Expiring' ? 'text-orange-600' : 'text-slate-600'}>
-                                            {new Date(lease.expiry).toLocaleDateString()}
+                                        <Text size="sm" fw={800} className="text-slate-600">
+                                            {lease.endDate ? new Date(lease.endDate).toLocaleDateString() : 'Perpetual / Indefinite'}
                                         </Text>
-                                        <Text size="9px" fw={700} c="dimmed">ISO: {lease.expiry}</Text>
+                                        <Text size="9px" fw={700} c="dimmed">ISO: {lease.endDate || 'N/A'}</Text>
                                     </td>
                                     <td className="px-8 py-5">
                                         <Group gap={8} justify="flex-end">

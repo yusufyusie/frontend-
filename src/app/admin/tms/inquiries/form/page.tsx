@@ -15,6 +15,7 @@ export default function InquiryFormPage() {
     const [tenants, setTenants] = useState<Tenant[]>([]);
     const [furnitureTypes, setFurnitureTypes] = useState<SystemLookup[]>([]);
     const [officeLayouts, setOfficeLayouts] = useState<SystemLookup[]>([]);
+    const [propertyTypes, setPropertyTypes] = useState<SystemLookup[]>([]);
     const [loading, setLoading] = useState(false);
 
     const [formData, setFormData] = useState({
@@ -34,6 +35,7 @@ export default function InquiryFormPage() {
         tenantsService.getAll().then(res => setTenants((res as any).data || res));
         lookupsService.getByCategory('OFFICE_SPREAD_TYPES').then(res => setOfficeLayouts((res as any).data || res));
         lookupsService.getByCategory('FURNITURE_TYPES').then(res => setFurnitureTypes((res as any).data || res));
+        lookupsService.getByCategory('PROPERTY_TYPES').then(res => setPropertyTypes((res as any).data || res));
     }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -64,8 +66,8 @@ export default function InquiryFormPage() {
     return (
         <div className="max-w-4xl mx-auto space-y-8 animate-fade-in pb-12">
             <div className="text-center space-y-2">
-                <Title order={1} className="text-4xl font-black text-[#16284F]">Define Your Ideal Space</Title>
-                <Text fw={600} c="dimmed">Complete the professional requirement intake for automated ITPC matching</Text>
+                <Title order={1} className="text-4xl font-black text-[#16284F]">Institutional Requirement Intake</Title>
+                <Text fw={600} c="dimmed">Complete the formal requirement profiling for strategic ITPC matching</Text>
             </div>
 
             <form onSubmit={handleSubmit}>
@@ -87,6 +89,14 @@ export default function InquiryFormPage() {
                                 required
                                 styles={inputStyles}
                                 searchable
+                            />
+                            <Select
+                                label="Intended Property Class"
+                                placeholder="Select spatial category"
+                                data={propertyTypes.map(p => ({ value: p.id.toString(), label: p.lookupValue.en }))}
+                                value={formData.propertyTypeId}
+                                onChange={(val) => setFormData({ ...formData, propertyTypeId: val || '' })}
+                                styles={inputStyles}
                             />
                         </Stack>
                     </Paper>
@@ -135,7 +145,7 @@ export default function InquiryFormPage() {
                                     styles={inputStyles}
                                 />
                                 <Select
-                                    label="Furniture Status"
+                                    label="Furnishing Requirement"
                                     placeholder="Select preference"
                                     data={furnitureTypes.map(f => ({ value: f.id.toString(), label: f.lookupValue.en }))}
                                     value={formData.furnitureStatusId}
@@ -159,7 +169,7 @@ export default function InquiryFormPage() {
                                     styles={inputStyles}
                                 />
                                 <NumberInput
-                                    label="Lease Duration (Months)"
+                                    label="Lease Term (Months)"
                                     value={formData.leaseTermMonths}
                                     onChange={(val) => setFormData({ ...formData, leaseTermMonths: Number(val) })}
                                     styles={inputStyles}
@@ -187,7 +197,7 @@ export default function InquiryFormPage() {
                         className="shadow-2xl font-black uppercase tracking-widest h-16"
                         leftSection={<Send size={20} strokeWidth={3} />}
                     >
-                        Initiate Automated Matching
+                        Initiate Strategic Intake
                     </Button>
                 </Stack>
             </form>

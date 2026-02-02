@@ -19,7 +19,8 @@ export const TenantForm = ({ initialData, onSubmit, onChange, isLoading, onValid
         name: '',
         companyRegNumber: '',
         tinNumber: '',
-        businessCategoryId: undefined,
+        industryId: undefined, // Top-level classification
+        sectorId: undefined, // Sub-classification
         statusId: undefined,
         email: '',
         phone: '',
@@ -30,7 +31,8 @@ export const TenantForm = ({ initialData, onSubmit, onChange, isLoading, onValid
         ...initialData
     });
 
-    const [bizCategories, setBizCategories] = useState<SystemLookup[]>([]);
+    const [industries, setIndustries] = useState<SystemLookup[]>([]);
+    const [sectors, setSectors] = useState<SystemLookup[]>([]);
     const [statusTypes, setStatusTypes] = useState<SystemLookup[]>([]);
     const [investmentOrigins, setInvestmentOrigins] = useState<SystemLookup[]>([]);
     const [regions, setRegions] = useState<Region[]>([]);
@@ -42,7 +44,8 @@ export const TenantForm = ({ initialData, onSubmit, onChange, isLoading, onValid
     }, [formData, onChange]);
 
     useEffect(() => {
-        lookupsService.getByCategory('BUSINESS_SECTORS').then(res => setBizCategories((res as any).data || res || []));
+        lookupsService.getByCategory('INDUSTRY').then(res => setIndustries((res as any).data || res || []));
+        lookupsService.getByCategory('SECTOR').then(res => setSectors((res as any).data || res || []));
         lookupsService.getByCategory('TENANT_STATUS').then(res => setStatusTypes((res as any).data || res || []));
         lookupsService.getByCategory('INVESTMENT_ORIGIN').then(res => setInvestmentOrigins((res as any).data || res || []));
         geoService.getRegions().then(res => setRegions(res.data || []));
@@ -310,18 +313,28 @@ export const TenantForm = ({ initialData, onSubmit, onChange, isLoading, onValid
                     </Box>
 
                     <Group gap="sm" mb="2.5rem">
-                        <Badge variant="filled" color="#0C7C92" size="lg" radius="sm" fw={900}>Sectors</Badge>
-                        <Text size="xs" fw={700} c="rgba(255,255,255,0.4)" tt="uppercase" lts="2px">Business Classification</Text>
+                        <Badge variant="filled" color="#0C7C92" size="lg" radius="sm" fw={900}>Classification</Badge>
+                        <Text size="xs" fw={700} c="rgba(255,255,255,0.4)" tt="uppercase" lts="2px">Business & Sector</Text>
                     </Group>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                         <AtomicLookupSelector
-                            label="Industrial Sector"
-                            items={bizCategories}
-                            value={formData.businessCategoryId ?? null}
-                            onChange={(val) => setFormData({ ...formData, businessCategoryId: val })}
+                            label="Industry (Top-Level)"
+                            items={industries}
+                            value={formData.industryId ?? null}
+                            onChange={(val) => setFormData({ ...formData, industryId: val })}
                             variant="form"
                         />
+                        <AtomicLookupSelector
+                            label="Sector (Sub-Category)"
+                            items={sectors}
+                            value={formData.sectorId ?? null}
+                            onChange={(val) => setFormData({ ...formData, sectorId: val })}
+                            variant="form"
+                        />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mt-10">
                         <AtomicLookupSelector
                             label="Operational Status"
                             items={statusTypes}

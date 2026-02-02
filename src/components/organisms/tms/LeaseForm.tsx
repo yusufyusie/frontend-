@@ -1,11 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Stack, Group, Text, Box, Paper, Title, Button, Badge, ThemeIcon, Select as MantineSelect, TextInput, NumberInput, Grid, Stepper, Divider, SegmentedControl, rem } from '@mantine/core';
-import { FileText, Building2, Users, DollarSign, Calendar, Map, Check, AlertCircle, Info, ArrowRight, ArrowLeft, RefreshCw, Banknote } from 'lucide-react';
+import { Stack, Group, Text, Box, Paper, Title, Button, Badge, ThemeIcon, Select as MantineSelect, TextInput, NumberInput, Grid, Stepper, Divider, SegmentedControl, rem, SimpleGrid } from '@mantine/core';
+import { FileText, Building2, Users, DollarSign, Calendar, Map, Check, AlertCircle, Info, ArrowRight, ArrowLeft, RefreshCw, Banknote, ShieldAlert, TrendingUp } from 'lucide-react';
 import { tenantsService, Tenant } from '@/services/tenants.service';
 import { locationsService, LocationOption } from '@/services/locations.service';
 import { lookupsService, SystemLookup } from '@/services/lookups.service';
+import { financialsService } from '@/services/financials.service';
 import { AtomicLookupSelector } from '@/components/molecules/tms/AtomicLookupSelector';
 
 interface LeaseFormProps {
@@ -20,6 +21,9 @@ export function LeaseForm({ initialData = {}, onSubmit, isLoading }: LeaseFormPr
     const [locations, setLocations] = useState<LocationOption[]>([]);
     const [billingCycles, setBillingCycles] = useState<SystemLookup[]>([]);
     const [currencies, setCurrencies] = useState<SystemLookup[]>([]);
+    const [leaseStatusTypes, setLeaseStatusTypes] = useState<SystemLookup[]>([]);
+    const [contractTypes, setContractTypes] = useState<SystemLookup[]>([]);
+    const [finSettings, setFinSettings] = useState<any>({ vatRate: 0.15, penaltyRate: 0.025 });
     const [formData, setFormData] = useState({
         tenantId: initialData.tenantId?.toString() || '',
         locationType: initialData.roomId ? 'ROOM' : 'PLOT',
@@ -34,22 +38,38 @@ export function LeaseForm({ initialData = {}, onSubmit, isLoading }: LeaseFormPr
         endDate: initialData.endDate || '',
         securityDeposit: initialData.securityDeposit || 0,
         advancePayment: initialData.advancePayment || 0,
+        statusId: initialData.statusId?.toString() || '',
+        contractTypeId: initialData.contractTypeId?.toString() || '',
     });
 
     useEffect(() => {
         loadTenants();
         loadLocations();
         loadLookups();
+        loadFinSettings();
     }, [formData.locationType]);
+
+    const loadFinSettings = async () => {
+        try {
+            const res = await financialsService.getSettings();
+            setFinSettings((res as any).data || res);
+        } catch (e) {
+            console.error('Failed to load financial settings');
+        }
+    };
 
     const loadLookups = async () => {
         try {
-            const [cycleRes, currRes]: any = await Promise.all([
+            const [cycleRes, currRes, statusRes, typeRes]: any = await Promise.all([
                 lookupsService.getByCategory('BILLING_CYCLES'),
-                lookupsService.getByCategory('CURRENCY_TYPES')
+                lookupsService.getByCategory('CURRENCY_TYPES'),
+                lookupsService.getByCategory('LEASE_STATUS'),
+                lookupsService.getByCategory('CONTRACT_TYPES')
             ]);
             setBillingCycles((cycleRes as any).data || cycleRes || []);
             setCurrencies((currRes as any).data || currRes || []);
+            setLeaseStatusTypes((statusRes as any).data || statusRes || []);
+            setContractTypes((typeRes as any).data || typeRes || []);
         } catch (e) {
             console.error(e);
         }
@@ -220,6 +240,15 @@ export function LeaseForm({ initialData = {}, onSubmit, isLoading }: LeaseFormPr
                                         leftSection={<FileText size={18} className="text-slate-400" />}
                                     />
                                 </Grid.Col>
+                                <Grid.Col span={{ base: 12, md: 6 }}>
+                                    <AtomicLookupSelector
+                                        label="Agreement Type"
+                                        items={contractTypes}
+                                        value={formData.contractTypeId}
+                                        onChange={(v) => setFormData({ ...formData, contractTypeId: v })}
+                                        variant="form"
+                                    />
+                                </Grid.Col>
                                 <Grid.Col span={{ base: 12, md: 3 }}>
                                     <AtomicLookupSelector
                                         label="Currency"
@@ -276,11 +305,57 @@ export function LeaseForm({ initialData = {}, onSubmit, isLoading }: LeaseFormPr
                                         prefix={`${formData.currency} `}
                                         styles={{
                                             ...inputStyles,
-                                            input: { ...inputStyles.input, backgroundColor: '#16284F', color: 'white', border: 'none' }
                                         }}
                                     />
                                 </Grid.Col>
                             </Grid>
+                        </Paper>
+
+                        {/* Executive Financial Obligation Preview */}
+                        <Paper p="2rem" radius="2.5rem" className="bg-[#16284F] text-white relative overflow-hidden shadow-2xl">
+                            <div className="absolute right-0 top-0 opacity-10 p-6">
+                                <TrendingUp size={160} className="text-emerald-400" />
+                            </div>
+
+                            <Stack gap="xl" className="relative z-10">
+                                <Group justify="space-between">
+                                    <Stack gap={2}>
+                                        <Text size="10px" fw={900} className="text-cyan-400 uppercase tracking-[0.2em]">Institutional Financial Preview</Text>
+                                        <Title order={3} className="text-white font-black">Contract Revenue Summary</Title>
+                                    </Stack>
+                                    <Badge color="emerald" variant="filled" radius="md" p="md" fw={900}>DYNAMIC COMPLIANCE</Badge>
+                                </Group>
+
+                                <SimpleGrid cols={{ base: 1, md: 3 }} spacing="xl">
+                                    <Stack gap={2}>
+                                        <Text size="xs" fw={800} className="text-slate-400 uppercase">Net Rental (Cycle)</Text>
+                                        <Text size="xl" fw={900} className="text-white">
+                                            {formData.currency} {(formData.contractArea * formData.baseRent).toLocaleString()}
+                                        </Text>
+                                    </Stack>
+                                    <Stack gap={2}>
+                                        <Text size="xs" fw={800} className="text-slate-400 uppercase">VAT Analysis (+{(finSettings.vatRate * 100).toFixed(1)}%)</Text>
+                                        <Text size="xl" fw={900} className="text-emerald-400">
+                                            {formData.currency} {(formData.contractArea * formData.baseRent * finSettings.vatRate).toLocaleString()}
+                                        </Text>
+                                    </Stack>
+                                    <Stack gap={2}>
+                                        <Text size="xs" fw={800} className="text-slate-400 uppercase">Total Obligation</Text>
+                                        <Text size="2xl" fw={950} className="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
+                                            {formData.currency} {(formData.contractArea * formData.baseRent * (1 + finSettings.vatRate)).toLocaleString()}
+                                        </Text>
+                                    </Stack>
+                                </SimpleGrid>
+
+                                <Divider color="slate.8" />
+
+                                <Group gap="xs" px="md" py="xs" className="bg-white/5 rounded-2xl border border-white/10">
+                                    <ShieldAlert size={16} className="text-amber-400" />
+                                    <Text size="xs" fw={700} className="text-slate-300 italic">
+                                        Late payments subject to {(finSettings.penaltyRate * 100).toFixed(1)}% monthly variation penalty as per park policy.
+                                    </Text>
+                                </Group>
+                            </Stack>
                         </Paper>
 
                         <Paper p="xl" radius="2rem" className="bg-[#F8FAFC] border-slate-100" withBorder>
@@ -341,6 +416,15 @@ export function LeaseForm({ initialData = {}, onSubmit, isLoading }: LeaseFormPr
                                     size="md"
                                     radius="xl"
                                     styles={inputStyles}
+                                />
+                            </Grid.Col>
+                            <Grid.Col span={{ base: 12, md: 12 }}>
+                                <AtomicLookupSelector
+                                    label="Initial Lease Status"
+                                    items={leaseStatusTypes}
+                                    value={formData.statusId}
+                                    onChange={(v) => setFormData({ ...formData, statusId: v })}
+                                    variant="form"
                                 />
                             </Grid.Col>
                         </Grid>

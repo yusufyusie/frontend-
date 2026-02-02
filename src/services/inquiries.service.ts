@@ -84,9 +84,10 @@ export interface Inquiry {
     contractStartDate?: string;
     contractEndDate?: string;
     contractStatus?: string;
-    agreedSpace?: number;
-    agreedRate?: number;
-    agreedAmount?: number;
+    gracePeriod?: number;
+    gracePeriodOffset?: number;
+    gracePeriodRemarks?: string;
+    residencyDate?: string;
     securityDeposit?: number;
     advancePayment?: number;
     contractRemarks?: string;
@@ -95,9 +96,6 @@ export interface Inquiry {
     handoverDate?: string;
     handoverRemarks?: string;
     handoverCompleted?: boolean;
-    residencyDate?: string;
-    gracePeriod?: number;
-    gracePeriodRemarks?: string;
 
     // Exit
     exitDate?: string;

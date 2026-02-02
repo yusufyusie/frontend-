@@ -24,9 +24,14 @@ export const TenantTableRow = ({ tenant, onDelete }: Props) => {
                 </Group>
             </Table.Td>
             <Table.Td>
-                <Badge variant="outline" color="gray" size="sm">
-                    {(tenant as any).businessCategory?.lookupValue?.en || 'N/A'}
-                </Badge>
+                <div className="flex flex-col gap-1">
+                    <Badge variant="light" color="cyan" size="xs">
+                        {(tenant as any).industry?.lookupValue?.en || 'N/A'}
+                    </Badge>
+                    <Badge variant="outline" color="blue" size="xs">
+                        {(tenant as any).sector?.lookupValue?.en || (tenant as any).businessCategory?.lookupValue?.en || 'N/A'}
+                    </Badge>
+                </div>
             </Table.Td>
             <Table.Td>
                 <Stack gap={2}>

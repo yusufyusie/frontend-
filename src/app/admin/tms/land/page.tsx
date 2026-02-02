@@ -103,7 +103,7 @@ export default function LandPage() {
             countResources(data);
             setMetrics({ zones, blocks, plots, buildings, floors, rooms, totalArea });
         } catch (error) {
-            toast.error('Failed to fetch land resource tree');
+            toast.error('Failed to fetch territorial registry');
         } finally {
             setIsLoading(false);
         }
@@ -226,7 +226,7 @@ export default function LandPage() {
     const handleLevelClick = (level: 'ZONE' | 'BLOCK' | 'PLOT' | 'BUILDING' | 'FLOOR' | 'ROOM') => {
         setDiscoveryMode(level);
         setNavigationStack([]);
-        const labelMap: any = { 'ZONE': 'Zones', 'BLOCK': 'Blocks', 'PLOT': 'Plots', 'BUILDING': 'Buildings', 'FLOOR': 'Floors', 'ROOM': 'Rooms' };
+        const labelMap: any = { 'ZONE': 'Zones', 'BLOCK': 'Blocks', 'PLOT': 'Plots', 'BUILDING': 'Complexes', 'FLOOR': 'Levels', 'ROOM': 'Units' };
         toast.info(`Discovery Mode: Listing all ${labelMap[level].toLowerCase()} across the system.`);
     };
 
@@ -372,13 +372,13 @@ export default function LandPage() {
             }
         ],
         'BUILDING': [
-            { header: 'Bldg Code', accessor: 'code', width: '120px' },
+            { header: 'Complex Code', accessor: 'code', width: '120px' },
             {
                 header: 'Specs', accessor: 'itpcBuildingType', width: '180px', render: (node) => (
                     <Badge variant="light" color="gray" size="sm" radius="sm" className="font-black">{node.meta?.itpcBuildingType || 'Standard G+0'}</Badge>
                 )
             },
-            { header: 'Floors', accessor: 'floors', width: '90px', align: 'center' },
+            { header: 'Levels', accessor: 'floors', width: '90px', align: 'center' },
             {
                 header: 'Status', accessor: 'isActive', width: '110px', align: 'center', render: (node) => (
                     <Badge variant="dot" color={node.meta?.isActive ? 'teal' : 'gray'} size="sm">Operational</Badge>
@@ -391,36 +391,36 @@ export default function LandPage() {
             }
         ],
         'FLOOR': [
-            { header: 'Floor Code', accessor: 'code', width: '120px' },
+            { header: 'Level Code', accessor: 'code', width: '120px' },
             { header: 'No.', accessor: 'floorNumber', width: '80px', align: 'center' },
             {
-                header: 'Rentable (m²)', accessor: 'rentableArea', width: '140px', align: 'right', render: (node) => (
+                header: 'Assignable (m²)', accessor: 'rentableArea', width: '140px', align: 'right', render: (node) => (
                     <span className="text-[12px] font-mono font-black">{Number(node.meta?.rentableArea || 0).toLocaleString()}</span>
                 )
             },
             {
-                header: 'Parent Bldg', accessor: 'parentRefName', width: '160px', render: (node) => (
+                header: 'Parent Complex', accessor: 'parentRefName', width: '160px', render: (node) => (
                     node.meta?.parentRefName && <Badge variant="outline" color="violet" size="xs" radius="sm" className="font-black uppercase">{node.meta?.parentRefName}</Badge>
                 )
             }
         ],
         'ROOM': [
-            { header: 'Room Code', accessor: 'code', width: '120px' },
+            { header: 'Unit Code', accessor: 'code', width: '120px' },
             { header: 'Area (m²)', accessor: 'areaM2', width: '120px', align: 'right' },
             {
-                header: 'Tenant', accessor: 'occupantName', width: '180px', render: (node) => (
+                header: 'Resident', accessor: 'occupantName', width: '180px', render: (node) => (
                     <span className="text-[11px] font-black text-[#0C7C92] uppercase">{node.meta?.occupantName || 'VACANT'}</span>
                 )
             },
             {
-                header: 'Occupancy', accessor: 'occupancyStatus', width: '120px', align: 'center', render: (node) => (
+                header: 'Residency', accessor: 'occupancyStatus', width: '120px', align: 'center', render: (node) => (
                     <Badge variant="gradient" gradient={node.meta?.occupancyStatus === 'Occupied' ? { from: '#0C7C92', to: '#1098AD', deg: 45 } : { from: '#94A3B8', to: '#CBD5E1', deg: 45 }} size="sm" radius="xl" fw={900} className="text-white">
                         {(node.meta?.occupancyStatus || 'VACANT').toUpperCase()}
                     </Badge>
                 )
             },
             {
-                header: 'Parent Floor', accessor: 'parentRefName', width: '160px', render: (node) => (
+                header: 'Parent Level', accessor: 'parentRefName', width: '160px', render: (node) => (
                     node.meta?.parentRefName && <Badge variant="outline" color="amber" size="xs" radius="sm" className="font-black uppercase">{node.meta?.parentRefName}</Badge>
                 )
             }
@@ -433,8 +433,8 @@ export default function LandPage() {
 
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                    <h1 className="text-3xl md:text-4xl font-bold text-primary">Spatial Structure</h1>
-                    <p className="text-gray-500 mt-1">Unified territorial hierarchy: Zone → Block → Plot → Building → Floor → Room</p>
+                    <h1 className="text-3xl md:text-4xl font-bold text-primary">Territorial Registry</h1>
+                    <p className="text-gray-500 mt-1">Unified strategic hierarchy: Zone → Block → Plot → Complex → Level → Unit</p>
                 </div>
                 {!discoveryMode && (
                     <button
@@ -533,7 +533,7 @@ export default function LandPage() {
                             onClick={() => setViewMode('grid')}
                             className="transition-all duration-300"
                         >
-                            Grid View
+                            Registry Grid
                         </Button>
                         <Button
                             variant={viewMode === 'map' ? 'filled' : 'light'}
@@ -543,7 +543,7 @@ export default function LandPage() {
                             onClick={() => setViewMode('map')}
                             className="transition-all duration-300"
                         >
-                            Map View
+                            Strategic Map
                         </Button>
                     </Button.Group>
                 </div>

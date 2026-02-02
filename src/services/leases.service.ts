@@ -22,6 +22,8 @@ export interface Lease {
     constructionStatusId?: number;
     contractUrl?: string;
     activeTermVersion: number;
+    contractTypeId?: number;
+    contractType?: any;
     metadata?: any;
     createdAt?: string;
     updatedAt?: string;
