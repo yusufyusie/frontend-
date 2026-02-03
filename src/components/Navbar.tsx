@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { useAccessStore } from '@/store/access.store';
 import { authService } from '@/services/auth.service';
 import { Menu, Bell, Search, Settings, LogOut, User, ChevronDown } from 'lucide-react';
+import { ExchangeRateIndicator } from './molecules/tms/ExchangeRateIndicator';
 
 interface NavbarProps {
     onToggleSidebar?: () => void;
@@ -70,7 +71,9 @@ export function Navbar({ onToggleSidebar }: NavbarProps) {
                 </div>
 
                 {/* Right: Notifications + User Menu */}
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-4">
+                    <ExchangeRateIndicator />
+
                     {/* Notifications */}
                     <button
                         className="relative p-2 hover:bg-gray-100 rounded-lg transition-colors"

@@ -65,10 +65,10 @@ export function LifecycleTimeline({ timeline, currentStatus, metadata, status }:
                         }
                         title={
                             <Group justify="space-between">
-                                <Text fw={900} size="sm" className="text-slate-800 uppercase tracking-tight">
+                                <Text fw={800} size="sm" className="text-brand-navy uppercase tracking-tight font-primary">
                                     {config.label}
                                 </Text>
-                                <Badge variant="light" color="gray" size="xs">
+                                <Badge variant="light" color="gray" size="xs" fw={700}>
                                     {format(new Date(entry.createdAt), 'MMM dd, yyyy HH:mm')}
                                 </Badge>
                             </Group>
@@ -76,10 +76,10 @@ export function LifecycleTimeline({ timeline, currentStatus, metadata, status }:
                     >
                         <Stack gap={4} mt={4}>
                             <Text size="xs" fw={700} className="text-slate-600">
-                                Action: <span className="text-slate-900">{entry.action}</span>
+                                Action: <span className="text-brand-navy font-bold">{entry.action}</span>
                             </Text>
                             {entry.remarks && (
-                                <Paper p="xs" radius="md" className="bg-slate-50 border border-slate-100 italic">
+                                <Paper p="xs" radius="md" className="bg-slate-50 border border-slate-100">
                                     <Text size="xs" c="dimmed" fw={600}>"{entry.remarks}"</Text>
                                 </Paper>
                             )}

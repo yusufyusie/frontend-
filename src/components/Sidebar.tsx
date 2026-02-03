@@ -51,8 +51,6 @@ export function Sidebar({ isOpen = true, isCollapsed = false, onClose }: Sidebar
             if (menus && menus.length > 0) {
                 setMenuItems(menus);
                 // Removed auto-expansion of menus
-                // const parentIds = menus.filter(m => m.children && m.children.length > 0).map(m => m.id);
-                // setExpandedMenus(new Set(parentIds));
 
             } else {
 
@@ -298,7 +296,7 @@ export function Sidebar({ isOpen = true, isCollapsed = false, onClose }: Sidebar
                     <div className="absolute bottom-0 left-0 right-0 px-4 py-3 border-t border-primary-700 bg-primary-700/50 backdrop-blur-sm">
                         <div className="text-center">
                             <div className="text-xs font-semibold text-accent mb-0.5">Ethiopian IT Park</div>
-                            <div className="text-[10px] text-white/40">TMS v1.0</div>
+                            <div className="text-[10px] text-white/40">Tenant Management System</div>
                         </div>
                     </div>
                 )}

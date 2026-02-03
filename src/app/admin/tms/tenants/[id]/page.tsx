@@ -10,7 +10,7 @@ import {
 import {
     Building2, Globe, Mail, Phone, MapPin, Calculator, FileCheck,
     History, ArrowLeft, Settings, ShieldCheck, Users, ArrowRightLeft,
-    Briefcase, FileText, LayoutDashboard, Plus
+    Briefcase, FileText, LayoutDashboard, Plus, Factory
 } from 'lucide-react';
 import { tenantsService, Tenant } from '@/services/tenants.service';
 import { TenantContactList } from '@/components/organisms/tms/TenantContactList';
@@ -48,18 +48,36 @@ export default function TenantDetailPage() {
     if (isLoading) return <LoadingOverlay visible />;
     if (!tenant) return <Container py="xl"><Text>Tenant not found</Text></Container>;
 
-    // Area Calculations
     const totalLeasedArea = tenant.leases?.reduce((acc: number, l: any) => acc + Number(l.actualArea), 0) || 0;
     const totalVariance = tenant.leases?.reduce((acc: number, l: any) => acc + (Number(l.actualArea) - Number(l.contractArea)), 0) || 0;
+
+    const isLand = tenant.leases?.some((l: any) => l.plotId || l.landResourceId) ||
+        tenant.inquiries?.some((i: any) => i.inquiryType === 'LAND_SUBLEASE');
+
+    const track = isLand ? {
+        label: 'Land Sublease Track',
+        color: 'teal',
+        icon: Factory,
+        areaLabel: 'Allocated Land Size',
+        varianceLabel: 'Plot Variance',
+        portfolioLabel: 'Land Sublease Portfolio'
+    } : {
+        label: 'Office Rent Track',
+        color: 'blue',
+        icon: Building2,
+        areaLabel: 'Total Office Area',
+        varianceLabel: 'Space Variance',
+        portfolioLabel: 'Office Rent Registry'
+    };
 
     return (
         <Container size="xl" py="xl" className="animate-fade-in">
             {/* Breadcrumbs & Header */}
             <Box mb="xl">
                 <Breadcrumbs mb="xs">
-                    <Anchor href="/admin" size="xs">Admin</Anchor>
-                    <Anchor href="/admin/tms/tenants" size="xs">Tenant Directory</Anchor>
-                    <Text size="xs" c="dimmed">{tenant.companyRegNumber}</Text>
+                    <Anchor href="/admin" size="xs" fw={700}>Admin</Anchor>
+                    <Anchor href="/admin/tms/tenants" size="xs" fw={700}>Tenant Directory</Anchor>
+                    <Text size="xs" c="dimmed" fw={800}>{tenant.companyRegNumber}</Text>
                 </Breadcrumbs>
 
                 <Group justify="space-between" align="flex-start">
@@ -73,20 +91,28 @@ export default function TenantDetailPage() {
                                 leftSection={<ArrowLeft size={16} />}
                                 p={0}
                             />
-                            <Title order={1} fw={900} className="text-[#16284F] tracking-tight">{tenant.name}</Title>
+                            <Title order={1} fw={800} className="text-brand-navy tracking-tight font-primary">{tenant.name}</Title>
                             <Badge size="lg" variant="dot" color={tenant.statusId === 1 ? 'teal' : 'orange'} className="glass border shadow-sm">
                                 {tenant.status?.name || 'Active'}
                             </Badge>
+                            <Badge
+                                size="lg"
+                                variant="light"
+                                color={track.color}
+                                leftSection={<track.icon size={14} />}
+                                className="font-bold uppercase tracking-wider border shadow-sm px-4"
+                            >
+                                {track.label}
+                            </Badge>
                         </Group>
                         <Group gap="xs" mt={4} ml={40}>
-                            <Text c="dimmed" size="sm" fw={600}>{tenant.businessCategory?.name || 'General Business'}</Text>
-                            <Text c="dimmed" size="sm">•</Text>
-                            <Text c="dimmed" size="sm">Partner since {new Date(tenant.createdAt!).toLocaleDateString()}</Text>
+                            <Text c="dimmed" size="xs" fw={700} className="uppercase tracking-wide">{tenant.industry?.name || tenant.businessCategory?.name || 'Authorized Tenant'}</Text>
+                            <Text c="dimmed" size="xs">•</Text>
+                            <Text c="dimmed" size="xs">Resident since {new Date(tenant.createdAt!).toLocaleDateString()}</Text>
                         </Group>
                     </Box>
                     <Group>
-                        <Button variant="light" color="blue" leftSection={<Settings size={18} />} className="hover-lift rounded-xl glass">Account Settings</Button>
-                        <Button variant="filled" color="teal" leftSection={<Plus size={18} />} className="shadow-lg hover-lift rounded-xl">Add Lease</Button>
+                        <Button variant="filled" color="teal" leftSection={<Plus size={18} />} className="shadow-lg hover-lift rounded-xl font-bold bg-brand-teal font-primary">New Agreement</Button>
                     </Group>
                 </Group>
             </Box>
@@ -98,7 +124,7 @@ export default function TenantDetailPage() {
                     <Box h="100%" style={{ position: 'sticky', top: '1rem' }}>
                         <TenantProfilePreview
                             data={tenant}
-                            bizCategoryLabel={tenant.businessCategory?.name}
+                            bizCategoryLabel={tenant.industry?.name || tenant.businessCategory?.name}
                             statusLabel={tenant.status?.name}
                         />
                     </Box>
@@ -108,12 +134,10 @@ export default function TenantDetailPage() {
                 <Grid.Col span={{ base: 12, lg: 8 }}>
                     <Stack gap="xl">
                         {/* Stats Overview (Refined for Horizontal Flow) */}
-
-                        {/* Stats Overview (Refined for Horizontal Flow) */}
                         <SimpleGrid cols={{ base: 1, sm: 2, md: 4 }} spacing="md">
-                            <Paper withBorder p="lg" radius="1.5rem" className="glass shadow-sm hover-glow transition-base" style={{ background: 'white' }}>
+                            <Paper withBorder p="lg" radius="1.5rem" className="glass shadow-sm hover-glow transition-base border-slate-100" style={{ background: 'white' }}>
                                 <Group justify="space-between" mb="xs">
-                                    <Text size="xs" c="dimmed" fw={800} tt="uppercase" lts="1px">Allocated Area</Text>
+                                    <Text size="xs" c="dimmed" fw={800} tt="uppercase" lts="1px">{track.areaLabel}</Text>
                                     <Box p={6} bg="blue.0" style={{ borderRadius: '8px' }}><MapPin size={14} className="text-blue-600" /></Box>
                                 </Group>
                                 <Group gap="xs" align="flex-end">
@@ -122,9 +146,9 @@ export default function TenantDetailPage() {
                                 </Group>
                             </Paper>
 
-                            <Paper withBorder p="lg" radius="1.5rem" className="glass shadow-sm hover-glow transition-base" style={{ background: 'white' }}>
+                            <Paper withBorder p="lg" radius="1.5rem" className="glass shadow-sm hover-glow transition-base border-slate-100" style={{ background: 'white' }}>
                                 <Group justify="space-between" mb="xs">
-                                    <Text size="xs" c="dimmed" fw={800} tt="uppercase" lts="1px">Area Variance</Text>
+                                    <Text size="xs" c="dimmed" fw={800} tt="uppercase" lts="1px">{track.varianceLabel}</Text>
                                     <Box p={6} bg="orange.0" style={{ borderRadius: '8px' }}><ArrowRightLeft size={14} className="text-orange-600" /></Box>
                                 </Group>
                                 <Title order={3} fw={900} c={Math.abs(totalVariance) > 5 ? 'red.7' : '#0C7C92'}>
@@ -132,15 +156,15 @@ export default function TenantDetailPage() {
                                 </Title>
                             </Paper>
 
-                            <Paper withBorder p="lg" radius="1.5rem" className="glass shadow-sm hover-glow transition-base" style={{ background: 'white' }}>
+                            <Paper withBorder p="lg" radius="1.5rem" className="glass shadow-sm hover-glow transition-base border-slate-100" style={{ background: 'white' }}>
                                 <Group justify="space-between" mb="xs">
                                     <Text size="xs" c="dimmed" fw={800} tt="uppercase" lts="1px">Agreements</Text>
-                                    <Box p={6} bg="teal.0" style={{ borderRadius: '8px' }}><Building2 size={14} className="text-teal-600" /></Box>
+                                    <Box p={6} bg="teal.0" style={{ borderRadius: '8px' }}><track.icon size={14} className={`text-${track.color}-600`} /></Box>
                                 </Group>
                                 <Title order={3} fw={900} c="#16284F">{tenant.leases?.length || 0}</Title>
                             </Paper>
 
-                            <Paper withBorder p="lg" radius="1.5rem" className="glass shadow-sm hover-glow transition-base" style={{ background: 'white' }}>
+                            <Paper withBorder p="lg" radius="1.5rem" className="glass shadow-sm hover-glow transition-base border-slate-100" style={{ background: 'white' }}>
                                 <Group justify="space-between" mb="xs">
                                     <Text size="xs" c="dimmed" fw={800} tt="uppercase" lts="1px">Identity Health</Text>
                                     <Box p={6} bg="green.0" style={{ borderRadius: '8px' }}><ShieldCheck size={14} className="text-green-600" /></Box>
@@ -152,11 +176,11 @@ export default function TenantDetailPage() {
                         {/* Content Tabs */}
                         <Tabs defaultValue="pipeline" variant="pills" radius="xl">
                             <Tabs.List className="glass p-1 border shadow-xs inline-flex mb-lg" style={{ background: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(10px)' }}>
-                                <Tabs.Tab h={rem(40)} value="pipeline" leftSection={<History size={14} />}>Strategic Pipeline</Tabs.Tab>
-                                <Tabs.Tab h={rem(40)} value="intel" leftSection={<Briefcase size={14} />}>Organizational Detail</Tabs.Tab>
-                                <Tabs.Tab h={rem(40)} value="registry" leftSection={<FileText size={14} />}>Lease Registry</Tabs.Tab>
-                                <Tabs.Tab h={rem(40)} value="vault" leftSection={<FileCheck size={14} />}>Document Vault</Tabs.Tab>
-                                <Tabs.Tab h={rem(40)} value="ledger" leftSection={<LayoutDashboard size={14} />}>Financial Ledger</Tabs.Tab>
+                                <Tabs.Tab h={rem(40)} value="pipeline" leftSection={<History size={14} />}>Pipeline</Tabs.Tab>
+                                <Tabs.Tab h={rem(40)} value="intel" leftSection={<Briefcase size={14} />}>Identity</Tabs.Tab>
+                                <Tabs.Tab h={rem(40)} value="registry" leftSection={<track.icon size={14} />}>Portfolio</Tabs.Tab>
+                                <Tabs.Tab h={rem(40)} value="vault" leftSection={<FileCheck size={14} />}>Vault</Tabs.Tab>
+                                <Tabs.Tab h={rem(40)} value="ledger" leftSection={<LayoutDashboard size={14} />}>Ledger</Tabs.Tab>
                             </Tabs.List>
 
                             {/* ... (Existing Tab Panels, now nested in Grid.Col) ... */}
@@ -165,7 +189,7 @@ export default function TenantDetailPage() {
                                 <Stack gap="xl">
                                     <Group justify="space-between">
                                         <Box>
-                                            <Title order={3} className="text-[#16284F] tracking-tight">Strategic Asset Analytics</Title>
+                                            <Title order={3} className="text-brand-navy tracking-tight font-primary">Pipeline Analysis</Title>
                                             <Text size="sm" c="dimmed">Lifecycle tracking and venture economics evaluation</Text>
                                         </Box>
                                         <Button
@@ -254,8 +278,8 @@ export default function TenantDetailPage() {
                             <Tabs.Panel value="registry">
                                 <Paper withBorder p="xl" radius="xl" className="glass shadow-md">
                                     <Group justify="space-between" mb="lg">
-                                        <Title order={4} className="text-[#16284F]">Active Space Agreements</Title>
-                                        <Badge variant="light" color="teal">{tenant.leases?.length || 0} Entries</Badge>
+                                        <Title order={4} className="text-[#16284F]">{track.portfolioLabel}</Title>
+                                        <Badge variant="light" color={track.color} size="lg" radius="md" className="font-black px-4">{tenant.leases?.length || 0} Entries</Badge>
                                     </Group>
                                     <Table verticalSpacing="md" highlightOnHover>
                                         <Table.Thead className="bg-gray-50/50">

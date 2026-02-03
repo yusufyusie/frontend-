@@ -27,10 +27,18 @@ class ExchangeRateService {
      * Default: USD to ETB
      */
     async getCurrent(fromCurrency: string = 'USD', toCurrency: string = 'ETB') {
-        const response = await api.get<{ rate: number; validFrom: string }>(
-            `${this.baseUrl}/current`,
+        const response = await api.get<ExchangeRate>(
+            `${this.baseUrl}/latest`,
             { params: { fromCurrency, toCurrency } }
         );
+        return response.data;
+    }
+
+    /**
+     * Alias for getCurrent to match naming in other components
+     */
+    async getLatest() {
+        const response = await api.get<ExchangeRate>(`${this.baseUrl}/latest`);
         return response.data;
     }
 

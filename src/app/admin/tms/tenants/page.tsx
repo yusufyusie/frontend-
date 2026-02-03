@@ -1,7 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, Search, Filter, RefreshCw, Eye, Edit, Trash2, MoreVertical, Users, Building2, FileText, TrendingUp, Mail, Phone, ExternalLink, Sparkles } from 'lucide-react';
+import {
+    Plus, Search, Filter, RefreshCw, Eye, Edit, Trash2, MoreVertical,
+    Users, Building2, FileText, TrendingUp, Mail, Phone, ExternalLink, Globe,
+    Sparkles, Factory, Briefcase, Zap, ShieldCheck, MapPin, Target
+} from 'lucide-react';
 import { tenantsService, Tenant } from '@/services/tenants.service';
 import { lookupsService } from '@/services/lookups.service';
 import { TenantOnboardingWizard } from '@/components/organisms/tms/TenantOnboardingWizardMaster';
@@ -9,6 +13,11 @@ import { TenantStatusBadge } from '@/components/atoms/tms/TenantStatusBadge';
 import { SpatialStats } from '@/components/organisms/tms/SpatialStats';
 import { SmartPagination } from '@/components/SmartPagination';
 import { toast } from '@/components/Toast';
+import {
+    Group, Stack, Text, Box, Paper, Title, Button, Badge, Table,
+    ActionIcon, Tooltip, ThemeIcon, ScrollArea, Avatar, Divider,
+    TextInput, Select, Tabs as MantineTabs
+} from '@mantine/core';
 import Link from 'next/link';
 
 export default function TenantDirectoryPage() {
@@ -25,7 +34,7 @@ export default function TenantDirectoryPage() {
     });
     const [activeTab, setActiveTab] = useState('all');
     const [page, setPage] = useState(1);
-    const pageSize = 10;
+    const [pageSize, setPageSize] = useState(10);
 
     // Metrics
     const [metrics, setMetrics] = useState({
@@ -34,6 +43,8 @@ export default function TenantDirectoryPage() {
         onboarding: 0,
         suspended: 0
     });
+
+    const [mounted, setMounted] = useState(false);
 
     const fetchTenants = async () => {
         setIsLoading(true);
@@ -56,20 +67,22 @@ export default function TenantDirectoryPage() {
     };
 
     useEffect(() => {
+        setMounted(true);
         lookupsService.getByCategory('INDUSTRY').then(res => setIndustries((res as any).data || res));
         lookupsService.getByCategory('SECTOR').then(res => setSectors((res as any).data || res));
     }, []);
 
     useEffect(() => {
-        fetchTenants();
-    }, [filters]);
+        if (mounted) fetchTenants();
+    }, [filters, mounted]);
+
+    if (!mounted) return null;
 
     const handleOnboard = async (data: Partial<Tenant>) => {
         setIsLoading(true);
         try {
             await tenantsService.create(data);
             toast.success('✅ Tenant onboarded successfully');
-            // setOpened(false); // DEFERRED TO WIZARD SUCCESS SCREEN
             fetchTenants();
         } catch (error: any) {
             toast.error(error.response?.data?.message || 'Onboarding failed');
@@ -100,224 +113,344 @@ export default function TenantDirectoryPage() {
     const paginatedTenants = filteredTenants.slice((page - 1) * pageSize, page * pageSize);
     const totalPages = Math.ceil(filteredTenants.length / pageSize);
 
+    // Helper to determine Commercial Track
+    const getCommercialTrack = (tenant: any) => {
+        // Priority 1: Metadata track set during onboarding
+        const metaTrack = tenant.metadata?.track;
+        if (metaTrack === 'LAND') return { label: 'LAND LEASE', color: 'teal', icon: Factory };
+        if (metaTrack === 'OFFICE') return { label: 'OFFICE RENT', color: 'blue', icon: Briefcase };
+
+        // Priority 2: Inferred from leases
+        const hasLandLease = tenant.leases?.some((l: any) => l.plotId || l.landResourceId);
+        const hasOfficeLease = tenant.leases?.some((l: any) => l.roomId);
+        const hasLandInquiry = tenant.inquiries?.some((i: any) => i.inquiryType === 'LAND_SUBLEASE');
+
+        if (hasLandLease || hasLandInquiry) return { label: 'LAND LEASE', color: 'teal', icon: Factory };
+        if (hasOfficeLease) return { label: 'OFFICE RENT', color: 'blue', icon: Briefcase };
+
+        return { label: 'PENDING', color: 'slate', icon: Target };
+    };
+
     return (
-        <div className="space-y-6 animate-fade-in">
-            {/* Page Header - Access Control Style */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <div>
-                    <h1 className="text-3xl md:text-4xl font-bold text-primary">Tenant Profile</h1>
-                    <p className="text-gray-500 mt-1">Enterprise-grade database of IT Park registered organizations</p>
-                </div>
-                <button
-                    onClick={() => setOpened(true)}
-                    className="btn btn-primary flex items-center gap-2 w-full sm:w-auto justify-center"
-                >
-                    <Plus className="w-5 h-5" />
-                    <span>Onboard New Tenant</span>
-                </button>
+        <div className="space-y-8 animate-fade-in pb-12">
+            {/* Ultra-Premium Header */}
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6 overflow-hidden relative">
+                <Box>
+                    <Group gap="xl" mb={4}>
+                        <div className="relative">
+                            <ThemeIcon size={64} radius="24px" variant="gradient" gradient={{ from: '#16284F', to: '#0C7C92', deg: 45 }} className="shadow-2xl shadow-brand-navy/30">
+                                <Users size={32} strokeWidth={2.5} />
+                            </ThemeIcon>
+                            <div className="absolute -bottom-2 -right-2 bg-green-500 w-6 h-6 rounded-full border-4 border-[#F8FAFC] flex items-center justify-center">
+                                <ShieldCheck size={12} className="text-white" />
+                            </div>
+                        </div>
+                        <div>
+                            <Title order={1} className="text-3xl font-extrabold text-brand-navy tracking-tight font-primary">Tenant Directory</Title>
+                            <Text c="dimmed" fw={600} size="sm" className="mt-1">Official Registry of IT Park Companies</Text>
+                        </div>
+                    </Group>
+                </Box>
+                <Group gap="md">
+                    <Button
+                        size="lg"
+                        radius="xl"
+                        className="bg-brand-teal shadow-xl shadow-brand-teal/20 font-extrabold hover:scale-105 transition-transform px-8 font-primary"
+                        onClick={() => setOpened(true)}
+                        leftSection={<Plus size={20} strokeWidth={3} />}
+                    >
+                        Register New Tenant
+                    </Button>
+                </Group>
             </div>
 
-            {/* Compact Intelligence Header - Replaces individual metric cards and large stats */}
+            {/* Strategic Intelligence Header */}
             <SpatialStats tenantMetrics={metrics} />
 
-            {/* Filters Row */}
-            <div className="flex flex-col md:flex-row gap-4">
-                <div className="card p-0 overflow-hidden flex-grow shadow-sm">
-                    <div className="relative">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                        <input
-                            type="text"
+            {/* Integrated Search & Filter Hub */}
+            <Paper p="2rem" radius="3rem" className="bg-white border border-slate-100 shadow-xl shadow-slate-200/40 relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-[#16284F] via-[#0C7C92] to-teal-400 opacity-80" />
+
+                <Group gap="xl" wrap="nowrap" align="end">
+                    <div className="flex-1">
+                        <TextInput
                             value={filters.search}
-                            onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-                            placeholder="Search by company name, registration, or TIN..."
-                            className="w-full pl-12 pr-4 py-4 border-none outline-none focus:ring-0 transition-all text-sm font-medium text-gray-700 bg-transparent"
+                            onChange={(e) => setFilters({ ...filters, search: e.currentTarget.value })}
+                            placeholder="Search by legal identity, registration, or TIN sequence..."
+                            size="lg"
+                            radius="xl"
+                            leftSection={<Search size={18} className="text-slate-400" />}
+                            leftSectionWidth={48}
+                            styles={{
+                                input: {
+                                    backgroundColor: '#F8FAFC',
+                                    border: '1px solid #E2E8F0',
+                                    fontWeight: 700,
+                                    fontSize: '14px',
+                                    paddingLeft: '48px',
+                                }
+                            }}
                         />
                     </div>
-                </div>
-                <div className="w-full md:w-64">
-                    <div className="card p-0 overflow-hidden shadow-sm h-full flex items-center bg-white">
-                        <Filter className="ml-4 w-4 h-4 text-gray-400" />
-                        <select
+
+                    <div className="w-64 hidden md:block">
+                        <Select
+                            data={industries.map(i => ({ value: i.id.toString(), label: i.lookupValue.en }))}
                             value={filters.industryId}
-                            onChange={(e) => setFilters({ ...filters, industryId: e.target.value })}
-                            className="w-full py-4 px-3 border-none outline-none focus:ring-0 text-sm font-bold text-gray-600 bg-transparent cursor-pointer"
-                        >
-                            <option value="">All Industries</option>
-                            {industries.map(i => (
-                                <option key={i.id} value={i.id}>{i.lookupValue.en}</option>
-                            ))}
-                        </select>
+                            onChange={(val) => setFilters({ ...filters, industryId: val || '' })}
+                            placeholder="All Vertical Categories"
+                            size="lg"
+                            radius="xl"
+                            clearable
+                            leftSection={<Factory size={18} className="text-slate-400" />}
+                            leftSectionWidth={48}
+                            styles={{
+                                input: {
+                                    backgroundColor: '#F8FAFC',
+                                    border: '1px solid #E2E8F0',
+                                    fontWeight: 700,
+                                    fontSize: '13px',
+                                    paddingLeft: '48px'
+                                }
+                            }}
+                        />
                     </div>
-                </div>
-                <div className="w-full md:w-64">
-                    <div className="card p-0 overflow-hidden shadow-sm h-full flex items-center bg-white">
-                        <Filter className="ml-4 w-4 h-4 text-gray-400" />
-                        <select
+
+                    <div className="w-64 hidden md:block">
+                        <Select
+                            data={sectors.map(s => ({ value: s.id.toString(), label: s.lookupValue.en }))}
                             value={filters.sectorId}
-                            onChange={(e) => setFilters({ ...filters, sectorId: e.target.value })}
-                            className="w-full py-4 px-3 border-none outline-none focus:ring-0 text-sm font-bold text-gray-600 bg-transparent cursor-pointer"
-                        >
-                            <option value="">All Sectors</option>
-                            {sectors.map(s => (
-                                <option key={s.id} value={s.id}>{s.lookupValue.en}</option>
-                            ))}
-                        </select>
+                            onChange={(val) => setFilters({ ...filters, sectorId: val || '' })}
+                            placeholder="All Technical Domains"
+                            size="lg"
+                            radius="xl"
+                            clearable
+                            leftSection={<Briefcase size={18} className="text-slate-400" />}
+                            leftSectionWidth={48}
+                            styles={{
+                                input: {
+                                    backgroundColor: '#F8FAFC',
+                                    border: '1px solid #E2E8F0',
+                                    fontWeight: 700,
+                                    fontSize: '13px',
+                                    paddingLeft: '48px'
+                                }
+                            }}
+                        />
                     </div>
-                </div>
-            </div>
+                </Group>
+            </Paper>
 
-            {/* Tabs - Modern Pill Style */}
-            <div className="flex gap-4 p-1.5 bg-slate-100/50 rounded-2xl w-fit">
-                {[
-                    { key: 'all', label: 'All Organizations', count: tenants.length },
-                    { key: 'active', label: 'Active', count: metrics.active },
-                    { key: 'onboarding', label: 'Onboarding', count: metrics.onboarding },
-                    { key: 'suspended', label: 'Suspended', count: metrics.suspended }
-                ].map(tab => (
-                    <button
-                        key={tab.key}
-                        onClick={() => setActiveTab(tab.key)}
-                        className={`px-5 py-2 text-[11px] font-black transition-all rounded-[0.85rem] tracking-wider uppercase ${activeTab === tab.key
-                            ? 'bg-white text-primary shadow-sm'
-                            : 'text-gray-400 hover:text-gray-600'
-                            }`}
-                    >
-                        {tab.label} <span className="ml-1 opacity-50">{tab.count}</span>
-                    </button>
-                ))}
-            </div>
+            {/* Main Lifecycle Table */}
+            <Paper radius="3rem" className="bg-white border border-slate-100 shadow-2xl shadow-slate-200/60 overflow-hidden">
+                <Box p="xl" className="border-b border-slate-50 bg-[#F8FAFC]/50">
+                    <Group justify="space-between">
+                        <MantineTabs value={activeTab} onChange={(val) => { setActiveTab(val || 'all'); setPage(1); }} variant="pills" radius="xl">
+                            <MantineTabs.List className="bg-white p-1 rounded-full shadow-inner border border-slate-100">
+                                <MantineTabs.Tab value="all" className="font-extrabold px-6 data-[active]:bg-brand-navy data-[active]:text-white font-primary text-xs">ALL ENTITIES ({tenants.length})</MantineTabs.Tab>
+                                <MantineTabs.Tab value="active" className="font-extrabold px-6 data-[active]:bg-brand-teal data-[active]:text-white font-primary text-xs">OPERATIONAL ({metrics.active})</MantineTabs.Tab>
+                                <MantineTabs.Tab value="onboarding" className="font-extrabold px-6 data-[active]:bg-orange-500 data-[active]:text-white font-primary text-xs">ONBOARDING ({metrics.onboarding})</MantineTabs.Tab>
+                                <MantineTabs.Tab value="suspended" className="font-extrabold px-6 data-[active]:bg-rose-500 data-[active]:text-white font-primary text-xs">SUSPENDED ({metrics.suspended})</MantineTabs.Tab>
+                            </MantineTabs.List>
+                        </MantineTabs>
 
-            {/* Table - Access Control Style */}
-            <div className="border border-slate-200/60 rounded-3xl overflow-hidden bg-white shadow-xl shadow-slate-200/40">
-                <div className="overflow-x-auto custom-scrollbar">
-                    <table className="w-full text-left border-collapse">
+                        <Group gap="xl">
+                            <ActionIcon variant="subtle" color="gray" radius="md" size="lg" onClick={fetchTenants}><RefreshCw size={18} /></ActionIcon>
+                        </Group>
+                    </Group>
+                </Box>
+
+                <ScrollArea h={700} scrollbarSize={8}>
+                    <Table verticalSpacing="lg" horizontalSpacing="xl" className="border-separate border-spacing-y-3 px-8">
                         <thead>
-                            <tr className="bg-[#F8FAFC] border-b border-slate-200">
-                                <th className="px-6 py-5 text-[10px] font-black text-[#64748B] uppercase tracking-[0.15em] w-[25%]">Organization Entity</th>
-                                <th className="px-6 py-5 text-[10px] font-black text-[#64748B] uppercase tracking-[0.15em] w-[15%]">Institutional Industry</th>
-                                <th className="px-6 py-5 text-[10px] font-black text-[#64748B] uppercase tracking-[0.15em] w-[15%]">Business Sector</th>
-                                <th className="px-6 py-5 text-[10px] font-black text-[#64748B] uppercase tracking-[0.15em] w-[15%]">Interface</th>
-                                <th className="px-6 py-5 text-[10px] font-black text-[#64748B] uppercase tracking-[0.15em] w-[15%]">Resources</th>
-                                <th className="px-6 py-5 text-[10px] font-black text-[#64748B] uppercase tracking-[0.15em] text-center w-[10%]">Status</th>
-                                <th className="px-6 py-5 text-[10px] font-black text-[#0C7C92] uppercase tracking-[0.15em] text-right w-[10%]">Operations</th>
+                            <tr>
+                                <th className="text-[11px] font-black uppercase text-slate-500 py-4 pl-6 tracking-wider">Company Profile</th>
+                                <th className="text-[11px] font-black uppercase text-slate-500 tracking-wider">Spatial Footprint</th>
+                                <th className="text-[11px] font-black uppercase text-slate-500 tracking-wider">Industry Sector</th>
+                                <th className="text-[11px] font-black uppercase text-slate-500 tracking-wider">Contacts</th>
+                                <th className="text-[11px] font-black uppercase text-slate-500 tracking-wider">Status & Health</th>
+                                <th className="text-[11px] font-black uppercase text-slate-500 tracking-wider pr-6 text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-100">
+                        <tbody>
                             {paginatedTenants.length === 0 ? (
                                 <tr>
-                                    <td colSpan={6} className="text-center py-32 bg-slate-50/50">
-                                        <div className="inline-flex p-8 bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 mb-6">
-                                            <TrendingUp size={56} className="text-slate-200" strokeWidth={1} />
+                                    <td colSpan={6} className="py-40 text-center bg-slate-50/20 rounded-[3rem]">
+                                        <div className="flex flex-col items-center">
+                                            <div className="p-8 bg-white rounded-full shadow-lg mb-6">
+                                                <Users size={64} className="text-slate-200" strokeWidth={1} />
+                                            </div>
+                                            <Text fw={800} size="xl" className="text-slate-800 uppercase tracking-wide">Registry Empty</Text>
+                                            <Text size="sm" c="dimmed" className="mt-1">Adjust filters or register a new company</Text>
                                         </div>
-                                        <p className="text-xl font-black text-slate-800 tracking-tight">System Record Empty</p>
-                                        <p className="text-sm text-slate-400 mt-2 font-medium">No tenants match the current filter criteria.</p>
                                     </td>
                                 </tr>
                             ) : (
-                                paginatedTenants.map((tenant) => (
-                                    <tr key={tenant.id} className="hover:bg-teal-50/20 transition-all duration-200 group relative">
-                                        <td className="px-6 py-5">
-                                            <div className="flex items-center gap-4">
-                                                <div className="w-12 h-12 rounded-[1rem] bg-white shadow-lg border border-slate-100 flex items-center justify-center text-primary font-black text-sm group-hover:scale-110 transition-transform">
-                                                    {tenant.name.substring(0, 2).toUpperCase()}
-                                                </div>
-                                                <div>
-                                                    <div className="font-extrabold text-[#16284F] text-[14px] leading-tight mb-1">{tenant.name}</div>
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 uppercase tracking-wider">REG: {tenant.companyRegNumber}</span>
-                                                        <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-orange-50 text-orange-500 uppercase tracking-wider">TIN: {tenant.tinNumber || 'PENDING'}</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-5">
-                                            <div className="flex items-center gap-2">
-                                                <Sparkles size={14} className="text-teal-400" />
-                                                <span className="text-[11px] font-black text-slate-600 uppercase tracking-tight">
-                                                    {(tenant as any).industry?.lookupValue?.en || 'UNSPECIFIED'}
-                                                </span>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-5">
-                                            <div className="flex items-center gap-2">
-                                                <Building2 size={14} className="text-blue-400" />
-                                                <span className="text-[11px] font-black text-slate-600 uppercase tracking-tight">
-                                                    {(tenant as any).sector?.lookupValue?.en || (tenant as any).businessCategory?.lookupValue?.en || 'UNSPECIFIED'}
-                                                </span>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-5">
-                                            <div className="space-y-2">
-                                                {tenant.email && (
-                                                    <a href={`mailto:${tenant.email}`} className="flex items-center gap-2 group/link">
-                                                        <div className="p-1 rounded-md bg-slate-50 group-hover/link:bg-blue-50 transition-colors">
-                                                            <Mail size={12} className="text-slate-400 group-hover/link:text-blue-500" />
+                                paginatedTenants.map((tenant) => {
+                                    const track = getCommercialTrack(tenant);
+                                    const TrackIcon = track.icon;
+
+                                    return (
+                                        <tr key={tenant.id} className="bg-white border border-slate-100 hover:shadow-2xl hover:shadow-slate-200/50 transition-all duration-300 group cursor-pointer">
+                                            <td className="py-6 pl-8 rounded-l-[3rem]">
+                                                <Group gap="xl">
+                                                    <div className="relative">
+                                                        <Avatar
+                                                            size={54}
+                                                            radius="16px"
+                                                            bg="white"
+                                                            className="shadow-md border-2 border-white font-bold text-[#16284F]"
+                                                            style={{ border: `2px solid ${track.color === 'teal' ? '#2dd4bf' : track.color === 'blue' ? '#60a5fa' : '#e2e8f0'}` }}
+                                                        >
+                                                            {tenant.name.substring(0, 2).toUpperCase()}
+                                                        </Avatar>
+                                                        <div className={`absolute -bottom-1 -right-1 p-1 rounded-full border-2 border-white bg-${track.color}-500 shadow-sm`}>
+                                                            <TrackIcon size={10} className="text-white" />
                                                         </div>
-                                                        <span className="text-[11px] font-bold text-slate-500 group-hover/link:text-blue-600 truncate max-w-[150px]">{tenant.email}</span>
-                                                    </a>
-                                                )}
-                                                {tenant.phone && (
-                                                    <div className="flex items-center gap-2">
-                                                        <div className="p-1 rounded-md bg-slate-50">
-                                                            <Phone size={12} className="text-slate-400" />
-                                                        </div>
-                                                        <span className="text-[11px] font-bold text-slate-500">{tenant.phone}</span>
                                                     </div>
-                                                )}
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-5">
-                                            <div className="flex flex-col gap-1.5">
-                                                <div className="flex items-center gap-2">
-                                                    <Users size={12} className="text-teal-500" />
-                                                    <span className="text-[11px] font-black text-slate-700">{tenant._count?.contacts || 0} Professional Liaisons</span>
-                                                </div>
-                                                <div className="flex items-center gap-2">
-                                                    <FileText size={12} className="text-orange-500" />
-                                                    <span className="text-[11px] font-black text-slate-700">{tenant._count?.documents || 0} Registered Documents</span>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-5 text-center">
-                                            <TenantStatusBadge statusName={(tenant as any).status?.lookupCode} />
-                                        </td>
-                                        <td className="px-6 py-5">
-                                            <div className="flex items-center justify-end gap-2 opacity-40 group-hover:opacity-100 transition-opacity">
-                                                <Link
-                                                    href={`/admin/tms/tenants/${tenant.id}`}
-                                                    className="p-2.5 bg-white text-primary border border-slate-200 rounded-xl hover:shadow-lg hover:bg-slate-50 transition-all active:scale-95"
-                                                    title="Organization Intelligence"
-                                                >
-                                                    <Eye className="w-4 h-4" />
-                                                </Link>
-                                                <button
-                                                    onClick={() => handleDelete(tenant.id)}
-                                                    className="p-2.5 bg-white text-rose-500 border border-slate-200 rounded-xl hover:shadow-lg hover:bg-rose-50 transition-all active:scale-95"
-                                                    title="Deactivate Access"
-                                                >
-                                                    <Trash2 className="w-4 h-4" />
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))
+                                                    <Stack gap={2}>
+                                                        <Group gap="xs">
+                                                            <Text size="md" fw={800} className="text-brand-navy tracking-tight font-primary group-hover:text-brand-teal transition-colors leading-tight">
+                                                                {tenant.name}
+                                                            </Text>
+                                                            {tenant.website && (
+                                                                <Tooltip label="Visit Corporate Portal">
+                                                                    <ActionIcon
+                                                                        component="a"
+                                                                        href={tenant.website.startsWith('http') ? tenant.website : `https://${tenant.website}`}
+                                                                        target="_blank"
+                                                                        size="xs"
+                                                                        variant="subtle"
+                                                                        color="blue"
+                                                                    >
+                                                                        <Globe size={12} />
+                                                                    </ActionIcon>
+                                                                </Tooltip>
+                                                            )}
+                                                        </Group>
+                                                        <Group gap={6}>
+                                                            <Badge variant="light" color={track.color} size="xs" radius="xs" className="font-black text-[9px] px-1.5 h-4">
+                                                                {track.label}
+                                                            </Badge>
+                                                            <Badge variant="filled" color="slate" size="xs" radius="xs" className="font-mono text-[9px] px-1.5 h-4">
+                                                                REG: {tenant.companyRegNumber}
+                                                            </Badge>
+                                                        </Group>
+                                                    </Stack>
+                                                </Group>
+                                            </td>
+                                            <td className="text-center">
+                                                <Stack gap={2} align="center">
+                                                    <Group gap={4} justify="center">
+                                                        <Text size="md" fw={900} className="text-brand-navy">
+                                                            {(tenant.leases?.reduce((acc: number, l: any) => acc + (Number(l.contractArea) || 0), 0) || 0).toLocaleString()}
+                                                        </Text>
+                                                        <Text size="xs" fw={700} c="dimmed">m²</Text>
+                                                    </Group>
+                                                    <Badge variant="outline" color="gray" size="xs" className="font-black">
+                                                        {tenant._count?.leases || 0} Assets
+                                                    </Badge>
+                                                </Stack>
+                                            </td>
+                                            <td>
+                                                <Stack gap={2}>
+                                                    <Group gap={6}>
+                                                        <Sparkles size={12} className="text-teal-400" />
+                                                        <Text size="xs" fw={900} className="text-slate-400 uppercase tracking-tighter">Industry</Text>
+                                                    </Group>
+                                                    <Text size="xs" fw={950} className="text-[#16284F] uppercase tracking-tighter">
+                                                        {(tenant as any).industry?.lookupValue?.en || 'UNCLASSIFIED'}
+                                                    </Text>
+                                                </Stack>
+                                            </td>
+                                            <td>
+                                                <Stack gap={6}>
+                                                    <Group gap={8} className="group/link">
+                                                        <ThemeIcon size={20} radius="sm" variant="light" color="blue"><Mail size={12} /></ThemeIcon>
+                                                        <Text size="xs" fw={800} className="text-slate-500 truncate max-w-[140px]">{tenant.email || '—'}</Text>
+                                                    </Group>
+                                                    <Group gap={8}>
+                                                        <ThemeIcon size={20} radius="sm" variant="light" color="teal"><Phone size={12} /></ThemeIcon>
+                                                        <Text size="xs" fw={800} className="text-slate-500">{tenant.phone || '—'}</Text>
+                                                    </Group>
+                                                </Stack>
+                                            </td>
+                                            <td>
+                                                <Stack gap={4}>
+                                                    <TenantStatusBadge statusName={(tenant as any).status?.lookupCode} />
+                                                    <Group gap={8} justify="center">
+                                                        <Tooltip label="Active Leases"><Badge variant="outline" color="teal" size="xs" className="font-black">{tenant._count?.leases || 0} Lease</Badge></Tooltip>
+                                                        <Tooltip label="Active Inquiries"><Badge variant="outline" color="blue" size="xs" className="font-black">{tenant._count?.inquiries || 0} Inq</Badge></Tooltip>
+                                                    </Group>
+                                                </Stack>
+                                            </td>
+                                            <td className="pr-8 rounded-r-[3rem] text-right">
+                                                <Group gap="xs" justify="flex-end">
+                                                    <Tooltip label="View Company Profile">
+                                                        <ActionIcon
+                                                            component={Link}
+                                                            href={`/admin/tms/tenants/${tenant.id}`}
+                                                            variant="light"
+                                                            color="blue"
+                                                            radius="30rem"
+                                                            size="lg"
+                                                            className="hover:scale-110 transition-transform"
+                                                        >
+                                                            <Eye size={16} />
+                                                        </ActionIcon>
+                                                    </Tooltip>
+
+                                                    <Tooltip label="Edit Details">
+                                                        <ActionIcon
+                                                            variant="light"
+                                                            color="teal"
+                                                            radius="30rem"
+                                                            size="lg"
+                                                            className="hover:scale-110 transition-transform"
+                                                            onClick={(e: React.MouseEvent) => {
+                                                                e.stopPropagation();
+                                                                // Future: open edit modal or navigate to edit tab
+                                                                toast.info('Quick Edit feature coming soon');
+                                                            }}
+                                                        >
+                                                            <Edit size={16} />
+                                                        </ActionIcon>
+                                                    </Tooltip>
+
+                                                    <Tooltip label="Deactivate Account">
+                                                        <ActionIcon
+                                                            variant="light"
+                                                            color="rose"
+                                                            radius="30rem"
+                                                            size="lg"
+                                                            onClick={(e: React.MouseEvent) => { e.stopPropagation(); handleDelete(tenant.id); }}
+                                                            className="hover:bg-rose-100 hover:scale-110 transition-all"
+                                                        >
+                                                            <Trash2 size={16} />
+                                                        </ActionIcon>
+                                                    </Tooltip>
+                                                </Group>
+                                            </td>
+                                        </tr>
+                                    );
+                                })
                             )}
                         </tbody>
-                    </table>
-                </div>
+                    </Table>
+                </ScrollArea>
 
-                {totalPages > 1 && (
-                    <div className="p-6 border-t border-slate-100 bg-[#F8FAFC]/50">
-                        <SmartPagination
-                            currentPage={page}
-                            totalPages={totalPages}
-                            pageSize={pageSize}
-                            totalElements={filteredTenants.length}
-                            onPageChange={setPage}
-                        />
-                    </div>
-                )}
-            </div>
+                <Box className="border-t border-slate-100 bg-slate-50/10">
+                    <SmartPagination
+                        currentPage={page}
+                        totalPages={totalPages}
+                        pageSize={pageSize}
+                        totalElements={filteredTenants.length}
+                        onPageChange={setPage}
+                        onPageSizeChange={setPageSize}
+                        embedded={true}
+                    />
+                </Box>
+            </Paper>
 
             {/* Beautiful Wizard Modal */}
             <TenantOnboardingWizard
@@ -329,3 +462,4 @@ export default function TenantDirectoryPage() {
         </div>
     );
 }
+

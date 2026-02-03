@@ -63,44 +63,60 @@ export const AtomicLookupSelector = ({
                 data={selectData}
                 value={value?.toString()}
                 onChange={(val) => {
-                    const selected = items.find(i => i.id.toString() === val || i.lookupCode === val);
-                    onChange(selected ? (selected.lookupCode || selected.id) : null);
+                    const selected = items.find(i => i.id.toString() === val);
+                    onChange(selected ? selected.id : null);
                 }}
                 maxDropdownHeight={300}
                 radius="xl"
                 size="md"
+                leftSectionPointerEvents="none"
+                leftSection={(() => {
+                    const itemData = value ? selectData.find(d => d.value === value.toString()) : null;
+                    const Icon = itemData ? (LucideIcons as any)[itemData.icon || 'Circle'] || LucideIcons.Circle : LucideIcons.Sparkles;
+                    return (
+                        <ThemeIcon
+                            size="md"
+                            variant="transparent"
+                            color={itemData?.color || 'blue.4'}
+                            style={{ opacity: 0.6 }}
+                        >
+                            <Icon size={18} strokeWidth={2.5} />
+                        </ThemeIcon>
+                    );
+                })()}
                 styles={{
-                    label: { fontWeight: 900, color: '#16284F', fontSize: '11px', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' },
+                    label: { fontWeight: 900, color: '#16284F', fontSize: '11px', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '1px' },
                     input: {
-                        border: '2px solid #F1F5F9',
-                        backgroundColor: '#F8FAFC',
+                        border: '2px solid #E2E8F0',
+                        backgroundColor: '#fff',
                         fontWeight: 700,
-                        height: variant === 'discovery' ? '44px' : '48px',
+                        height: variant === 'discovery' ? '44px' : '54px',
                         transition: 'all 0.2s ease',
-                        '&:focus': { borderColor: '#16284F' }
+                        paddingLeft: rem(48), // Explicit spacing for branded icon
+                        '&:focus': { borderColor: '#16284F', backgroundColor: '#fff' }
                     },
                     dropdown: {
-                        borderRadius: '1.25rem',
-                        border: '1px solid rgba(226, 232, 240, 0.8)',
-                        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
-                        padding: '6px',
-                        backdropFilter: 'blur(16px)',
-                        backgroundColor: 'rgba(255, 255, 255, 0.98)',
+                        borderRadius: '1.5rem',
+                        border: '1px solid #E2E8F0',
+                        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.1)',
+                        padding: '8px',
                         zIndex: 1000
                     },
                     option: {
-                        borderRadius: '0.75rem',
-                        marginBottom: '2px',
-                        padding: '10px 14px',
-                        transition: 'all 0.15s ease',
+                        borderRadius: '1rem',
+                        marginBottom: '4px',
+                        padding: '12px 16px',
+                    },
+                    section: {
+                        width: rem(48),
+                        justifyContent: 'center',
                     }
                 }}
                 comboboxProps={{
                     transitionProps: { transition: 'pop-top-left', duration: 200 },
                     shadow: 'xl',
                 }}
-                // Custom CSS for branded ultra-thin scrollbar and interaction states
-                className="[&_[data-combobox-option][data-selected]]:!bg-[#16284F] [&_[data-combobox-option][data-selected]]:!text-white [&_[data-combobox-option]:hover]:!bg-[#F1F5F9] [&_[data-combobox-option]:hover]:translate-x-1 [&_.mantine-ScrollArea-scrollbar]:!w-[4px] [&_.mantine-ScrollArea-thumb]:!bg-[#0C7C92] [&_.mantine-ScrollArea-viewport]:!max-h-[300px]"
+                className="[&_.mantine-Select-input]:!pl-[48px]"
                 renderOption={({ option, checked }) => {
                     const itemData = selectData.find(d => d.value === option.value);
                     const lookupItem = items.find(i => i.id.toString() === option.value);
@@ -127,16 +143,6 @@ export const AtomicLookupSelector = ({
                         </Group>
                     );
                 }}
-                leftSection={value ? (
-                    (() => {
-                        const item = selectData.find(d => d.value === value.toString());
-                        return (
-                            <ThemeIcon size="xs" variant="transparent" color={item?.color}>
-                                {getIcon(item?.icon)}
-                            </ThemeIcon>
-                        );
-                    })()
-                ) : null}
             />
         </Box>
     );

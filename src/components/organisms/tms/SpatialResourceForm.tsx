@@ -290,6 +290,20 @@ export const SpatialResourceForm = ({ initialData, onSubmit, isLoading, onValidi
                                     onChange={(val) => setFormData({ ...formData, roomStatusId: val })}
                                     variant="form"
                                 />
+                                <AtomicLookupSelector
+                                    label={catConfigs['OFFICE_SPREAD_TYPES']?.label || 'Layout Configuration'}
+                                    items={lookups['OFFICE_SPREAD_TYPES'] || []}
+                                    value={formData.officeSpreadId}
+                                    onChange={(val) => setFormData({ ...formData, officeSpreadId: val })}
+                                    variant="form"
+                                />
+                                <AtomicLookupSelector
+                                    label={catConfigs['FURNITURE_TYPES']?.label || 'Furnishing Status'}
+                                    items={lookups['FURNITURE_TYPES'] || []}
+                                    value={formData.furnitureStatusId}
+                                    onChange={(val) => setFormData({ ...formData, furnitureStatusId: val })}
+                                    variant="form"
+                                />
                             </>
                         )}
 

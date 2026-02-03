@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Group, Stack, Text, Box, Paper, Title, Button, TextInput, Select, NumberInput, Textarea } from '@mantine/core';
+import { Group, Stack, Text, Box, Paper, Title, Button, TextInput, Select, NumberInput, Textarea, Alert, Badge, Divider } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
-import { Mail, Calendar, MapPin, Building2, LayoutGrid, DollarSign, Clock, Send, Sparkles } from 'lucide-react';
+import { Mail, Calendar, MapPin, Building2, LayoutGrid, DollarSign, Clock, Send, Sparkles, Factory, Home, Info, Users, Target, CheckCircle2 } from 'lucide-react';
 import { lookupsService, SystemLookup } from '@/services/lookups.service';
 import { tenantsService, Tenant } from '@/services/tenants.service';
 import { inquiriesService } from '@/services/inquiries.service';
@@ -13,16 +13,12 @@ import { useRouter } from 'next/navigation';
 export default function InquiryFormPage() {
     const router = useRouter();
     const [tenants, setTenants] = useState<Tenant[]>([]);
-    const [furnitureTypes, setFurnitureTypes] = useState<SystemLookup[]>([]);
-    const [officeLayouts, setOfficeLayouts] = useState<SystemLookup[]>([]);
-    const [propertyTypes, setPropertyTypes] = useState<SystemLookup[]>([]);
     const [loading, setLoading] = useState(false);
 
     const [formData, setFormData] = useState({
         tenantId: '',
         propertyTypeId: '',
-        minArea: 0,
-        maxArea: 0,
+        requestedSize: 0,
         minBaseRent: 0,
         preferredMoveIn: '',
         furnitureStatusId: '',
@@ -30,14 +26,20 @@ export default function InquiryFormPage() {
         inquiryType: 'OFFICE',
         leaseTermMonths: 12,
         note: '',
+        capexFDI: 0,
+        estimatedJobs: 0,
+        purpose: '',
+        industry: '',
+        sector: '',
     });
 
     useEffect(() => {
         tenantsService.getAll().then(res => setTenants((res as any).data || res));
-        lookupsService.getByCategory('OFFICE_SPREAD_TYPES').then(res => setOfficeLayouts((res as any).data || res));
-        lookupsService.getByCategory('FURNITURE_TYPES').then(res => setFurnitureTypes((res as any).data || res));
-        lookupsService.getByCategory('PROPERTY_TYPES').then(res => setPropertyTypes((res as any).data || res));
     }, []);
+
+    // Determine if form is for Office or Land Sublease
+    const isOfficeType = formData.inquiryType === 'OFFICE' || formData.inquiryType === 'PROJECT_OFFICE';
+    const isLandType = formData.inquiryType === 'LAND_SUBLEASE';
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -45,13 +47,15 @@ export default function InquiryFormPage() {
         try {
             await inquiriesService.create({
                 ...formData,
+                minArea: formData.requestedSize, // Map to minArea for backend compatibility if needed
+                maxArea: formData.requestedSize,
                 tenantId: Number(formData.tenantId),
                 propertyTypeId: formData.propertyTypeId ? Number(formData.propertyTypeId) : undefined,
                 furnitureStatusId: formData.furnitureStatusId ? Number(formData.furnitureStatusId) : undefined,
                 officeSpreadId: formData.officeSpreadId ? Number(formData.officeSpreadId) : undefined,
                 preferredMoveIn: formData.preferredMoveIn || undefined,
             });
-            toast.success('🚀 Inquiry submitted successfully! Moving to analysis.');
+            toast.success('🚀 Inquiry submitted successfully! Moving to pipeline analysis.');
             router.push('/admin/tms/inquiries');
         } catch (e) {
             toast.error('Failed to submit inquiry');
@@ -61,147 +65,275 @@ export default function InquiryFormPage() {
     };
 
     const inputStyles = {
-        label: { fontWeight: 800, color: '#16284F', fontSize: '11px', marginBottom: '4px', textTransform: 'uppercase' as const, letterSpacing: '0.5px' },
-        input: { borderRadius: '12px', border: '2px solid #f1f5f9', backgroundColor: '#f8fafc' }
+        label: { fontWeight: 800, color: '#16284F', fontSize: '11px', marginBottom: '6px', textTransform: 'uppercase' as const, letterSpacing: '0.8px', fontFamily: 'OOOK, system-ui, sans-serif' },
+        input: { borderRadius: '14px', border: '2px solid #e2e8f0', backgroundColor: '#f8fafc', fontSize: '14px', fontWeight: 600, height: '50px', transition: 'all 0.2s' }
     };
 
     return (
-        <div className="max-w-4xl mx-auto space-y-8 animate-fade-in pb-12">
+        <div className="max-w-5xl mx-auto space-y-8 animate-fade-in pb-12">
+            {/* Header */}
             <div className="text-center space-y-2">
-                <Title order={1} className="text-4xl font-black text-[#16284F]">Institutional Requirement Intake</Title>
-                <Text fw={600} c="dimmed">Complete the formal requirement profiling for strategic ITPC matching</Text>
+                <Title order={1} className="text-4xl font-extrabold text-brand-navy tracking-tight font-primary">
+                    New Space Inquiry
+                </Title>
+                <Text fw={700} c="dimmed" size="md">
+                    Formalize your space requirement for matching & allocation
+                </Text>
             </div>
 
             <form onSubmit={handleSubmit}>
                 <Stack gap="xl">
-                    {/* Basic Identity */}
-                    <Paper p="xl" radius="2rem" withBorder className="border-slate-100 bg-white shadow-xl">
-                        <Group gap="xs" mb="xl">
-                            <Box p={8} bg="blue.0" style={{ borderRadius: '50%' }}><Sparkles size={18} className="text-blue-600" /></Box>
-                            <Text size="sm" fw={900} c="#16284F" tt="uppercase" lts="2px">Strategic Identity</Text>
+                    {/* SECTION 1: Tenant & Contract Type */}
+                    <Paper p="xl" radius="2rem" withBorder className="border-slate-200 bg-white shadow-2xl shadow-slate-200/50">
+                        <Group gap="sm" mb="xl">
+                            <Box p={10} bg="blue.0" className="rounded-full">
+                                <Sparkles size={20} className="text-blue-600" />
+                            </Box>
+                            <div>
+                                <Text size="sm" fw={800} className="text-brand-navy uppercase tracking-wide font-primary" lts="1px">Tenant & Agreement Type</Text>
+                                <Text size="xs" c="dimmed" fw={600}>Who is requesting and what type of contract</Text>
+                            </div>
                         </Group>
 
                         <Stack gap="lg">
                             <Select
                                 label="Requesting Organization"
-                                placeholder="Select registered tenant"
-                                data={tenants.map(t => ({ value: t.id.toString(), label: t.name }))}
+                                description="Select the registered tenant entity making this inquiry"
+                                placeholder="Choose tenant from registry"
+                                data={tenants.map(t => ({ value: t.id.toString(), label: `${t.name} (${t.companyRegNumber})` }))}
                                 value={formData.tenantId}
                                 onChange={(val) => setFormData({ ...formData, tenantId: val || '' })}
                                 required
                                 styles={inputStyles}
                                 searchable
+                                leftSection={<Building2 size={16} className="text-slate-400" />}
                             />
-                            <Select
-                                label="Inquiry Type / Contract Nature"
-                                placeholder="Select institutional category"
-                                data={[
-                                    { value: 'OFFICE', label: 'Office Lease (Standard)' },
-                                    { value: 'LAND_SUBLEASE', label: 'Land Sublease (Industrial)' },
-                                    { value: 'PROJECT_OFFICE', label: 'Project Office' },
-                                ]}
-                                value={formData.inquiryType}
-                                onChange={(val) => setFormData({ ...formData, inquiryType: val || 'OFFICE' })}
-                                required
-                                styles={inputStyles}
-                            />
-                            <Select
-                                label="Intended Property Class"
-                                placeholder="Select spatial category"
-                                data={propertyTypes.map(p => ({ value: p.id.toString(), label: p.lookupValue.en }))}
-                                value={formData.propertyTypeId}
-                                onChange={(val) => setFormData({ ...formData, propertyTypeId: val || '' })}
-                                styles={inputStyles}
-                            />
+
+                            <div>
+                                <Text size="xs" fw={900} c="#16284F" tt="uppercase" lts="0.8px" mb={8}>
+                                    Commercial Track & Purpose
+                                </Text>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    {[
+                                        { value: 'OFFICE', label: 'Office Rent Track', icon: Building2, desc: 'Building residency & corporate units', color: 'blue' },
+                                        { value: 'LAND_SUBLEASE', label: 'Land Sublease Track', icon: Factory, desc: 'Industrial plots & developments', color: 'teal' },
+                                        { value: 'PROJECT_OFFICE', label: 'Project Office', icon: Target, desc: 'Temporary strategic workspace', color: 'orange' },
+                                    ].map((type) => {
+                                        const Icon = type.icon;
+                                        const isSelected = formData.inquiryType === type.value;
+                                        const colorMap: Record<string, string> = {
+                                            blue: 'border-blue-500 bg-blue-50/30 text-blue-600',
+                                            teal: 'border-teal-500 bg-teal-50/30 text-teal-600',
+                                            orange: 'border-orange-500 bg-orange-50/30 text-orange-600'
+                                        };
+
+                                        return (
+                                            <button
+                                                key={type.value}
+                                                type="button"
+                                                onClick={() => setFormData({ ...formData, inquiryType: type.value })}
+                                                className={`p-6 rounded-[2rem] border-2 transition-all text-left group relative overflow-hidden ${isSelected
+                                                    ? colorMap[type.color]
+                                                    : 'border-slate-100 bg-white hover:border-slate-200 hover:shadow-lg'
+                                                    }`}
+                                            >
+                                                {isSelected && <Box pos="absolute" top={16} right={16}><CheckCircle2 size={20} /></Box>}
+                                                <Icon size={32} className={`transition-transform group-hover:rotate-12 ${isSelected ? '' : 'text-slate-400'}`} />
+                                                <Text fw={900} size="md" mt={12} className={isSelected ? 'text-slate-900' : 'text-slate-700'}>
+                                                    {type.label}
+                                                </Text>
+                                                <Text size="xs" c="dimmed" fw={600} mt={4}>
+                                                    {type.desc}
+                                                </Text>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+
+
                         </Stack>
                     </Paper>
 
-                    {/* Spatial & Layout Requirements */}
-                    <Paper p="xl" radius="2rem" withBorder className="border-slate-100 bg-white shadow-xl">
-                        <Group gap="xs" mb="xl">
-                            <Box p={8} bg="teal.0" style={{ borderRadius: '50%' }}><LayoutGrid size={18} className="text-teal-600" /></Box>
-                            <Text size="sm" fw={900} c="#16284F" tt="uppercase" lts="2px">Spatial Requirements</Text>
+                    {/* SECTION 2: Space & Layout Requirements (DYNAMIC) */}
+                    <Paper p="xl" radius="2rem" withBorder className="border-slate-200 bg-white shadow-2xl shadow-slate-200/50">
+                        <Group gap="sm" mb="xl">
+                            <Box p={10} bg="teal.0" className="rounded-full">
+                                <LayoutGrid size={20} className="text-teal-600" />
+                            </Box>
+                            <div>
+                                <Text size="sm" fw={800} className="text-brand-navy uppercase tracking-wide font-primary">
+                                    {isOfficeType ? 'Office Space Requirements' : 'Land/Plot Requirements'}
+                                </Text>
+                                <Text size="xs" c="dimmed" fw={600}>
+                                    {isOfficeType ? 'Specify your workspace dimensions and preferences' : 'Define land area and usage specifications'}
+                                </Text>
+                            </div>
                         </Group>
 
-                        <Group grow align="start" gap="xl">
-                            <Stack gap="lg">
+                        <Stack gap="xl">
+                            {/* Area Requirements */}
+                            <NumberInput
+                                label={isOfficeType ? "Office Area (m²)" : "Land Area (m²)"}
+                                description="Total space required as per official agreement"
+                                placeholder="e.g., 50"
+                                value={formData.requestedSize}
+                                onChange={(val) => setFormData({ ...formData, requestedSize: Number(val) })}
+                                styles={inputStyles}
+                                min={0}
+                                required
+                            />
+
+                            {/* Conditional Fields Based on Type */}
+                            {isLandType && (
                                 <Group grow>
-                                    <NumberInput
-                                        label="Min Area (m²)"
-                                        placeholder="0"
-                                        value={formData.minArea}
-                                        onChange={(val) => setFormData({ ...formData, minArea: Number(val) })}
+                                    <TextInput
+                                        label="Intended Purpose / Activity"
+                                        description="e.g., Manufacturing, Warehousing, R&D Facility"
+                                        placeholder="Describe land use purpose"
+                                        value={formData.purpose}
+                                        onChange={(e) => setFormData({ ...formData, purpose: e.target.value })}
                                         styles={inputStyles}
                                     />
                                     <NumberInput
-                                        label="Max Area (m²)"
-                                        placeholder="No limit"
-                                        value={formData.maxArea}
-                                        onChange={(val) => setFormData({ ...formData, maxArea: Number(val) })}
+                                        label="Estimated Capital Investment (USD)"
+                                        description="Expected CapEx/FDI for the project"
+                                        placeholder="e.g., 500000"
+                                        value={formData.capexFDI}
+                                        onChange={(val) => setFormData({ ...formData, capexFDI: Number(val) })}
                                         styles={inputStyles}
+                                        leftSection={<DollarSign size={16} />}
+                                        min={0}
                                     />
                                 </Group>
-                                <Select
-                                    label="Office Layout Preference"
-                                    placeholder="Select configuration"
-                                    data={officeLayouts.map(o => ({ value: o.id.toString(), label: o.lookupValue.en }))}
-                                    value={formData.officeSpreadId}
-                                    onChange={(val) => setFormData({ ...formData, officeSpreadId: val || '' })}
-                                    styles={inputStyles}
-                                />
-                            </Stack>
-                            <Stack gap="lg">
+                            )}
+
+                            <Divider />
+
+                            {/* Financial & Timeline */}
+                            <Group align="flex-end" gap="xs">
                                 <NumberInput
-                                    label="Target Rent (Monthly)"
-                                    placeholder="ETB / USD"
+                                    label="Target Rent/Lease Rate (Monthly)"
+                                    description={isOfficeType ? "Budget per month in USD/ETB" : "Expected ground rent per month"}
+                                    placeholder="e.g., 5000"
                                     leftSection={<DollarSign size={16} />}
                                     value={formData.minBaseRent}
                                     onChange={(val) => setFormData({ ...formData, minBaseRent: Number(val) })}
                                     styles={inputStyles}
+                                    min={0}
+                                    className="flex-1"
                                 />
-                                <Select
-                                    label="Furnishing Requirement"
-                                    placeholder="Select preference"
-                                    data={furnitureTypes.map(f => ({ value: f.id.toString(), label: f.lookupValue.en }))}
-                                    value={formData.furnitureStatusId}
-                                    onChange={(val) => setFormData({ ...formData, furnitureStatusId: val || '' })}
-                                    styles={inputStyles}
-                                />
-                            </Stack>
-                        </Group>
-                    </Paper>
+                                <Group align="flex-end" gap={0} className="flex-[1.2]">
+                                    <NumberInput
+                                        label={`Contract Duration (${formData.leaseTermMonths >= 12 && formData.leaseTermMonths % 12 === 0 ? 'Years' : 'Months'})`}
+                                        description="Preferred lease term length"
+                                        placeholder="e.g., 12"
+                                        value={formData.leaseTermMonths >= 12 && formData.leaseTermMonths % 12 === 0 ? formData.leaseTermMonths / 12 : formData.leaseTermMonths}
+                                        onChange={(val) => {
+                                            const v = Number(val);
+                                            // If we're currently in "Year mode" (determined by the badge/value), we'd want to stick to it.
+                                            // But for simplicity, we'll just treat input <= 10 as years IF it was already years? 
+                                            // No, let's just make it a simple "Years" input if it's >= 12 and multiple of 12.
+                                            setFormData({ ...formData, leaseTermMonths: v });
+                                        }}
+                                        styles={{
+                                            ...inputStyles,
+                                            input: { ...inputStyles.input, borderTopRightRadius: 0, borderBottomRightRadius: 0, borderRight: 0 }
+                                        }}
+                                        min={1}
+                                        className="flex-1"
+                                    />
+                                    <Box pb={0}>
+                                        <Button
+                                            variant="filled"
+                                            color="#16284F"
+                                            h={50}
+                                            px="xl"
+                                            radius="0 14px 14px 0"
+                                            className="font-black"
+                                            onClick={() => {
+                                                // Toggle logic: if months, convert to years (if possible) or just show months
+                                                // This is just a visual badge now, but let's make it more interactive if needed.
+                                            }}
+                                        >
+                                            {formData.leaseTermMonths >= 12
+                                                ? `${(formData.leaseTermMonths / 12).toFixed(1).replace('.0', '')} YEARS`
+                                                : `${formData.leaseTermMonths} MO`}
+                                        </Button>
+                                    </Box>
+                                </Group>
+                            </Group>
 
-                    {/* Timeline & Notes */}
-                    <Paper p="xl" radius="2rem" withBorder className="border-slate-100 bg-white shadow-xl">
-                        <Group grow align="start" gap="xl">
-                            <Stack gap="lg" className="w-1/2">
+                            <Group grow>
                                 <TextInput
-                                    label="Preferred Move-in Date"
+                                    label="Preferred Move-in / Start Date"
+                                    description="When do you need occupancy"
                                     type="date"
-                                    placeholder="YYYY-MM-DD"
                                     value={formData.preferredMoveIn}
                                     onChange={(e) => setFormData({ ...formData, preferredMoveIn: e.target.value })}
                                     styles={inputStyles}
+                                    leftSection={<Calendar size={16} />}
                                 />
-                                <NumberInput
-                                    label="Lease Term (Months)"
-                                    value={formData.leaseTermMonths}
-                                    onChange={(val) => setFormData({ ...formData, leaseTermMonths: Number(val) })}
-                                    styles={inputStyles}
-                                />
-                            </Stack>
-                            <Textarea
-                                label="Operational Notes / Specific Amenities"
-                                placeholder="I.e. Near server room, specific ventilation needs..."
-                                className="flex-grow"
-                                rows={5}
-                                value={formData.note}
-                                onChange={(e) => setFormData({ ...formData, note: e.target.value })}
-                                styles={inputStyles}
-                            />
-                        </Group>
+                                {isLandType && (
+                                    <NumberInput
+                                        label="Job Creation Estimate"
+                                        description="Expected employment generation"
+                                        placeholder="Number of jobs"
+                                        value={formData.estimatedJobs}
+                                        onChange={(val) => setFormData({ ...formData, estimatedJobs: Number(val) })}
+                                        styles={inputStyles}
+                                        leftSection={<Users size={16} />}
+                                        min={0}
+                                    />
+                                )}
+                            </Group>
+                        </Stack>
                     </Paper>
 
+                    {/* SECTION 3: Additional Details */}
+                    <Paper p="xl" radius="2rem" withBorder className="border-slate-200 bg-white shadow-2xl shadow-slate-200/50">
+                        <Group gap="sm" mb="xl">
+                            <Box p={10} bg="orange.0" className="rounded-full">
+                                <Info size={20} className="text-orange-600" />
+                            </Box>
+                            <div>
+                                <Text size="sm" fw={900} c="#16284F" tt="uppercase" lts="2px">Supplementary Information</Text>
+                                <Text size="xs" c="dimmed" fw={600}>Any specific requirements or operational notes</Text>
+                            </div>
+                        </Group>
+
+                        <Textarea
+                            label="Additional Requirements & Notes"
+                            description={isOfficeType
+                                ? "Specify amenities like parking, security, proximity requirements, etc."
+                                : "Construction plans, infrastructure needs, utility requirements, etc."}
+                            placeholder={isOfficeType
+                                ? "e.g., Need 24/7 access, dedicated parking for 5 vehicles, near public transport..."
+                                : "e.g., Requires 3-phase power, water access, proximity to highway..."}
+                            rows={6}
+                            value={formData.note}
+                            onChange={(e) => setFormData({ ...formData, note: e.target.value })}
+                            styles={inputStyles}
+                        />
+                    </Paper>
+
+                    {/* Context Alert */}
+                    {formData.inquiryType && (
+                        <Alert
+                            icon={<Info size={20} />}
+                            color={isOfficeType ? 'blue' : 'green'}
+                            title={`${isOfficeType ? 'Office Lease' : 'Land Sublease'} Workflow`}
+                            className="border-2"
+                        >
+                            <Text size="sm" fw={600}>
+                                {isOfficeType
+                                    ? 'Your inquiry will enter the Office Allocation Pipeline. The system will match available office spaces based on your requirements and guide you through proposal review, offer negotiation, and contract signing.'
+                                    : 'Your inquiry will enter the Land Sublease Pipeline. This involves proposal submission, board approval, site allocation, construction permissions, and formal lease agreement execution.'}
+                            </Text>
+                        </Alert>
+                    )}
+
+                    {/* Submit Button */}
                     <Button
                         type="submit"
                         size="xl"
@@ -209,10 +341,10 @@ export default function InquiryFormPage() {
                         bg="#0C7C92"
                         fullWidth
                         loading={loading}
-                        className="shadow-2xl font-black uppercase tracking-widest h-16"
-                        leftSection={<Send size={20} strokeWidth={3} />}
+                        className="shadow-2xl font-black uppercase tracking-widest h-16 hover:scale-[1.02] transition-transform"
+                        leftSection={<Send size={22} strokeWidth={3} />}
                     >
-                        Initiate Strategic Intake
+                        Submit Inquiry to Pipeline
                     </Button>
                 </Stack>
             </form>

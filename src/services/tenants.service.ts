@@ -41,6 +41,7 @@ export interface Tenant {
         contacts: number;
         documents: number;
         leases?: number;
+        inquiries?: number;
     };
 }
 

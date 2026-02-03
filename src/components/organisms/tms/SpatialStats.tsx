@@ -45,8 +45,8 @@ export const SpatialStats = ({ tenantMetrics }: Props) => {
                                         <Zap size={16} className="text-white" />
                                     </Box>
                                     <div>
-                                        <Text size="xs" fw={900} c="dimmed" tt="uppercase" lts="1.2px">Operations</Text>
-                                        <Text size="sm" fw={900} c="#16284F">Live Tenants</Text>
+                                        <Text size="xs" fw={900} c="dimmed" tt="uppercase" lts="1.2px">Portfolio</Text>
+                                        <Text size="sm" fw={900} c="#16284F">Tenant Registry</Text>
                                     </div>
                                 </Group>
                                 <Group gap="xl" mt="xs">
@@ -57,7 +57,7 @@ export const SpatialStats = ({ tenantMetrics }: Props) => {
                                     <Divider orientation="vertical" />
                                     <div>
                                         <Text size="xl" fw={900} c="teal">{tenantMetrics?.active || 0}</Text>
-                                        <Text size="10px" fw={700} c="dimmed" tt="uppercase">Active Users</Text>
+                                        <Text size="10px" fw={700} c="dimmed" tt="uppercase">Operational</Text>
                                     </div>
                                 </Group>
                             </Box>
@@ -71,8 +71,8 @@ export const SpatialStats = ({ tenantMetrics }: Props) => {
                                         <Layers size={16} className="text-white" />
                                     </Box>
                                     <div>
-                                        <Text size="xs" fw={900} c="dimmed" tt="uppercase" lts="1.2px">Real Estate</Text>
-                                        <Text size="sm" fw={900} c="#16284F">Spatial Yield</Text>
+                                        <Text size="xs" fw={900} c="dimmed" tt="uppercase" lts="1.2px">Asset Status</Text>
+                                        <Text size="sm" fw={900} c="#16284F">Occupancy Rate</Text>
                                     </div>
                                 </Group>
                                 <Group gap="md" mt="xs" align="center">
@@ -103,8 +103,8 @@ export const SpatialStats = ({ tenantMetrics }: Props) => {
                                         <Target size={16} className="text-white" />
                                     </Box>
                                     <div>
-                                        <Text size="xs" fw={900} c="dimmed" tt="uppercase" lts="1.2px">Variance</Text>
-                                        <Text size="sm" fw={900} c="#16284F">Data Integrity</Text>
+                                        <Text size="xs" fw={900} c="dimmed" tt="uppercase" lts="1.2px">Lease Audit</Text>
+                                        <Text size="sm" fw={900} c="#16284F">Area Reconciliation</Text>
                                     </div>
                                 </Group>
                                 <Group gap="xs" mt="sm">
@@ -119,7 +119,7 @@ export const SpatialStats = ({ tenantMetrics }: Props) => {
                                     >
                                         Δ {summary.variance?.toFixed(2) || '0.00'} m²
                                     </Badge>
-                                    <Text size="10px" fw={700} c="dimmed" tt="uppercase">Contract Delta</Text>
+                                    <Text size="10px" fw={700} c="dimmed" tt="uppercase">Area Measurement Gap</Text>
                                 </Group>
                             </Box>
                         </Group>

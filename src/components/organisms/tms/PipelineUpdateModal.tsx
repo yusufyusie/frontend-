@@ -18,6 +18,7 @@ import {
     Coins,
     Activity,
     Building2,
+    Factory,
     Info,
     Fingerprint
 } from 'lucide-react';
@@ -46,6 +47,28 @@ export function PipelineUpdateModal({ opened, onClose, inquiry, onSuccess, tenan
 
     const [loading, setLoading] = useState(false);
 
+    // Track Context Configuration
+    const isLand = targetInquiry?.inquiryType === 'LAND_SUBLEASE';
+    const trackConfig = isLand ? {
+        label: 'Land Sublease Track',
+        color: 'teal',
+        gradient: 'from-brand-teal via-[#0D8B9E] to-brand-navy',
+        icon: Factory,
+        spaceLabel: 'Land Area (m²)',
+        rateLabel: 'Annual Lease Rate / m²',
+        currency: 'USD',
+        termLabel: 'Contract Term (Years)'
+    } : {
+        label: 'Office Rent Track',
+        color: 'blue',
+        gradient: 'from-brand-navy via-[#1B3664] to-brand-teal',
+        icon: Building2,
+        spaceLabel: 'Office Area (m²)',
+        rateLabel: 'Monthly Rent / m²',
+        currency: 'USD',
+        termLabel: 'Contract Term (Months)'
+    };
+
     // Initial state derived from targetInquiry
     const [capexFDI, setCapexFDI] = useState<number | string>(targetInquiry?.capexFDI || 0);
     const [estimatedJobs, setEstimatedJobs] = useState<number | string>(targetInquiry?.estimatedJobs || 0);
@@ -57,7 +80,7 @@ export function PipelineUpdateModal({ opened, onClose, inquiry, onSuccess, tenan
     const [validUntil, setValidUntil] = useState<Date | null>(targetInquiry?.offerValidUntil ? new Date(targetInquiry.offerValidUntil) : null);
 
     // Contract State
-    const [duration, setDuration] = useState<number | string>(targetInquiry?.contractDuration || 12);
+    const [duration, setDuration] = useState<number | string>(targetInquiry?.contractDuration || (isLand ? 50 : 12));
     const [startDate, setStartDate] = useState<Date | null>(targetInquiry?.contractStartDate ? new Date(targetInquiry.contractStartDate) : new Date());
     const [securityDeposit, setSecurityDeposit] = useState<number | string>(targetInquiry?.securityDeposit || 0);
     const [advancePayment, setAdvancePayment] = useState<number | string>(targetInquiry?.advancePayment || 0);
@@ -98,7 +121,7 @@ export function PipelineUpdateModal({ opened, onClose, inquiry, onSuccess, tenan
             setOfferedRate(targetInquiry.offeredRate || 0);
             setOfferedCurrency(targetInquiry.offeredCurrency || 'USD');
             setValidUntil(targetInquiry.offerValidUntil ? new Date(targetInquiry.offerValidUntil) : null);
-            setDuration(targetInquiry.contractDuration || 12);
+            setDuration(targetInquiry.contractDuration || (isLand ? 50 : 12));
             setStartDate(targetInquiry.contractStartDate ? new Date(targetInquiry.contractStartDate) : new Date());
             setSecurityDeposit(targetInquiry.securityDeposit || 0);
             setAdvancePayment(targetInquiry.advancePayment || 0);
@@ -110,7 +133,7 @@ export function PipelineUpdateModal({ opened, onClose, inquiry, onSuccess, tenan
             setConstructionStatusId(targetInquiry.constructionStatusId || '');
             setRemarks(''); // Reset remarks on inquiry change
         }
-    }, [targetInquiry?.id, targetInquiry?.status]);
+    }, [targetInquiry?.id, targetInquiry?.status, isLand]);
 
     if (!targetInquiry) return null;
 
@@ -241,23 +264,23 @@ export function PipelineUpdateModal({ opened, onClose, inquiry, onSuccess, tenan
                                 </Stack>
                             </Paper>
 
-                            <Paper withBorder p="xl" radius="2rem" className="bg-slate-50/50">
+                            <Paper withBorder p="xl" radius="2rem" className="bg-slate-50/50 border-slate-100 shadow-sm">
                                 <Stack gap="md">
                                     <Group gap="xs">
-                                        <div className="p-2 bg-white rounded-lg shadow-sm">
-                                            <Users size={16} className="text-[#0C7C92]" />
+                                        <div className="p-2 bg-white rounded-lg shadow-sm border border-slate-100">
+                                            <Users size={16} className="text-brand-teal" />
                                         </div>
-                                        <Text size="xs" fw={900} className="uppercase tracking-widest text-slate-500">Social Impact</Text>
+                                        <Text size="xs" fw={800} className="uppercase tracking-wide text-brand-navy/60 font-primary">Personnel Impact</Text>
                                     </Group>
                                     <NumberInput
                                         label="Projected Employment"
-                                        description="Estimated job creation"
+                                        description="Estimated headcount generation"
                                         placeholder="Enter headcount"
                                         value={estimatedJobs}
                                         onChange={setEstimatedJobs}
                                         radius="md"
                                         size="md"
-                                        styles={{ input: { fontWeight: 900 } }}
+                                        styles={{ input: { fontWeight: 700 } }}
                                     />
                                 </Stack>
                             </Paper>
@@ -322,7 +345,7 @@ export function PipelineUpdateModal({ opened, onClose, inquiry, onSuccess, tenan
                                             <Stack gap={2}>
                                                 <Group gap="xs">
                                                     <Info size={14} className="text-slate-500" />
-                                                    <Text size="xs" fw={900} c="dimmed" tt="uppercase" lts="1px">Spatial Capacity Monitoring</Text>
+                                                    <Title order={3} fw={800} className="text-brand-navy font-primary mt-2">Spatial Capacity Monitoring</Title>
                                                 </Group>
                                                 <Text size="sm" fw={700} c={(targetInquiry as any).isSingleTenantOccupied || ((offeredSpace || 0) > (targetInquiry as any).availableArea) ? 'red.9' : 'teal.9'}>
                                                     {(targetInquiry as any).isSingleTenantOccupied
@@ -341,7 +364,7 @@ export function PipelineUpdateModal({ opened, onClose, inquiry, onSuccess, tenan
 
                                 <Group grow>
                                     <NumberInput
-                                        label="Allocated Area (sqm)"
+                                        label={trackConfig.spaceLabel}
                                         description="Final spatial commitment"
                                         value={offeredSpace}
                                         onChange={setOfferedSpace}
@@ -350,8 +373,8 @@ export function PipelineUpdateModal({ opened, onClose, inquiry, onSuccess, tenan
                                         leftSection={<Maximize size={16} />}
                                     />
                                     <NumberInput
-                                        label={targetInquiry.inquiryType === 'LAND_SUBLEASE' ? "Annual Rent / m² (USD)" : "Lease Rate (USD/sqm)"}
-                                        description={targetInquiry.inquiryType === 'LAND_SUBLEASE' ? "Institutional annual rate" : "Standard commercial rate"}
+                                        label={trackConfig.rateLabel}
+                                        description={isLand ? "Institutional annual rate" : "Standard commercial rate"}
                                         value={offeredRate}
                                         onChange={setOfferedRate}
                                         radius="md"
@@ -409,20 +432,20 @@ export function PipelineUpdateModal({ opened, onClose, inquiry, onSuccess, tenan
                             <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mb-6 animate-pulse">
                                 <Send size={32} className="text-blue-600" />
                             </div>
-                            <Title order={3} className="text-[#16284F] tracking-tighter mb-2">Offer Dispatched</Title>
+                            <Title order={3} className="text-[#16284F] tracking-tight mb-2">Offer Dispatched</Title>
                             <Text size="sm" c="dimmed" max-w={400}>
                                 The proposal is currently under review by the tenant. Legal execution can proceed once the signed offer is received.
                             </Text>
 
                             <Group gap="xl" mt={32}>
                                 <Stack gap={2} align="center">
-                                    <Text size="xs" fw={900} c="dimmed" className="uppercase tracking-widest">Valid Until</Text>
-                                    <Text fw={900}>{validUntil?.toLocaleDateString() || 'N/A'}</Text>
+                                    <Text size="xs" fw={700} c="dimmed" className="uppercase tracking-wide">Valid Until</Text>
+                                    <Text fw={700}>{validUntil?.toLocaleDateString() || 'N/A'}</Text>
                                 </Stack>
                                 <Divider orientation="vertical" />
                                 <Stack gap={2} align="center">
-                                    <Text size="xs" fw={900} c="dimmed" className="uppercase tracking-widest">Offered Space</Text>
-                                    <Text fw={900}>{offeredSpace} m²</Text>
+                                    <Text size="xs" fw={700} c="dimmed" className="uppercase tracking-wide">Offered Space</Text>
+                                    <Text fw={700}>{offeredSpace} m²</Text>
                                 </Stack>
                             </Group>
                         </Paper>
@@ -444,8 +467,8 @@ export function PipelineUpdateModal({ opened, onClose, inquiry, onSuccess, tenan
                             <Stack gap="xl">
                                 <Group grow>
                                     <NumberInput
-                                        label={targetInquiry.inquiryType === 'LAND_SUBLEASE' ? "Contract Term (Years)" : "Contract Term (Months)"}
-                                        description={targetInquiry.inquiryType === 'LAND_SUBLEASE' ? "Duration of land lease" : "Duration of the residency"}
+                                        label={trackConfig.termLabel}
+                                        description={isLand ? "Duration of land lease" : "Duration of the residency"}
                                         value={duration}
                                         onChange={setDuration}
                                         radius="md"
@@ -537,7 +560,7 @@ export function PipelineUpdateModal({ opened, onClose, inquiry, onSuccess, tenan
                                         size="md"
                                     />
                                     <NumberInput
-                                        label="Institutional Grace Period (Months)"
+                                        label={`Grace Period (${isLand ? 'Years' : 'Months'})`}
                                         description="Duration of rent-free"
                                         value={gracePeriod}
                                         onChange={setGracePeriod}
@@ -723,11 +746,11 @@ export function PipelineUpdateModal({ opened, onClose, inquiry, onSuccess, tenan
                     targetInquiry.status === 'OFFER_ACCEPTED' ? 4 : 5;
 
     const steps = [
-        { label: 'Intake', icon: Activity },
-        { label: 'Review', icon: ShieldCheck },
-        { label: 'Terms', icon: Coins },
-        { label: 'Acceptance', icon: CheckCircle2 },
-        { label: 'Execution', icon: FileSignature },
+        { label: 'Intent', icon: Activity },
+        { label: 'Intelligence', icon: ShieldCheck },
+        { label: 'Decision', icon: Coins },
+        { label: 'Agreement', icon: CheckCircle2 },
+        { label: 'Residency', icon: FileSignature },
     ];
 
     return (
@@ -762,23 +785,23 @@ export function PipelineUpdateModal({ opened, onClose, inquiry, onSuccess, tenan
             }}
         >
             {/* Mission Control Header - Condensed */}
-            <Box h={110} style={{ flexShrink: 0 }} className="relative bg-gradient-to-br from-[#16284F] via-[#1B3664] to-[#0C7C92] p-8 overflow-hidden">
+            <Box h={110} style={{ flexShrink: 0 }} className={cn("relative bg-gradient-to-br p-8 overflow-hidden", trackConfig.gradient)}>
                 {/* Decorative Elements */}
                 <div className="absolute top-[-50px] right-[-50px] w-64 h-64 bg-white/5 rounded-full blur-3xl" />
-                <div className="absolute bottom-[-10px] left-[5%] w-24 h-24 bg-[#0C7C92]/20 rounded-full blur-2xl font-black" />
+                <div className="absolute bottom-[-10px] left-[5%] w-24 h-24 bg-white/10 rounded-full blur-2xl font-black" />
 
                 <Group justify="space-between" align="center" className="relative z-10 w-full">
                     <Stack gap={0}>
                         <Group gap="xs">
                             <div className="p-1.5 bg-white/10 backdrop-blur-md rounded-lg border border-white/10">
-                                <Building2 size={18} className="text-white" />
+                                <trackConfig.icon size={18} className="text-white" />
                             </div>
-                            <Badge variant="filled" color="#0C7C92" size="xs" radius="sm" className="font-black tracking-widest px-1.5">
-                                MISSION CONTROL v4.1
+                            <Badge variant="filled" color="white" size="xs" radius="sm" className={cn("font-black tracking-widest px-1.5", isLand ? "text-teal-900" : "text-blue-900")}>
+                                {isLand ? 'LAND SUBLEASE' : 'OFFICE RENT'}
                             </Badge>
                         </Group>
-                        <Title className="text-2xl font-black text-white tracking-tighter leading-tight mt-1">
-                            Commercial Intake Lifecycle
+                        <Title className="text-2xl font-extrabold text-white tracking-tight leading-tight mt-1">
+                            Pipeline Lifecycle
                         </Title>
                     </Stack>
 
@@ -799,7 +822,7 @@ export function PipelineUpdateModal({ opened, onClose, inquiry, onSuccess, tenan
                     {/* Progress Track Background */}
                     <div className="absolute top-1/2 left-0 w-full h-1 bg-slate-200 -translate-y-1/2 z-0" />
                     <div
-                        className="absolute top-1/2 left-0 h-1 bg-[#0C7C92] -translate-y-1/2 transition-all duration-700 z-0"
+                        className={cn("absolute top-1/2 left-0 h-1 -translate-y-1/2 transition-all duration-700 z-0", isLand ? "bg-teal-600" : "bg-blue-600")}
                         style={{ width: `${(currentStep / 5) * 100}%` }}
                     />
 
@@ -819,10 +842,10 @@ export function PipelineUpdateModal({ opened, onClose, inquiry, onSuccess, tenan
                                     {isCompleted ? <CheckCircle2 size={16} /> : <Icon size={16} />}
                                 </div>
                                 <Text
-                                    size="8px"
-                                    fw={900}
+                                    size="9px"
+                                    fw={800}
                                     className={cn(
-                                        "uppercase tracking-widest transition-colors duration-500",
+                                        "uppercase tracking-wider transition-colors duration-500",
                                         isActive ? "text-[#0C7C92]" : isCompleted ? "text-slate-600" : "text-slate-400"
                                     )}
                                 >

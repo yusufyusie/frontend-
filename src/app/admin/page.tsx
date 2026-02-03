@@ -8,6 +8,7 @@ import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { useAccessStore } from '@/store/access.store';
 import Link from 'next/link';
 
+import { FinanceSnapshot } from '@/components/organisms/dashboard/FinanceSnapshot';
 import { Users, UserCheck, Shield, Lock, ChevronRight, UserPlus, Info, Mail, Activity, Target } from 'lucide-react';
 
 export default function AdminDashboard() {
@@ -130,6 +131,9 @@ export default function AdminDashboard() {
                     </div>
                 </div>
             </div>
+
+            {/* Financial Health Snapshot */}
+            <FinanceSnapshot />
 
             {/* Core statistics grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">

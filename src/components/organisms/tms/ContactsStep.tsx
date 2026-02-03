@@ -78,11 +78,15 @@ export const ContactsStep = ({ contacts, onChange }: ContactsStepProps) => {
             backgroundColor: '#fff',
             fontWeight: 600,
             transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-            paddingLeft: rem(20),
+            paddingLeft: rem(48),
             '&:focus': {
                 borderColor: '#0C7C92',
                 boxShadow: '0 0 0 4px rgba(12, 124, 146, 0.05)'
             }
+        },
+        section: {
+            width: rem(48),
+            justifyContent: 'center'
         }
     };
 
@@ -227,12 +231,15 @@ export const ContactsStep = ({ contacts, onChange }: ContactsStepProps) => {
                         onChange={(e) => setNewContact({ ...newContact, name: e.currentTarget.value })}
                         styles={inputStyles}
                         required
+                        className="[&_.mantine-TextInput-input]:!pl-[20px]" // No icon here
                     />
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                         <TextInput
                             label="Direct Business Email"
                             placeholder="abebe@tech-corp.com"
                             leftSection={<Mail size={18} className="text-[#0C7C92]" />}
+                            leftSectionWidth={48}
+                            leftSectionPointerEvents="none"
                             value={newContact.email}
                             onChange={(e) => setNewContact({ ...newContact, email: e.currentTarget.value })}
                             styles={inputStyles}
@@ -242,6 +249,8 @@ export const ContactsStep = ({ contacts, onChange }: ContactsStepProps) => {
                             label="Mobile Contact Line"
                             placeholder="+251 --- ---"
                             leftSection={<Phone size={18} className="text-[#0C7C92]" />}
+                            leftSectionWidth={48}
+                            leftSectionPointerEvents="none"
                             value={newContact.phone}
                             onChange={(e) => setNewContact({ ...newContact, phone: e.currentTarget.value })}
                             styles={inputStyles}
@@ -252,6 +261,8 @@ export const ContactsStep = ({ contacts, onChange }: ContactsStepProps) => {
                             label="Official Designation / Role"
                             placeholder="e.g. Chief Technical Officer"
                             leftSection={<Briefcase size={18} className="text-[#0C7C92]" />}
+                            leftSectionWidth={48}
+                            leftSectionPointerEvents="none"
                             value={newContact.position}
                             onChange={(e) => setNewContact({ ...newContact, position: e.currentTarget.value })}
                             styles={inputStyles}
@@ -260,6 +271,8 @@ export const ContactsStep = ({ contacts, onChange }: ContactsStepProps) => {
                             label="Department / Office"
                             placeholder="e.g. IT & Engineering"
                             leftSection={<Users size={18} className="text-[#0C7C92]" />}
+                            leftSectionWidth={48}
+                            leftSectionPointerEvents="none"
                             value={newContact.department}
                             onChange={(e) => setNewContact({ ...newContact, department: e.currentTarget.value })}
                             styles={inputStyles}

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Paper, Stack, Group, Box, Text, Avatar, Badge, Divider, ThemeIcon, rem, RingProgress } from '@mantine/core';
-import { Building2, Globe, Mail, Phone, MapPin, ShieldCheck, CheckCircle2, QrCode, Award, Zap, Landmark, Rocket } from 'lucide-react';
+import { Building2, Globe, Mail, Phone, MapPin, ShieldCheck, CheckCircle2, QrCode, Award, Zap, Landmark, Rocket, Sparkles } from 'lucide-react';
 import { Tenant } from '@/services/tenants.service';
 
 interface TenantProfilePreviewProps {
@@ -30,7 +30,7 @@ export const TenantProfilePreview = ({ data, bizCategoryLabel, statusLabel }: Te
             <Box h={120} style={{ background: 'linear-gradient(135deg, #16284F 0%, #0C7C92 100%)', position: 'relative' }}>
                 <Box pos="absolute" top={20} right={20}>
                     <Badge variant="white" size="lg" radius="xl" color="teal" fw={900}>
-                        STRATEGIC RESIDENT
+                        AUTHORIZED TENANT
                     </Badge>
                 </Box>
                 {/* Abstract pattern overlay */}
@@ -45,48 +45,48 @@ export const TenantProfilePreview = ({ data, bizCategoryLabel, statusLabel }: Te
                 />
             </Box>
 
-            <Stack gap={0} p="2.5rem" mt={-60} style={{ flex: 1 }}>
+            <Stack gap={0} p="2.5rem" mt={-50} style={{ flex: 1 }}>
                 {/* Profile Header */}
                 <Group align="flex-end" justify="space-between" mb="xl">
                     <Box style={{ position: 'relative' }}>
                         <Avatar
                             size={rem(120)}
-                            radius="3rem"
+                            radius="2rem"
                             bg="white"
-                            p={4}
+                            p={6}
                             style={{ boxShadow: '0 20px 40px -10px rgba(0,0,0,0.1)' }}
                         >
                             <Box
                                 w="100%"
                                 h="100%"
                                 style={{
-                                    background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
-                                    borderRadius: '2.5rem',
+                                    background: 'linear-gradient(135deg, #0C7C92 0%, #065e6e 100%)',
+                                    borderRadius: '1.5rem',
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center'
                                 }}
                             >
-                                <Building2 size={rem(48)} className="text-[#0C7C92]" />
+                                <Sparkles size={rem(48)} className="text-white" />
                             </Box>
                         </Avatar>
                         <Box
                             pos="absolute"
-                            bottom={5}
-                            right={5}
-                            bg="teal"
-                            p={6}
-                            style={{ borderRadius: '50%', border: '4px solid white' }}
+                            bottom={0}
+                            right={0}
+                            bg="teal.6"
+                            p={8}
+                            style={{ borderRadius: '50%', border: '4px solid white', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
                         >
                             <ShieldCheck size={20} className="text-white" />
                         </Box>
                     </Box>
 
                     <Stack align="flex-end" gap={4}>
-                        <Text size="xs" c="dimmed" fw={800} tt="uppercase" lts="2px">Verification Status</Text>
+                        <Text size="xs" c="dimmed" fw={800} tt="uppercase" lts="1px">Verification Status</Text>
                         <Group gap={8}>
                             <Award size={18} className="text-yellow-500" />
-                            <Text size="md" fw={900} c="#16284F">INSTITUTIONAL GRADE</Text>
+                            <Text size="md" fw={900} c="#16284F">VERIFIED COMPANY</Text>
                         </Group>
                     </Stack>
                 </Group>
@@ -94,9 +94,9 @@ export const TenantProfilePreview = ({ data, bizCategoryLabel, statusLabel }: Te
                 {/* Main Content */}
                 <Stack gap="xl">
                     <Box>
-                        <Text size="xs" fw={900} c="#0C7C92" tt="uppercase" lts="2.5px" mb={4}>Authoritative Identity</Text>
-                        <Text size={rem(36)} fw={900} c="#16284F" lts="-1.5px" style={{ lineHeight: 1.05 }}>
-                            {data.name || 'Resident Authorization'}
+                        <Text size="xs" fw={900} c="#0C7C92" tt="uppercase" lts="1.5px" mb={4}>Organization Profile</Text>
+                        <Text size={rem(32)} fw={900} c="#16284F" lts="-1px" style={{ lineHeight: 1.05 }}>
+                            {data.name || 'Company Name'}
                         </Text>
                         <Group gap="xs" mt="lg">
                             <Badge color="#16284F" variant="filled" size="sm" radius="xs" fw={900} className="tracking-widest">CERTIFIED</Badge>
@@ -116,7 +116,7 @@ export const TenantProfilePreview = ({ data, bizCategoryLabel, statusLabel }: Te
 
                     <Divider size="xs" color="gray.1" label="Entity Statistics" labelPosition="center" />
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 gap-4">
                         <Paper p="lg" radius="1.5rem" bg="slate.50" style={{ border: '1px solid #f1f5f9' }}>
                             <Group gap="xs" mb={4}>
                                 <Zap size={14} className="text-teal-600" />
@@ -127,19 +127,10 @@ export const TenantProfilePreview = ({ data, bizCategoryLabel, statusLabel }: Te
                             </Group>
                             <Text size="sm" fw={800} c="#16284F">{data.tinNumber || 'PENDING'}</Text>
                         </Paper>
-                        <Paper p="lg" radius="1.5rem" bg="slate.50" style={{ border: '1px solid #f1f5f9' }}>
-                            <Group gap="xs" mb={4}>
-                                <Landmark size={14} className="text-purple-600" />
-                                <Text size="xs" c="dimmed" fw={800} tt="uppercase" lts="1px">Financial</Text>
-                            </Group>
-                            <Text size="sm" fw={800} c="#16284F" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                {data.metadata?.bankName || 'BANK PENDING'}
-                            </Text>
-                        </Paper>
                     </div>
 
                     <Stack gap="sm">
-                        <Text size="xs" fw={900} c="dimmed" tt="uppercase" lts="1.5px" mb={4}>Digital Credentials</Text>
+                        <Text size="xs" fw={900} c="dimmed" tt="uppercase" lts="1px" mb={4}>Primary Contacts</Text>
                         <Paper p="md" radius="md" bg="#F8FAFC" style={{ border: '1px solid #E2E8F0' }}>
                             <Group justify="space-between" mb="xs">
                                 <Group gap="md">
@@ -164,8 +155,8 @@ export const TenantProfilePreview = ({ data, bizCategoryLabel, statusLabel }: Te
                         <Box pos="absolute" top={0} left={0} w="100%" h={4} style={{ background: 'linear-gradient(90deg, #16284F 0%, #0C7C92 100%)' }} />
                         <Group justify="space-between">
                             <Stack gap={2}>
-                                <Text size="10px" fw={900} c="#16284F" tt="uppercase" lts="2.5px">Encrypted System ID</Text>
-                                <Text size="11px" c="dimmed" fw={700}>HASH: {data.companyRegNumber ? `XP-${data.companyRegNumber}` : 'XP-TEMP-001'}</Text>
+                                <Text size="10px" fw={900} c="#16284F" tt="uppercase" lts="1px">System Tracking ID</Text>
+                                <Text size="11px" c="dimmed" fw={700}>REF: {data.companyRegNumber ? `${data.companyRegNumber}` : 'TEMP-001'}</Text>
                             </Stack>
                             <Box
                                 p={10}

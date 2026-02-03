@@ -35,12 +35,14 @@ import {
     Lightbulb,
     ShieldCheck,
     MapPin,
+    Factory,
 } from 'lucide-react';
 import { Tenant } from '@/services/tenants.service';
 import { TenantForm } from './TenantForm';
 import { ContactsStep, TenantContact } from './ContactsStep';
 import { DocumentsStep, TenantDocument } from './DocumentsStep';
 import { TenantProfilePreview } from './TenantProfilePreview';
+import { cn } from '@/lib/utils';
 
 interface WizardStep {
     step: number;
@@ -69,64 +71,84 @@ export const TenantOnboardingWizard = ({
 }: TenantOnboardingWizardProps) => {
     const [active, setActive] = useState(0);
     const [showHelp, setShowHelp] = useState(true);
+    const [commercialTrack, setCommercialTrack] = useState<'OFFICE' | 'LAND' | null>(null);
     const [tenantData, setTenantData] = useState<Partial<Tenant>>({});
     const [contacts, setContacts] = useState<TenantContact[]>([]);
     const [documents, setDocuments] = useState<TenantDocument[]>([]);
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [submissionError, setSubmissionError] = useState<string | null>(null);
     const [stepValidity, setStepValidity] = useState({
-        0: false,  // Company info
-        1: true,   // Contacts (optional)
-        2: true,   // Documents (optional)
-        3: true,   // Review
+        0: false,  // Track Selection
+        1: false,  // Company info
+        2: true,   // Contacts (optional)
+        3: true,   // Documents (optional)
+        4: true,   // Review
     });
 
-    const wizardSteps: WizardStep[] = [
-        {
-            step: 0,
-            label: 'Strategic Entity Profile',
-            description: 'Registry and Tax identification',
-            icon: <Building2 size={18} />,
-            help: {
-                title: 'Business Registry',
-                content: 'Accurate registration data is vital for valid contract generation and regulatory compliance.',
-                tips: ['Match official documents', 'Verify TIN digits', 'Check physical address']
+    const wizardSteps: WizardStep[] = useMemo(() => {
+        const baseSteps: WizardStep[] = [
+            {
+                step: 0,
+                label: 'Lease Model',
+                description: 'Select rental category',
+                icon: <LayoutDashboard size={18} />,
+                help: {
+                    title: 'Classification Model',
+                    content: 'Specify the lease structure for this organization to apply correct administrative rules.',
+                    tips: ['Office Rental: For building occupants', 'Land Sublease: For plot developments', 'Selection affects legal templates']
+                }
             }
-        },
-        {
-            step: 1,
-            label: 'Operational Liaisons',
-            description: 'Key focal persons & contacts',
-            icon: <Users size={18} />,
-            help: {
-                title: 'Designated Contacts',
-                content: 'Designate the primary individuals responsible for administrative and technical communication.',
-                tips: ['Assign a head contact', 'Check email syntax', 'Define specific roles']
+        ];
+
+        const contextualSteps: WizardStep[] = [
+            {
+                step: 1,
+                label: commercialTrack === 'LAND' ? 'Plot Specification' : 'Organization Identity',
+                description: 'Legal & Tax registration',
+                icon: commercialTrack === 'LAND' ? <Factory size={18} /> : <Building2 size={18} />,
+                help: {
+                    title: 'Registration Compliance',
+                    content: commercialTrack === 'LAND' ? 'Define land utilization and investment scope for the plot.' : 'Ensure legal name matches official trade license documents.',
+                    tips: ['Verify Trade License details', 'Check TIN digits carefully', 'Match corporate address']
+                }
+            },
+            {
+                step: 2,
+                label: 'Key Contacts',
+                description: 'Liaison & representative details',
+                icon: <Users size={18} />,
+                help: {
+                    title: 'Assigned Liaisons',
+                    content: 'Designate the primary individuals responsible for administrative and technical communication.',
+                    tips: ['Assign a head contact', 'Check email syntax', 'Define specific roles']
+                }
+            },
+            {
+                step: 3,
+                label: 'Documentation',
+                description: 'Licenses & legal certificates',
+                icon: <FileText size={18} />,
+                help: {
+                    title: 'Identity Verification',
+                    content: 'Upload high-resolution scans of your trade license and relevant registration certificates.',
+                    tips: ['Clear PDF scans', 'Include all pages', 'Verify expiration dates']
+                }
+            },
+            {
+                step: 4,
+                label: 'Review & Confirm',
+                description: 'Final verification',
+                icon: <CheckCircle2 size={18} />,
+                help: {
+                    title: 'Profile Verification',
+                    content: 'Perform a final audit of the company profile before committing to the official registry.',
+                    tips: ['Check for contact typos', 'Ensure TIN is correct', 'Preview uploaded files']
+                }
             }
-        },
-        {
-            step: 2,
-            label: 'Compliance Artifacts',
-            description: 'Official licenses & certificates',
-            icon: <FileText size={18} />,
-            help: {
-                title: 'Artifact Submission',
-                content: 'Upload high-resolution scans of your trade license and relevant registration certificates.',
-                tips: ['Clear PDF scans', 'Include all pages', 'Verify expiration dates']
-            }
-        },
-        {
-            step: 3,
-            label: 'Final Compliance Audit',
-            description: 'Data verification & finish',
-            icon: <CheckCircle2 size={18} />,
-            help: {
-                title: 'Audit Confirmation',
-                content: 'Perform a final audit of the electronic profile before committing to the system registry.',
-                tips: ['Check contact typos', 'Verify TIN consistency', 'Confirm file previews']
-            }
-        },
-    ];
+        ];
+
+        return [...baseSteps, ...contextualSteps];
+    }, [commercialTrack]);
 
     const nextStep = useCallback(() => {
         if (active < wizardSteps.length - 1) {
@@ -156,6 +178,7 @@ export const TenantOnboardingWizard = ({
             ...tenantData,
             metadata: {
                 ...(tenantData.metadata as any || {}),
+                track: commercialTrack,
                 contacts: mappedContacts,
                 documents: documents.map(d => ({
                     name: d.name,
@@ -172,10 +195,10 @@ export const TenantOnboardingWizard = ({
         } catch (error: any) {
             setSubmissionError(error.response?.data?.message || error.message || 'System registry handshake failed');
         }
-    }, [onSubmit, tenantData, contacts, documents]);
+    }, [onSubmit, tenantData, contacts, documents, commercialTrack]);
 
     const handleCompanyInfoChange = useCallback((isValid: boolean) => {
-        setStepValidity(prev => ({ ...prev, 0: isValid }));
+        setStepValidity(prev => ({ ...prev, 1: isValid }));
     }, []);
 
     const handleTenantFormSubmit = useCallback(async (data: Partial<Tenant>) => {
@@ -201,6 +224,67 @@ export const TenantOnboardingWizard = ({
         switch (active) {
             case 0:
                 return (
+                    <Stack gap="1.5rem" py="lg">
+                        <Box ta="center">
+                            <Title order={2} fw={800} className="text-brand-navy mb-xs font-primary">Lease Category Selection</Title>
+                            <Text size="lg" c="dimmed" fw={600}>Specify the primary resource allocation model</Text>
+                        </Box>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <Paper
+                                withBorder
+                                p="2rem"
+                                radius="2rem"
+                                className={cn(
+                                    "cursor-pointer transition-all duration-500 hover:scale-[1.01] relative overflow-hidden group",
+                                    commercialTrack === 'OFFICE' ? "border-blue-500 bg-blue-50/30 ring-2 ring-blue-500/10" : "hover:border-slate-300"
+                                )}
+                                onClick={() => {
+                                    setCommercialTrack('OFFICE');
+                                    setStepValidity(prev => ({ ...prev, 0: true }));
+                                }}
+                            >
+                                {commercialTrack === 'OFFICE' && <Box pos="absolute" top={16} right={16}><CheckCircle2 className="text-blue-600" size={24} /></Box>}
+                                <Stack align="center" gap="lg">
+                                    <Box p={20} bg="blue.1" className="rounded-2xl text-blue-600 group-hover:rotate-6 transition-transform">
+                                        <Building2 size={40} />
+                                    </Box>
+                                    <Box ta="center">
+                                        <Text size="lg" fw={800} c="blue.9" mb={4}>Office Rental</Text>
+                                        <Text size="xs" c="dimmed" fw={600} className="px-4">Standard residency in corporate buildings and retail blocks.</Text>
+                                    </Box>
+                                </Stack>
+                            </Paper>
+
+                            <Paper
+                                withBorder
+                                p="2rem"
+                                radius="2rem"
+                                className={cn(
+                                    "cursor-pointer transition-all duration-500 hover:scale-[1.01] relative overflow-hidden group",
+                                    commercialTrack === 'LAND' ? "border-teal-500 bg-teal-50/30 ring-2 ring-teal-500/10" : "hover:border-slate-300"
+                                )}
+                                onClick={() => {
+                                    setCommercialTrack('LAND');
+                                    setStepValidity(prev => ({ ...prev, 0: true }));
+                                }}
+                            >
+                                {commercialTrack === 'LAND' && <Box pos="absolute" top={16} right={16}><CheckCircle2 className="text-teal-600" size={24} /></Box>}
+                                <Stack align="center" gap="lg">
+                                    <Box p={20} bg="teal.1" className="rounded-2xl text-teal-600 group-hover:rotate-6 transition-transform">
+                                        <Factory size={40} />
+                                    </Box>
+                                    <Box ta="center">
+                                        <Text size="lg" fw={800} c="teal.9" mb={4}>Land Sublease</Text>
+                                        <Text size="xs" c="dimmed" fw={600} className="px-4">Industrial plots, specialized zones, and ground-lease ventures.</Text>
+                                    </Box>
+                                </Stack>
+                            </Paper>
+                        </div>
+                    </Stack>
+                );
+            case 1:
+                return (
                     <div className="space-y-6">
                         <TenantForm
                             initialData={tenantData}
@@ -208,14 +292,15 @@ export const TenantOnboardingWizard = ({
                             onChange={handleDataChange}
                             isLoading={false}
                             onValidityChange={handleCompanyInfoChange}
+                            track={commercialTrack}
                         />
                     </div>
                 );
-            case 1:
-                return <ContactsStep contacts={contacts} onChange={setContacts} />;
             case 2:
-                return <DocumentsStep documents={documents} onChange={setDocuments} />;
+                return <ContactsStep contacts={contacts} onChange={setContacts} />;
             case 3:
+                return <DocumentsStep documents={documents} onChange={setDocuments} />;
+            case 4:
                 return (
                     <Stack gap="xl">
                         <Box>
@@ -244,18 +329,6 @@ export const TenantOnboardingWizard = ({
                                     <Box>
                                         <Text size="xs" c="dimmed" fw={800} tt="uppercase" lts="1px">Investment Origin</Text>
                                         <Text size="md" fw={700} c="#16284F">{(tenantData as any).metadata?.originId ? 'REGISTERED' : 'NOT SPECIFIED'}</Text>
-                                    </Box>
-                                    <Box>
-                                        <Text size="xs" c="dimmed" fw={800} tt="uppercase" lts="1px">Business Scale</Text>
-                                        <Text size="md" fw={700} c="#16284F">{(tenantData as any).metadata?.isStartup ? 'STARTUP VENTURE' : 'ESTABLISHED ENTITY'}</Text>
-                                    </Box>
-                                    <Box>
-                                        <Text size="xs" c="dimmed" fw={800} tt="uppercase" lts="1px">Bank Entity</Text>
-                                        <Text size="md" fw={700} c="#16284F">{(tenantData as any).metadata?.bankName || 'N/A'}</Text>
-                                    </Box>
-                                    <Box>
-                                        <Text size="xs" c="dimmed" fw={800} tt="uppercase" lts="1px">Account Number</Text>
-                                        <Text size="md" fw={700} c="#16284F">{(tenantData as any).metadata?.bankAccount || 'N/A'}</Text>
                                     </Box>
                                     <Box>
                                         <Text size="xs" c="dimmed" fw={800} tt="uppercase" lts="1px">Email</Text>
@@ -318,6 +391,10 @@ export const TenantOnboardingWizard = ({
                 </div>
             </Box>
 
+            <Stack gap={2} ml="xl">
+                <Title order={1} fw={800} className="text-3xl font-extrabold text-brand-navy tracking-tight font-primary">Onboarding Wizard</Title>
+                <Text size="sm" c="dimmed" fw={600}>Formal 5-stage setup for new authorized residents</Text>
+            </Stack>
             <Box ta="center">
                 <Title order={1} fw={900} c="#16284F" mb="md" lts="-2px" className="text-4xl">System Integration Confirmed</Title>
                 <Text size="lg" c="dimmed" fw={600} maw={500} mx="auto" style={{ lineHeight: 1.6 }}>
@@ -461,21 +538,17 @@ export const TenantOnboardingWizard = ({
                                 <Box className="md:hidden" w={80}>
                                     <Progress
                                         value={progress}
-                                        color="#0C7C92"
+                                        color="brand.teal"
                                         size="xs"
                                         radius="xl"
                                         striped
                                         animated
                                     />
-                                    <Text size="10px" fw={900} mt={4}>STAGE {active + 1}/4</Text>
+                                    <Text size="10px" fw={800} mt={4}>STAGE {active + 1}/4</Text>
                                 </Box>
                                 <div>
-                                    <Group gap="xs">
-                                        <Text size="10px" fw={900} c="#0C7C92" tt="uppercase" lts="1.5px">REGISTRATION PROGRESS</Text>
-                                        <Badge size="xs" variant="light" color="blue" radius="xs">LVL {active + 1}</Badge>
-                                    </Group>
-                                    <Title order={3} fw={900} c="#16284F" lts="-1px" mt={2}>
-                                        {wizardSteps[active].label}
+                                    <Title order={3} fw={800} className="text-brand-navy mt-2 font-primary">
+                                        Step {active + 1}: {wizardSteps[active].label}
                                     </Title>
                                 </div>
                             </Group>
@@ -520,7 +593,7 @@ export const TenantOnboardingWizard = ({
                                     <Stack gap="2.5rem">
                                         {/* Digital Certificate Preview */}
                                         <Box>
-                                            <Text size="xs" fw={900} c="dimmed" tt="uppercase" lts="1.5px" mb="lg">Electronic Profile Proxy</Text>
+                                            <Text size="xs" fw={900} c="dimmed" tt="uppercase" lts="1.5px" mb="lg">Profile Verification</Text>
                                             <TenantProfilePreview data={tenantData} />
                                         </Box>
 
@@ -550,7 +623,7 @@ export const TenantOnboardingWizard = ({
                                                 <Box p="md" bg="blue.0" style={{ borderRadius: '1.25rem' }}>
                                                     <Group gap="md">
                                                         <Info size={16} className="text-blue-600" />
-                                                        <Text size="xs" c="blue.9" fw={800}>Authoritative System Help</Text>
+                                                        <Text size="xs" c="blue.9" fw={800}>Support Knowledge Base</Text>
                                                     </Group>
                                                 </Box>
                                             </Stack>
@@ -581,8 +654,7 @@ export const TenantOnboardingWizard = ({
 
                                 <Group gap="xl">
                                     <Box visibleFrom="sm">
-                                        <Text size="xs" fw={900} c="dimmed" ta="right">SYSTEM COMPLIANCE</Text>
-                                        <Text size="xs" fw={900} c="#16284F" ta="right">VERIFIED PROGRESS: {Math.round(progress)}%</Text>
+                                        <Text size="xs" fw={900} c="#16284F" ta="right">PROGRESS: {Math.round(progress)}%</Text>
                                     </Box>
 
                                     {!isLastStep ? (
@@ -596,12 +668,10 @@ export const TenantOnboardingWizard = ({
                                             fw={900}
                                             style={{
                                                 background: '#16284F',
-                                                minWidth: rem(240),
-                                                boxShadow: '0 10px 30px rgba(22, 40, 79, 0.2)'
+                                                minWidth: rem(200),
                                             }}
-                                            className={canProceed ? 'pulse-nav' : ''}
                                         >
-                                            ADVANCE WORKFLOW
+                                            NEXT STEP
                                         </Button>
                                     ) : (
                                         <Button
@@ -615,11 +685,10 @@ export const TenantOnboardingWizard = ({
                                             fw={900}
                                             style={{
                                                 background: 'linear-gradient(135deg, #0C7C92 0%, #16284F 100%)',
-                                                minWidth: rem(260),
-                                                boxShadow: '0 10px 30px rgba(12, 124, 146, 0.3)'
+                                                minWidth: rem(220),
                                             }}
                                         >
-                                            AUTHORIZE INTEGRATION
+                                            COMPLETE SETUP
                                         </Button>
                                     )}
                                 </Group>

@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { Stack, TextInput, Group, Box, LoadingOverlay, Title, Paper, Text, rem, Badge, Select, Switch } from '@mantine/core';
-import { Building2, FileText, Globe, Phone, Mail, MapPin, Sparkles, Landmark, Rocket } from 'lucide-react';
+import { Building2, FileText, Globe, Phone, Mail, MapPin, Sparkles, Landmark, Rocket, Factory } from 'lucide-react';
 import { Tenant } from '@/services/tenants.service';
 import { SystemLookup, lookupsService } from '@/services/lookups.service';
 import { geoService, Region, City } from '@/services/geo.service';
@@ -12,9 +12,26 @@ interface Props {
     onChange?: (data: Partial<Tenant>) => void;
     isLoading?: boolean;
     onValidityChange?: (isValid: boolean) => void;
+    track?: 'OFFICE' | 'LAND' | null;
 }
 
-export const TenantForm = ({ initialData, onSubmit, onChange, isLoading, onValidityChange }: Props) => {
+export const TenantForm = ({ initialData, onSubmit, onChange, isLoading, onValidityChange, track }: Props) => {
+    const isLand = track === 'LAND';
+    const trackConfig = isLand ? {
+        label: 'Industrial Land Registry',
+        title: 'Project Venture Identity',
+        nameLabel: 'Venture / Project Name',
+        regLabel: 'Investment Permit / Reg #',
+        accent: 'teal',
+        icon: Factory
+    } : {
+        label: 'Official Registry',
+        title: 'Company Registration',
+        nameLabel: 'Official Register Name (Legal Entity)',
+        regLabel: 'Trade License / Registration #',
+        accent: 'blue',
+        icon: Building2
+    };
     const [formData, setFormData] = useState<Partial<Tenant>>({
         name: '',
         companyRegNumber: '',
@@ -79,7 +96,7 @@ export const TenantForm = ({ initialData, onSubmit, onChange, isLoading, onValid
             fontSize: rem(11),
             marginBottom: rem(8),
             textTransform: 'uppercase' as const,
-            letterSpacing: rem(1.5),
+            letterSpacing: rem(1),
             opacity: 0.8
         },
         input: {
@@ -90,7 +107,7 @@ export const TenantForm = ({ initialData, onSubmit, onChange, isLoading, onValid
             backgroundColor: '#fff',
             fontWeight: 600,
             transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-            paddingLeft: rem(20),
+            paddingLeft: rem(48),
             '&:focus': {
                 borderColor: '#0C7C92',
                 boxShadow: '0 0 0 4px rgba(12, 124, 146, 0.05)'
@@ -99,6 +116,10 @@ export const TenantForm = ({ initialData, onSubmit, onChange, isLoading, onValid
                 color: '#94A3B8',
                 fontWeight: 500
             }
+        },
+        section: {
+            width: rem(48),
+            justifyContent: 'center'
         }
     };
 
@@ -116,31 +137,34 @@ export const TenantForm = ({ initialData, onSubmit, onChange, isLoading, onValid
                     <div className="absolute top-0 right-0 w-48 h-48 bg-blue-50/30 rounded-bl-[10rem] -mr-12 -mt-12 transition-transform group-hover:scale-110 duration-700" />
 
                     <Group gap="xl" mb="2.5rem" className="relative z-10">
-                        <Box p={16} bg="#16284F" className="shadow-lg" style={{ borderRadius: '1.5rem' }}>
-                            <Building2 size={26} className="text-white" />
+                        <Box p={16} bg={isLand ? 'teal.9' : '#16284F'} className="shadow-lg" style={{ borderRadius: '1.5rem' }}>
+                            <trackConfig.icon size={26} className="text-white" />
                         </Box>
                         <div className="flex-1">
-                            <Badge color="blue" variant="light" size="sm" radius="sm" fw={900} mb={6} className="tracking-widest">OFFICIAL REGISTRY</Badge>
-                            <Title order={3} fw={900} lts="-1px" c="#16284F" className="text-2xl">Company Registration</Title>
+                            <Badge color={trackConfig.accent} variant="light" size="sm" radius="sm" fw={900} mb={6} className="tracking-widest">{trackConfig.label.toUpperCase()}</Badge>
+                            <Title order={3} fw={900} lts="-1px" c="#16284F" className="text-2xl">{trackConfig.title}</Title>
                         </div>
                     </Group>
 
                     <Stack gap="2rem" className="relative z-10">
                         <TextInput
-                            label="Official Register Name (Legal Entity)"
-                            placeholder="Enter legal entity name"
+                            label={trackConfig.nameLabel}
+                            placeholder={isLand ? "Enter industrial project name" : "Enter legal entity name"}
                             value={formData.name}
                             onChange={(e) => setFormData({ ...formData, name: e.currentTarget.value })}
                             required
                             size="md"
                             styles={inputStyles}
+                            className="[&_.mantine-TextInput-input]:!pl-[20px]"
                         />
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                             <TextInput
-                                label="Trade License / Registration #"
-                                placeholder="AA/---"
-                                leftSection={<FileText size={18} className="text-[#0C7C92]" />}
+                                label={trackConfig.regLabel}
+                                placeholder={isLand ? "IP/---" : "AA/---"}
+                                leftSection={<FileText size={18} className={`text-${trackConfig.accent}-600`} />}
+                                leftSectionWidth={48}
+                                leftSectionPointerEvents="none"
                                 value={formData.companyRegNumber}
                                 onChange={(e) => setFormData({ ...formData, companyRegNumber: e.currentTarget.value })}
                                 required
@@ -150,7 +174,9 @@ export const TenantForm = ({ initialData, onSubmit, onChange, isLoading, onValid
                             <TextInput
                                 label="Tax Identification Number (TIN)"
                                 placeholder="10-digit PIN"
-                                leftSection={<Landmark size={18} className="text-[#0C7C92]" />}
+                                leftSection={<Landmark size={18} className={`text-${trackConfig.accent}-600`} />}
+                                leftSectionWidth={48}
+                                leftSectionPointerEvents="none"
                                 value={formData.tinNumber}
                                 onChange={(e) => setFormData({ ...formData, tinNumber: e.currentTarget.value })}
                                 size="md"
@@ -210,6 +236,8 @@ export const TenantForm = ({ initialData, onSubmit, onChange, isLoading, onValid
                                 label="Corporate Contact Email"
                                 placeholder="admin@domain.com"
                                 leftSection={<Mail size={18} className="text-[#0C7C92]" />}
+                                leftSectionWidth={48}
+                                leftSectionPointerEvents="none"
                                 value={formData.email}
                                 onChange={(e) => setFormData({ ...formData, email: e.currentTarget.value })}
                                 size="md"
@@ -219,8 +247,21 @@ export const TenantForm = ({ initialData, onSubmit, onChange, isLoading, onValid
                                 label="Primary Operational Phone"
                                 placeholder="+251 ..."
                                 leftSection={<Phone size={18} className="text-[#0C7C92]" />}
+                                leftSectionWidth={48}
+                                leftSectionPointerEvents="none"
                                 value={formData.phone}
                                 onChange={(e) => setFormData({ ...formData, phone: e.currentTarget.value })}
+                                size="md"
+                                styles={inputStyles}
+                            />
+                            <TextInput
+                                label="Company Portal / Website"
+                                placeholder="https://..."
+                                leftSection={<Globe size={18} className={`text-${trackConfig.accent}-600`} />}
+                                leftSectionWidth={48}
+                                leftSectionPointerEvents="none"
+                                value={formData.website}
+                                onChange={(e) => setFormData({ ...formData, website: e.currentTarget.value })}
                                 size="md"
                                 styles={inputStyles}
                             />
@@ -237,6 +278,9 @@ export const TenantForm = ({ initialData, onSubmit, onChange, isLoading, onValid
                                 size="md"
                                 radius="xl"
                                 styles={inputStyles}
+                                leftSection={<MapPin size={18} className="text-slate-400" />}
+                                leftSectionWidth={48}
+                                leftSectionPointerEvents="none"
                             />
                             <Select
                                 label="Operational City"
@@ -249,13 +293,18 @@ export const TenantForm = ({ initialData, onSubmit, onChange, isLoading, onValid
                                 size="md"
                                 radius="xl"
                                 styles={inputStyles}
+                                leftSection={<MapPin size={18} className="text-slate-400" />}
+                                leftSectionWidth={48}
+                                leftSectionPointerEvents="none"
                             />
                         </div>
 
                         <TextInput
-                            label="Detailed Physical Address (Plot/Street)"
-                            placeholder="Plot, Building, Street Information"
-                            leftSection={<MapPin size={18} className="text-[#0C7C92]" />}
+                            label={isLand ? "Site / Plot Reference" : "Detailed Physical Address (Plot/Street)"}
+                            placeholder={isLand ? "Plot ID / Sector Block" : "Plot, Building, Street Information"}
+                            leftSection={<MapPin size={18} className={`text-${trackConfig.accent}-600`} />}
+                            leftSectionWidth={48}
+                            leftSectionPointerEvents="none"
                             value={formData.address}
                             onChange={(e) => setFormData({ ...formData, address: e.currentTarget.value })}
                             size="md"
@@ -264,49 +313,7 @@ export const TenantForm = ({ initialData, onSubmit, onChange, isLoading, onValid
                     </Stack>
                 </Paper>
 
-                {/* 3. Financial Identity & Compliance */}
-                <Paper p="2.5rem" radius="2.5rem" bg="white" style={{ border: '1px solid #E2E8F0', boxShadow: '0 20px 40px -10px rgba(0,0,0,0.03)' }} className="relative overflow-hidden group">
-                    <div className="absolute right-0 top-0 w-2 h-full bg-orange-100" />
-
-                    <Group gap="xl" mb="2.5rem">
-                        <Box p={16} bg="#FFFBEB" className="text-orange-600" style={{ borderRadius: '1.5rem' }}>
-                            <Landmark size={26} strokeWidth={2.5} />
-                        </Box>
-                        <div>
-                            <Badge color="orange" variant="light" size="sm" radius="sm" fw={900} mb={6} className="tracking-widest">FINANCIAL REGISTRY</Badge>
-                            <Title order={3} fw={900} c="#16284F" className="text-2xl">Financial Identity</Title>
-                        </div>
-                    </Group>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                        <TextInput
-                            label="Primary Bank Entity"
-                            placeholder="Commercial Bank of Ethiopia, etc."
-                            leftSection={<Building2 size={18} className="text-orange-500" />}
-                            value={(formData as any).metadata?.bankName || ''}
-                            onChange={(e) => setFormData({
-                                ...formData,
-                                metadata: { ...(formData.metadata || {}), bankName: e.currentTarget.value }
-                            })}
-                            size="md"
-                            styles={inputStyles}
-                        />
-                        <TextInput
-                            label="Operational Account Number"
-                            placeholder="Account for billing & lease payments"
-                            leftSection={<FileText size={18} className="text-orange-500" />}
-                            value={(formData as any).metadata?.bankAccount || ''}
-                            onChange={(e) => setFormData({
-                                ...formData,
-                                metadata: { ...(formData.metadata || {}), bankAccount: e.currentTarget.value }
-                            })}
-                            size="md"
-                            styles={inputStyles}
-                        />
-                    </div>
-                </Paper>
-
-                {/* 4. High-Fidelity Intelligence & Classification */}
+                {/* 3. High-Fidelity Intelligence & Classification */}
                 <Paper p="2.5rem" radius="2.5rem" bg="#16284F" style={{ boxShadow: '0 20px 60px -10px rgba(22, 40, 79, 0.3)' }} className="relative overflow-hidden group">
                     <Box pos="absolute" bottom={-20} right={-20} style={{ opacity: 0.05 }} className="group-hover:scale-110 transition-transform duration-[2s]">
                         <Sparkles size={160} className="text-white" />
@@ -345,6 +352,6 @@ export const TenantForm = ({ initialData, onSubmit, onChange, isLoading, onValid
                     </div>
                 </Paper>
             </form>
-        </Box >
+        </Box>
     );
 };
