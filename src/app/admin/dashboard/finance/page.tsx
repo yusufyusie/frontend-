@@ -28,7 +28,10 @@ import {
     Zap,
     Briefcase
 } from 'lucide-react';
-import { TradingViewChart } from '@/components/organisms/reports/TradingViewChart';
+import { TradingViewChart, ChartSeriesType } from '@/components/organisms/reports/TradingViewChart';
+import { ITPCPieChart } from '@/components/organisms/reports/ITPCPieChart';
+import { ITPCBarChart } from '@/components/organisms/reports/ITPCBarChart';
+import { ITPCRadarChart } from '@/components/organisms/reports/ITPCRadarChart';
 import { financeReportsService, KPISummary, RevenueTrend } from '@/services/finance-reports.service';
 
 export default function FinancialOverviewPage() {
@@ -36,6 +39,7 @@ export default function FinancialOverviewPage() {
     const [stats, setStats] = useState<KPISummary | null>(null);
     const [trends, setTrends] = useState<RevenueTrend[]>([]);
     const [fiscalYear] = useState(new Date().getFullYear());
+    const [chartSeriesType, setChartSeriesType] = useState<ChartSeriesType>('Area');
 
     const loadData = async () => {
         try {
@@ -167,17 +171,30 @@ export default function FinancialOverviewPage() {
                                 <Title order={2} className="text-3xl font-black text-slate-900 tracking-tight">Revenue Trajectory</Title>
                             </Stack>
                             <Box className="bg-slate-50 p-1 rounded-xl">
-                                <Group gap={0}>
-                                    <Button variant="white" size="xs" radius="lg" className="shadow-sm">6 Months Tracking</Button>
-                                </Group>
+                                <Button.Group>
+                                    {(['Area', 'Line', 'Bar', 'Histogram', 'Baseline'] as const).map((t) => (
+                                        <Button
+                                            key={t}
+                                            variant={chartSeriesType === t ? 'filled' : 'white'}
+                                            bg={chartSeriesType === t ? '#0C7C92' : undefined}
+                                            size="xs"
+                                            radius="lg"
+                                            onClick={() => setChartSeriesType(t)}
+                                            className="transition-all duration-300"
+                                        >
+                                            {t}
+                                        </Button>
+                                    ))}
+                                </Button.Group>
                             </Box>
                         </Group>
 
                         <Box className="flex-1 mt-4 relative rounded-3xl overflow-hidden border border-slate-50 bg-slate-50/20">
                             <TradingViewChart
                                 data={getChartData()}
+                                type={chartSeriesType}
                                 height={320}
-                                title="Revenue Performance (USD)"
+                                title={`${chartSeriesType} Performance (USD)`}
                                 colors={{
                                     lineColor: '#0C7C92',
                                     areaTopColor: 'rgba(12, 124, 146, 0.4)',
@@ -274,6 +291,240 @@ export default function FinancialOverviewPage() {
                     </Paper>
                 ))}
             </div>
+
+            {/* Comprehensive Chart Showcase */}
+            <Stack gap="xl" className="mt-8">
+                <Group justify="space-between" align="center">
+                    <Stack gap={4}>
+                        <Group gap="xs">
+                            <Box className="bg-[#0C7C92]/10 p-3 rounded-2xl text-[#0C7C92]">
+                                <PieChart size={24} />
+                            </Box>
+                            <Text fw={950} size="sm" className="uppercase tracking-[0.25em] text-[#0C7C92]">
+                                Advanced Analytics Showcase
+                            </Text>
+                        </Group>
+                        <Title order={2} className="text-4xl font-[950] text-slate-900 tracking-tight">
+                            Multi-Series Chart Intelligence
+                        </Title>
+                        <Text size="sm" className="text-slate-500 font-medium max-w-3xl">
+                            Comprehensive visualization suite showcasing all available chart types with ITPC branding for enhanced financial insights and data-driven decision making.
+                        </Text>
+                    </Stack>
+                </Group>
+
+                {/* TradingView Time-Series Charts */}
+                <div>
+                    <Group gap="xs" mb="lg">
+                        <div className="h-1 w-1 rounded-full bg-[#0C7C92]" />
+                        <Text size="xs" fw={900} className="text-slate-600 uppercase tracking-widest">TradingView Time-Series</Text>
+                    </Group>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {/* Area Chart */}
+                        <Paper p={24} radius="2rem" className="bg-white border border-slate-100 shadow-lg hover:shadow-xl transition-all duration-500">
+                            <Stack gap="md">
+                                <Group justify="space-between" align="center">
+                                    <Stack gap={2}>
+                                        <Text size="xs" fw={900} className="text-[#0C7C92] uppercase tracking-[0.2em]">Area Series</Text>
+                                        <Text size="lg" fw={950} className="text-slate-900">Revenue Trends</Text>
+                                    </Stack>
+                                    <div className="h-0.5 w-8 bg-[#0C7C92] rounded-full" />
+                                </Group>
+                                <Box className="rounded-xl overflow-hidden border border-slate-100 bg-slate-50/20">
+                                    <TradingViewChart
+                                        data={getChartData()}
+                                        type="Area"
+                                        height={200}
+                                        showGrid={false}
+                                        colors={{
+                                            lineColor: '#0C7C92',
+                                            areaTopColor: 'rgba(12, 124, 146, 0.4)',
+                                            areaBottomColor: 'rgba(12, 124, 146, 0.05)',
+                                            textColor: '#94A3B8'
+                                        }}
+                                    />
+                                </Box>
+                            </Stack>
+                        </Paper>
+
+                        {/* Line Chart */}
+                        <Paper p={24} radius="2rem" className="bg-white border border-slate-100 shadow-lg hover:shadow-xl transition-all duration-500">
+                            <Stack gap="md">
+                                <Group justify="space-between" align="center">
+                                    <Stack gap={2}>
+                                        <Text size="xs" fw={900} className="text-[#16284F] uppercase tracking-[0.2em]">Line Series</Text>
+                                        <Text size="lg" fw={950} className="text-slate-900">Growth Trajectory</Text>
+                                    </Stack>
+                                    <div className="h-0.5 w-8 bg-[#16284F] rounded-full" />
+                                </Group>
+                                <Box className="rounded-xl overflow-hidden border border-slate-100 bg-slate-50/20">
+                                    <TradingViewChart
+                                        data={getChartData()}
+                                        type="Line"
+                                        height={200}
+                                        showGrid={false}
+                                        colors={{
+                                            lineColor: '#16284F',
+                                            textColor: '#94A3B8'
+                                        }}
+                                    />
+                                </Box>
+                            </Stack>
+                        </Paper>
+
+                        {/* Bar (OHLC) Chart */}
+                        <Paper p={24} radius="2rem" className="bg-white border border-slate-100 shadow-lg hover:shadow-xl transition-all duration-500">
+                            <Stack gap="md">
+                                <Group justify="space-between" align="center">
+                                    <Stack gap={2}>
+                                        <Text size="xs" fw={900} className="text-[#1098AD] uppercase tracking-[0.2em]">Bar Series (OHLC)</Text>
+                                        <Text size="lg" fw={950} className="text-slate-900">Price Action</Text>
+                                    </Stack>
+                                    <div className="h-0.5 w-8 bg-[#1098AD] rounded-full" />
+                                </Group>
+                                <Box className="rounded-xl overflow-hidden border border-slate-100 bg-slate-50/20">
+                                    <TradingViewChart
+                                        data={(() => {
+                                            const chartData = getChartData();
+                                            return chartData.map((d, idx) => ({
+                                                time: d.time,
+                                                open: d.value * (0.95 + Math.random() * 0.05),
+                                                high: d.value * (1.02 + Math.random() * 0.03),
+                                                low: d.value * (0.93 + Math.random() * 0.02),
+                                                close: d.value
+                                            }));
+                                        })()}
+                                        type="Bar"
+                                        height={200}
+                                        showGrid={false}
+                                        colors={{
+                                            upColor: '#10b981',
+                                            downColor: '#ef4444',
+                                            textColor: '#94A3B8'
+                                        }}
+                                    />
+                                </Box>
+                            </Stack>
+                        </Paper>
+
+                        {/* Histogram Chart */}
+                        <Paper p={24} radius="2rem" className="bg-white border border-slate-100 shadow-lg hover:shadow-xl transition-all duration-500">
+                            <Stack gap="md">
+                                <Group justify="space-between" align="center">
+                                    <Stack gap={2}>
+                                        <Text size="xs" fw={900} className="text-[#10b981] uppercase tracking-[0.2em]">Histogram Series</Text>
+                                        <Text size="lg" fw={950} className="text-slate-900">Volume Distribution</Text>
+                                    </Stack>
+                                    <div className="h-0.5 w-8 bg-[#10b981] rounded-full" />
+                                </Group>
+                                <Box className="rounded-xl overflow-hidden border border-slate-100 bg-slate-50/20">
+                                    <TradingViewChart
+                                        data={getChartData().map(d => ({ time: d.time, value: d.value * 0.3 }))}
+                                        type="Histogram"
+                                        height={200}
+                                        showGrid={false}
+                                        colors={{
+                                            lineColor: '#10b981',
+                                            textColor: '#94A3B8'
+                                        }}
+                                    />
+                                </Box>
+                            </Stack>
+                        </Paper>
+
+                        {/* Baseline Chart */}
+                        <Paper p={24} radius="2rem" className="bg-white border border-slate-100 shadow-lg hover:shadow-xl transition-all duration-500">
+                            <Stack gap="md">
+                                <Group justify="space-between" align="center">
+                                    <Stack gap={2}>
+                                        <Text size="xs" fw={900} className="text-[#FFD700] uppercase tracking-[0.2em]">Baseline Series</Text>
+                                        <Text size="lg" fw={950} className="text-slate-900">Variance Analysis</Text>
+                                    </Stack>
+                                    <div className="h-0.5 w-8 bg-[#FFD700] rounded-full" />
+                                </Group>
+                                <Box className="rounded-xl overflow-hidden border border-slate-100 bg-slate-50/20">
+                                    <TradingViewChart
+                                        data={getChartData()}
+                                        type="Baseline"
+                                        height={200}
+                                        showGrid={false}
+                                        colors={{
+                                            upColor: '#10b981',
+                                            downColor: '#ef4444',
+                                            textColor: '#94A3B8'
+                                        }}
+                                    />
+                                </Box>
+                            </Stack>
+                        </Paper>
+                    </div>
+                </div>
+
+                {/* Distribution Charts */}
+                <div>
+                    <Group gap="xs" mb="lg">
+                        <div className="h-1 w-1 rounded-full bg-[#16284F]" />
+                        <Text size="xs" fw={900} className="text-slate-600 uppercase tracking-widest">Distribution & Comparative Analytics</Text>
+                    </Group>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {/* Pie Chart */}
+                        <ITPCPieChart
+                            title="Lease Distribution by Type"
+                            data={[
+                                { name: 'Office Space', value: stats?.activeLeaseCount ? Math.floor(stats.activeLeaseCount * 0.45) : 18 },
+                                { name: 'Retail Units', value: stats?.activeLeaseCount ? Math.floor(stats.activeLeaseCount * 0.25) : 10 },
+                                { name: 'Co-Working', value: stats?.activeLeaseCount ? Math.floor(stats.activeLeaseCount * 0.20) : 8 },
+                                { name: 'Conference', value: stats?.activeLeaseCount ? Math.floor(stats.activeLeaseCount * 0.10) : 4 },
+                            ]}
+                            height={250}
+                        />
+
+                        {/* Donut Chart */}
+                        <ITPCPieChart
+                            title="Revenue Sources"
+                            data={[
+                                { name: 'Lease Payments', value: Math.floor((stats?.totalCollectionsUsd || 50000) * 0.65) },
+                                { name: 'Service Charges', value: Math.floor((stats?.totalCollectionsUsd || 50000) * 0.20) },
+                                { name: 'Utilities', value: Math.floor((stats?.totalCollectionsUsd || 50000) * 0.10) },
+                                { name: 'Other', value: Math.floor((stats?.totalCollectionsUsd || 50000) * 0.05) },
+                            ]}
+                            innerRadius={60}
+                            height={250}
+                        />
+
+                        {/* Radar Chart */}
+                        <ITPCRadarChart
+                            title="Portfolio Health Index"
+                            data={[
+                                { name: 'Occupancy', value: 85, fullMark: 100 },
+                                { name: 'Collection', value: stats?.collectionRate || 92, fullMark: 100 },
+                                { name: 'Retention', value: 78, fullMark: 100 },
+                                { name: 'Growth', value: stats?.monthlyGrowthRate ? Math.min(100, Math.max(0, 50 + stats.monthlyGrowthRate)) : 65, fullMark: 100 },
+                                { name: 'Stability', value: 88, fullMark: 100 },
+                            ]}
+                            height={250}
+                        />
+
+                        {/* Bar Chart */}
+                        <ITPCBarChart
+                            title="Monthly Performance"
+                            data={[
+                                { name: 'Jan', revenue: 45000, target: 50000 },
+                                { name: 'Feb', revenue: 52000, target: 50000 },
+                                { name: 'Mar', revenue: 48000, target: 50000 },
+                                { name: 'Apr', revenue: 61000, target: 55000 },
+                                { name: 'May', revenue: 55000, target: 55000 },
+                                { name: 'Jun', revenue: 67000, target: 60000 },
+                            ]}
+                            dataKeys={[
+                                { key: 'revenue', color: '#0C7C92', label: 'Actual Revenue' },
+                                { key: 'target', color: '#FFD700', label: 'Target' },
+                            ]}
+                            height={250}
+                        />
+                    </div>
+                </div>
+            </Stack>
         </Stack>
     );
 }

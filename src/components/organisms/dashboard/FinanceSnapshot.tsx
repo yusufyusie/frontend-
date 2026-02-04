@@ -132,12 +132,12 @@ export function FinanceSnapshot() {
                         <Box className="h-full min-h-[280px] rounded-[2rem] overflow-hidden border border-slate-100 bg-white shadow-inner p-4">
                             <TradingViewChart
                                 data={getChartData()}
+                                type="Baseline"
                                 height={240}
                                 title="Revenue Trajectory (USD)"
                                 colors={{
-                                    lineColor: '#0C7C92',
-                                    areaTopColor: 'rgba(12, 124, 146, 0.4)',
-                                    areaBottomColor: 'rgba(12, 124, 146, 0.05)',
+                                    upColor: '#10b981',
+                                    downColor: '#ef4444',
                                     textColor: '#94A3B8'
                                 }}
                             />

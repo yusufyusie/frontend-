@@ -112,6 +112,7 @@ export default function FinanceReportsPage() {
     const [fiscalYear, setFiscalYear] = useState<string>(new Date().getFullYear().toString());
     const [currencyView, setCurrencyView] = useState<'USD' | 'ETB'>('USD');
     const [activeTab, setActiveTab] = useState<string>('overview');
+    const [chartSeriesType, setChartSeriesType] = useState<any>('Area');
 
     // Exchange rate sensitivity
     const [showRateSensitivity, setShowRateSensitivity] = useState(false);
@@ -534,19 +535,35 @@ export default function FinanceReportsPage() {
                                             Monthly revenue performance over the last 12 months
                                         </Text>
                                     </Stack>
-                                    <Badge size="lg" variant="light" color="cyan">
-                                        Last 12 Months
-                                    </Badge>
+                                    <Group gap="xs">
+                                        <Button.Group>
+                                            {(['Area', 'Bar', 'Histogram', 'Baseline'] as const).map((t) => (
+                                                <Button
+                                                    key={t}
+                                                    variant={chartSeriesType === t ? 'filled' : 'white'}
+                                                    bg={chartSeriesType === t ? '#0C7C92' : undefined}
+                                                    size="xs"
+                                                    radius="lg"
+                                                    onClick={() => setChartSeriesType(t)}
+                                                >
+                                                    {t}
+                                                </Button>
+                                            ))}
+                                        </Button.Group>
+                                        <Badge size="lg" variant="light" color="cyan">
+                                            Last 12 Months
+                                        </Badge>
+                                    </Group>
                                 </Group>
                                 <Box className="h-96 w-full rounded-2xl overflow-hidden border border-slate-100 shadow-inner bg-white">
                                     <TradingViewChart
                                         data={getTradingViewData()}
+                                        type={chartSeriesType}
                                         height={380}
-                                        title={currencyView === 'USD' ? 'Revenue Flow ($)' : 'Revenue Flow (Br)'}
+                                        title={currencyView === 'USD' ? `${chartSeriesType} Revenue ($)` : `${chartSeriesType} Revenue (Br)`}
                                         colors={{
-                                            lineColor: '#0C7C92',
-                                            areaTopColor: 'rgba(12, 124, 146, 0.4)',
-                                            areaBottomColor: 'rgba(12, 124, 146, 0.05)',
+                                            upColor: '#10b981',
+                                            downColor: '#ef4444',
                                         }}
                                     />
                                 </Box>
