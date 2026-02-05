@@ -26,8 +26,7 @@ export default function AdminLayout({
                 />
 
                 {/* Main Content */}
-                <main className={`flex-1 transition-all duration-300 min-w-0 overflow-x-hidden ${sidebarOpen ? 'lg:ml-72' : 'lg:ml-20'
-                    }`}>
+                <main className={`flex-1 transition-all duration-300 min-w-0 overflow-x-hidden ${sidebarOpen ? 'lg:ml-72' : 'lg:ml-20'}`}>
                     <div className="p-4 md:p-6 max-w-full">
                         {children}
                     </div>

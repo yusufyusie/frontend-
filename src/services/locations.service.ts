@@ -105,6 +105,14 @@ class LocationsService {
         const response = await api.get(`${this.baseUrl}/rooms`, { params });
         return response.data;
     }
+
+    /**
+     * Get floors, optionally filtered by building
+     */
+    async getFloors(buildingId?: number): Promise<LocationOption[]> {
+        const response = await api.get(`${this.baseUrl}/buildings/${buildingId}/floors`);
+        return response.data;
+    }
 }
 
 export const locationsService = new LocationsService();

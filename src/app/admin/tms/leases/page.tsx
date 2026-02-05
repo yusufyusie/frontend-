@@ -8,7 +8,7 @@ import { motion } from 'framer-motion';
 
 import { LeaseForm } from '@/components/organisms/tms/LeaseForm';
 import { Modal } from '@/components/Modal';
-import { leasesService } from '@/services/leases.service';
+import { leasesService, Lease } from '@/services/leases.service';
 import { toast } from '@/components/Toast';
 import { DynamicStatusBadge } from '@/components/atoms/tms/DynamicStatusBadge';
 import { createPortal } from 'react-dom';

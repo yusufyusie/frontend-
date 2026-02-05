@@ -1,25 +1,25 @@
 'use client';
 
 import React from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, LabelList, Label } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, LabelList, Label } from 'recharts';
 import { Paper, Text, Stack, Group } from '@mantine/core';
 
-interface ITPCBarChartProps {
+interface ITPCAreaChartProps {
     data: { name: string;[key: string]: any }[];
     title: string;
+    description?: string;
     dataKeys: { key: string; color: string; label: string }[];
     height?: number;
     stacked?: boolean;
-    description?: string;
 }
 
-export const ITPCBarChart: React.FC<ITPCBarChartProps> = ({
+export const ITPCAreaChart: React.FC<ITPCAreaChartProps> = ({
     data,
     title,
+    description,
     dataKeys,
     height = 300,
     stacked = false,
-    description,
 }) => {
     const CustomTooltip = ({ active, payload, label }: any) => {
         if (active && payload && payload.length) {
@@ -74,10 +74,18 @@ export const ITPCBarChart: React.FC<ITPCBarChartProps> = ({
                 </Group>
 
                 <ResponsiveContainer width="100%" height={height}>
-                    <BarChart
+                    <AreaChart
                         data={data}
                         margin={{ top: 20, right: 30, left: 40, bottom: 30 }}
                     >
+                        <defs>
+                            {dataKeys.map((item) => (
+                                <linearGradient key={`grad-${item.key}`} id={`color-${item.key}`} x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="5%" stopColor={item.color} stopOpacity={0.3} />
+                                    <stop offset="95%" stopColor={item.color} stopOpacity={0.01} />
+                                </linearGradient>
+                            ))}
+                        </defs>
                         <CartesianGrid strokeDasharray="3 3" stroke="rgba(226, 232, 240, 0.5)" />
                         <XAxis
                             dataKey="name"
@@ -85,33 +93,37 @@ export const ITPCBarChart: React.FC<ITPCBarChartProps> = ({
                             axisLine={{ stroke: 'rgba(226, 232, 240, 0.5)' }}
                             dy={5}
                         >
-                            <Label value="Time Period" offset={-5} position="insideBottom" fill="#94A3B8" fontSize={11} fontWeight={700} />
+                            <Label value="Timeline" offset={-5} position="insideBottom" fill="#94A3B8" fontSize={11} fontWeight={700} />
                         </XAxis>
                         <YAxis
                             tick={{ fill: '#94A3B8', fontSize: 11, fontWeight: 700 }}
                             axisLine={{ stroke: 'rgba(226, 232, 240, 0.5)' }}
                             tickFormatter={(value) => value >= 1000 ? `${(value / 1000).toFixed(1)}k` : value}
                         >
-                            <Label value="Amount (USD)" angle={-90} position="insideLeft" style={{ textAnchor: 'middle', fill: '#94A3B8', fontSize: 11, fontWeight: 700 }} offset={10} />
+                            <Label value="Capital Flow (USD)" angle={-90} position="insideLeft" style={{ textAnchor: 'middle', fill: '#94A3B8', fontSize: 11, fontWeight: 700 }} offset={10} />
                         </YAxis>
-                        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(12, 124, 146, 0.05)' }} />
+                        <Tooltip content={<CustomTooltip />} />
                         <Legend
                             wrapperStyle={{ paddingTop: '20px' }}
                             iconType="circle"
                         />
                         {dataKeys.map((item) => (
-                            <Bar
+                            <Area
                                 key={item.key}
+                                type="monotone"
                                 dataKey={item.key}
                                 stackId={stacked ? "1" : undefined}
-                                fill={item.color}
+                                stroke={item.color}
+                                strokeWidth={3}
+                                fillOpacity={1}
+                                fill={`url(#color-${item.key})`}
                                 name={item.label}
-                                radius={stacked ? [0, 0, 0, 0] : [8, 8, 0, 0]}
+                                animationDuration={1500}
                             >
-                                {!stacked && <LabelList dataKey={item.key} position="top" style={{ fontSize: '10px', fontWeight: 900, fill: '#64748B' }} formatter={(v: any) => Number(v) >= 1000 ? `${(Number(v) / 1000).toFixed(1)}k` : v} />}
-                            </Bar>
+                                <LabelList dataKey={item.key} position="top" style={{ fontSize: '9px', fontWeight: 900, fill: item.color }} formatter={(v: any) => Number(v) >= 1000 ? `${(Number(v) / 1000).toFixed(1)}k` : v} />
+                            </Area>
                         ))}
-                    </BarChart>
+                    </AreaChart>
                 </ResponsiveContainer>
             </Stack>
         </Paper>

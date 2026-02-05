@@ -18,6 +18,9 @@ import { TenantJourneyMap } from '@/components/organisms/tms/TenantJourneyMap';
 import { VentureIntelCard } from '@/components/organisms/tms/VentureIntelCard';
 import { LifecycleTimeline } from '@/components/organisms/tms/LifecycleTimeline';
 import { PipelineUpdateModal } from '@/components/organisms/tms/PipelineUpdateModal';
+import { PaymentEntryModal } from '@/components/organisms/tms/PaymentEntryModal';
+import { DocumentUploadModal } from '@/components/organisms/tms/DocumentUploadModal';
+import { format } from 'date-fns';
 import { TenantProfilePreview } from '@/components/organisms/tms/TenantProfilePreview';
 import { toast } from '@/components/Toast';
 import Link from 'next/link';
@@ -27,13 +30,17 @@ export default function TenantDetailPage() {
     const id = parseInt(params.id as string);
     const [tenant, setTenant] = useState<Tenant | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [activeTab, setActiveTab] = useState<string | null>('overview');
     const [pipelineOpened, setPipelineOpened] = useState(false);
+    const [paymentOpened, setPaymentOpened] = useState(false);
+    const [docOpened, setDocOpened] = useState(false);
+    const [selectedSchedule, setSelectedSchedule] = useState<any>(null);
 
     useEffect(() => {
-        if (id) fetchTenant();
+        if (id) loadTenant();
     }, [id]);
 
-    const fetchTenant = async () => {
+    const loadTenant = async () => {
         setIsLoading(true);
         try {
             const res: any = await tenantsService.getOne(id);
@@ -238,6 +245,22 @@ export default function TenantDetailPage() {
                                                     <Text fw={700} mt={4} size="sm">{tenant.tinNumber || 'Not provided'}</Text>
                                                 </Box>
                                                 <Box>
+                                                    <Text size="xs" fw={800} c="dimmed" tt="uppercase">Trading Name</Text>
+                                                    <Text fw={700} mt={4} size="sm">{tenant.tradingName || '—'}</Text>
+                                                </Box>
+                                                <Box>
+                                                    <Text size="xs" fw={800} c="dimmed" tt="uppercase">Primary Contact</Text>
+                                                    <Text fw={700} mt={4} size="sm">{tenant.contactPerson || '—'}</Text>
+                                                </Box>
+                                                <Box>
+                                                    <Text size="xs" fw={800} c="dimmed" tt="uppercase">Business Type</Text>
+                                                    <Text fw={700} mt={4} size="sm" className="capitalize">{tenant.businessType || '—'}</Text>
+                                                </Box>
+                                                <Box>
+                                                    <Text size="xs" fw={800} c="dimmed" tt="uppercase">Active Phase</Text>
+                                                    <Text fw={700} mt={4} size="sm">{tenant.phase || 'Phase 1'}</Text>
+                                                </Box>
+                                                <Box>
                                                     <Text size="xs" fw={800} c="dimmed" tt="uppercase">Operational Email</Text>
                                                     <Group gap="xs" mt={4}>
                                                         <Mail size={14} className="text-blue-500" />
@@ -252,6 +275,13 @@ export default function TenantDetailPage() {
                                                     </Group>
                                                 </Box>
                                             </SimpleGrid>
+
+                                            <Divider my="xl" label="Business Activities" labelPosition="center" />
+                                            <Paper withBorder p="md" radius="lg" bg="slate.0" className="border-dashed bg-slate-50/50">
+                                                <Text size="sm" fw={500} italic={!tenant.activities} c={!tenant.activities ? 'dimmed' : 'slate.8'}>
+                                                    {tenant.activities || 'No specific business activities registered.'}
+                                                </Text>
+                                            </Paper>
 
                                             <Divider my="xl" label="Corporate Headquarters" labelPosition="center" />
                                             <Paper withBorder p="md" radius="lg" bg="gray.0" className="border-dashed">
@@ -327,60 +357,155 @@ export default function TenantDetailPage() {
                                     </Table>
                                 </Paper>
                             </Tabs.Panel>
-
                             <Tabs.Panel value="vault">
                                 <Paper withBorder p="xl" radius="xl" className="glass shadow-md">
                                     <Group justify="space-between" mb="xl">
                                         <Box>
-                                            <Title order={4} className="text-[#16284F]">Compliance Records</Title>
-                                            <Text size="xs" c="dimmed">Encrypted storage for legal and KM artifacts</Text>
+                                            <Title order={4} className="text-[#16284F]">Operational Documents</Title>
+                                            <Text size="xs" c="dimmed">LoI, Proposals, Contracts, and Investment Permits</Text>
                                         </Box>
-                                        <Button variant="light" size="xs" leftSection={<Plus size={14} />} className="rounded-xl">Upload Artifact</Button>
+                                        <Button
+                                            variant="light"
+                                            color="blue"
+                                            leftSection={<FileText size={14} />}
+                                            className="rounded-xl"
+                                            onClick={() => setDocOpened(true)}
+                                        >
+                                            Upload Document
+                                        </Button>
                                     </Group>
 
                                     {tenant.documents?.length === 0 ? (
                                         <Box py={60} style={{ textAlign: 'center' }}>
-                                            <FileCheck size={48} className="mx-auto text-gray-200 mb-4" strokeWidth={1} />
-                                            <Text c="dimmed" size="sm" fw={500}>The vault is empty. Upload registration documents for verification.</Text>
+                                            <FileText size={48} className="mx-auto text-gray-200 mb-4" strokeWidth={1} />
+                                            <Title order={4} fw={800} className="text-gray-400">Vault Empty</Title>
+                                            <Text c="dimmed" size="sm" mt="xs" maw={400} mx="auto">No document records found. Upload regulatory or contract files to track compliance.</Text>
                                         </Box>
                                     ) : (
-                                        <Stack gap="md">
-                                            {tenant.documents?.map((doc: any) => (
-                                                <Paper key={doc.id} withBorder p="md" radius="lg" bg="white/50" className="hover-lift transition-base shadow-sm">
-                                                    <Group justify="space-between">
-                                                        <Group>
-                                                            <Box p={10} bg="blue.0" style={{ borderRadius: '12px' }}>
-                                                                <FileCheck size={20} className="text-blue-600" />
-                                                            </Box>
-                                                            <Box>
+                                        <Table verticalSpacing="md" highlightOnHover>
+                                            <Table.Thead className="bg-gray-50/50">
+                                                <Table.Tr>
+                                                    <Table.Th h={rem(40)}>Document Name</Table.Th>
+                                                    <Table.Th>Type</Table.Th>
+                                                    <Table.Th>Added On</Table.Th>
+                                                    <Table.Th>Expiry</Table.Th>
+                                                    <Table.Th>Action</Table.Th>
+                                                </Table.Tr>
+                                            </Table.Thead>
+                                            <Table.Tbody>
+                                                {tenant.documents?.map((doc: any) => (
+                                                    <Table.Tr key={doc.id}>
+                                                        <Table.Td>
+                                                            <Group gap="sm">
+                                                                <FileText size={16} className="text-blue-600" />
                                                                 <Text fw={700} size="sm">{doc.name}</Text>
-                                                                <Group gap="xs">
-                                                                    <Badge size="xs" variant="outline" radius="sm" color="gray">{doc.category || 'General'}</Badge>
-                                                                    {doc.expiryDate && (
-                                                                        <Text size="xs" c="dimmed" fw={500}>Validity until: {new Date(doc.expiryDate).toLocaleDateString()}</Text>
-                                                                    )}
-                                                                </Group>
-                                                            </Box>
-                                                        </Group>
-                                                        <Group>
-                                                            <Button variant="subtle" size="xs">View</Button>
-                                                            <Button variant="subtle" size="xs" color="red">Revoke</Button>
-                                                        </Group>
-                                                    </Group>
-                                                </Paper>
-                                            ))}
-                                        </Stack>
+                                                            </Group>
+                                                        </Table.Td>
+                                                        <Table.Td>
+                                                            <Badge size="xs" variant="outline" color="gray">
+                                                                {doc.metadata?.type || 'OTHER'}
+                                                            </Badge>
+                                                        </Table.Td>
+                                                        <Table.Td>
+                                                            <Text size="xs" c="dimmed">{doc.createdAt ? format(new Date(doc.createdAt), 'MMM dd, yyyy') : 'N/A'}</Text>
+                                                        </Table.Td>
+                                                        <Table.Td>
+                                                            {doc.expiryDate ? (
+                                                                <Text size="xs" fw={700} color={new Date(doc.expiryDate) < new Date() ? 'red' : 'green'}>
+                                                                    {format(new Date(doc.expiryDate), 'MMM dd, yyyy')}
+                                                                </Text>
+                                                            ) : (
+                                                                <Text size="xs" c="dimmed">No Expiry</Text>
+                                                            )}
+                                                        </Table.Td>
+                                                        <Table.Td>
+                                                            <Group gap="xs">
+                                                                <Button component="a" href={doc.fileUrl} target="_blank" variant="subtle" size="compact-xs">View</Button>
+                                                                <Button variant="subtle" size="compact-xs" color="red">Revoke</Button>
+                                                            </Group>
+                                                        </Table.Td>
+                                                    </Table.Tr>
+                                                ))}
+                                            </Table.Tbody>
+                                        </Table>
                                     )}
                                 </Paper>
                             </Tabs.Panel>
 
                             <Tabs.Panel value="ledger">
-                                <Paper withBorder p="xl" radius="xl" className="glass shadow-md" style={{ textAlign: 'center' }}>
-                                    <Box py={60}>
-                                        <LayoutDashboard size={48} className="mx-auto text-gray-200 mb-4" strokeWidth={1} />
-                                        <Title order={4} fw={800} className="text-gray-400">Ledger Offline</Title>
-                                        <Text c="dimmed" size="sm" mt="xs" maw={400} mx="auto">The financial ledger is being provisioned. Payment history and invoicing will be synchronized in the next service update.</Text>
-                                    </Box>
+                                <Paper withBorder p="xl" radius="xl" className="glass shadow-md">
+                                    <Group justify="space-between" mb="lg">
+                                        <Box>
+                                            <Title order={4} className="text-[#16284F]">Financial Ledger & Payment Schedules</Title>
+                                            <Text size="xs" c="dimmed">Automated monthly/annual due tracking vs physical collections</Text>
+                                        </Box>
+                                        <Button
+                                            variant="light"
+                                            color="blue"
+                                            leftSection={<Plus size={14} />}
+                                            className="rounded-xl"
+                                            onClick={() => {
+                                                setSelectedSchedule(null);
+                                                setPaymentOpened(true);
+                                            }}
+                                        >
+                                            Record Partial Payment
+                                        </Button>
+                                    </Group>
+
+                                    {tenant.leases?.[0]?.paymentSchedules?.length === 0 || !tenant.leases?.[0]?.paymentSchedules ? (
+                                        <Box py={60} style={{ textAlign: 'center' }}>
+                                            <LayoutDashboard size={48} className="mx-auto text-gray-200 mb-4" strokeWidth={1} />
+                                            <Title order={4} fw={800} className="text-gray-400">Ledger Empty</Title>
+                                            <Text c="dimmed" size="sm" mt="xs" maw={400} mx="auto">No payment schedules have been generated yet. Complete the contract setup to activate the financial tracker.</Text>
+                                        </Box>
+                                    ) : (
+                                        <Table verticalSpacing="md" highlightOnHover>
+                                            <Table.Thead className="bg-gray-50/50">
+                                                <Table.Tr>
+                                                    <Table.Th h={rem(40)}>Period</Table.Th>
+                                                    <Table.Th>Due Date</Table.Th>
+                                                    <Table.Th>Amount Due</Table.Th>
+                                                    <Table.Th>Amount Paid</Table.Th>
+                                                    <Table.Th>Status</Table.Th>
+                                                    <Table.Th>Action</Table.Th>
+                                                </Table.Tr>
+                                            </Table.Thead>
+                                            <Table.Tbody>
+                                                {tenant.leases?.[0]?.paymentSchedules?.map((ps: any) => (
+                                                    <Table.Tr key={ps.id}>
+                                                        <Table.Td><Text fw={800} size="sm">{ps.month} {ps.year}</Text></Table.Td>
+                                                        <Table.Td><Text size="xs" fw={700} c="dimmed">{new Date(ps.dueDate).toLocaleDateString()}</Text></Table.Td>
+                                                        <Table.Td><Text fw={800} size="sm" c="blue.9">{Number(ps.amountDue).toLocaleString()} {tenant.leases?.[0]?.currency || 'USD'}</Text></Table.Td>
+                                                        <Table.Td><Text fw={700} size="sm" c="teal.8">{Number(ps.amountPaid).toLocaleString()}</Text></Table.Td>
+                                                        <Table.Td>
+                                                            <Badge
+                                                                size="xs"
+                                                                variant="filled"
+                                                                color={ps.status === 'PAID' ? 'teal' : ps.status === 'OVERDUE' ? 'red' : 'blue'}
+                                                            >
+                                                                {ps.status}
+                                                            </Badge>
+                                                        </Table.Td>
+                                                        <Table.Td>
+                                                            <Button
+                                                                variant="filled"
+                                                                color="teal"
+                                                                size="compact-xs"
+                                                                radius="xl"
+                                                                onClick={() => {
+                                                                    setSelectedSchedule(ps);
+                                                                    setPaymentOpened(true);
+                                                                }}
+                                                            >
+                                                                Pay
+                                                            </Button>
+                                                        </Table.Td>
+                                                    </Table.Tr>
+                                                ))}
+                                            </Table.Tbody>
+                                        </Table>
+                                    )}
                                 </Paper>
                             </Tabs.Panel>
                         </Tabs>
@@ -392,8 +517,29 @@ export default function TenantDetailPage() {
                 opened={pipelineOpened}
                 onClose={() => setPipelineOpened(false)}
                 tenant={tenant}
-                onUpdate={fetchTenant}
+                onUpdate={loadTenant}
             />
+
+            {tenant && tenant.leases?.[0] && (
+                <PaymentEntryModal
+                    opened={paymentOpened}
+                    onClose={() => setPaymentOpened(false)}
+                    leaseId={tenant.leases[0].id}
+                    scheduleId={selectedSchedule?.id}
+                    amountDue={selectedSchedule ? (Number(selectedSchedule.amountDue) - Number(selectedSchedule.amountPaid)) : 0}
+                    period={selectedSchedule ? `${selectedSchedule.month} ${selectedSchedule.year}` : ''}
+                    onSuccess={loadTenant}
+                />
+            )}
+
+            {tenant && (
+                <DocumentUploadModal
+                    opened={docOpened}
+                    onClose={() => setDocOpened(false)}
+                    tenantId={tenant.id}
+                    onSuccess={loadTenant}
+                />
+            )}
         </Container>
     );
 }

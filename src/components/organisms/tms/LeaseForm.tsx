@@ -134,7 +134,7 @@ export function LeaseForm({ initialData = {}, onSubmit, isLoading }: LeaseFormPr
                                     <MantineSelect
                                         label="Corporate Tenant"
                                         placeholder="Identify IT Park Resident..."
-                                        data={tenants.map(t => ({ value: t.id.toString(), label: t.name }))}
+                                        data={tenants.map(t => ({ value: t.id.toString(), label: t.name || 'Unnamed Tenant' }))}
                                         value={formData.tenantId}
                                         onChange={(v) => setFormData({ ...formData, tenantId: v || '' })}
                                         searchable

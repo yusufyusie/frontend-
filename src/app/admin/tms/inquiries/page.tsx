@@ -74,7 +74,7 @@ export default function InquiriesDashboardPage() {
                 (pipelineFilter === 'LAND' && i.inquiryType === 'LAND_SUBLEASE');
 
             const matchesSearch = !searchQuery ||
-                i.tenant?.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                i.tenant?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 i.inquiryNumber?.toLowerCase().includes(searchQuery.toLowerCase());
 
             return matchesPipeline && matchesSearch;
@@ -263,8 +263,10 @@ export default function InquiriesDashboardPage() {
                         <Table verticalSpacing="lg" horizontalSpacing="xl" className="border-separate border-spacing-y-3 px-8">
                             <thead>
                                 <tr>
-                                    <th className="text-[10px] font-black uppercase text-slate-400 py-4 pl-6 tracking-widest">Resident Entity Identification</th>
+                                    <th className="text-[10px] font-black uppercase text-slate-400 py-4 pl-6 tracking-widest">Tenant Entity</th>
                                     <th className="text-[10px] font-black uppercase text-slate-400 tracking-widest text-center">Inquiry Purpose</th>
+                                    <th className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Phase</th>
+                                    <th className="text-[10px] font-black uppercase text-slate-400 tracking-widest text-center">Applied On</th>
                                     <th className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Spatial & Fiscal Context</th>
                                     <th className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Lifecycle Status</th>
                                     <th className="text-[10px] font-black uppercase text-slate-400 pr-6 text-right text-transparent">Action</th>
@@ -287,7 +289,7 @@ export default function InquiriesDashboardPage() {
                                             <td className="py-6 pl-8 rounded-l-[2.5rem]">
                                                 <Group gap="lg">
                                                     <Avatar size={54} color={getStatusColor(inquiry.status)} radius="18px" fw={900} className="shadow-lg border-2 border-white">
-                                                        {inquiry.tenant?.name.substring(0, 2).toUpperCase()}
+                                                        {inquiry.tenant?.name?.substring(0, 2).toUpperCase() || '??'}
                                                     </Avatar>
                                                     <Stack gap={2}>
                                                         <Text size="md" fw={800} className="text-brand-navy tracking-tight font-primary group-hover:text-brand-teal transition-colors">
@@ -297,43 +299,36 @@ export default function InquiriesDashboardPage() {
                                                             <Badge variant="filled" color="slate" size="xs" radius="xs" className="font-mono text-[9px] px-1.5 h-4">
                                                                 {inquiry.inquiryNumber || `SEQ-${inquiry.id}`}
                                                             </Badge>
-                                                            <Text size="xs" c="dimmed" fw={700} className="capitalize">
-                                                                {format(new Date(inquiry.createdAt), 'MMM dd, yyyy')}
-                                                            </Text>
                                                         </Group>
                                                     </Stack>
                                                 </Group>
                                             </td>
                                             <td className="text-center">
-                                                {inquiry.inquiryType === 'LAND_SUBLEASE' ? (
-                                                    <Tooltip label="Industrial Land Sublease" position="top" withArrow transitionProps={{ transition: 'pop' }}>
-                                                        <Badge
-                                                            variant="light"
-                                                            color="teal"
-                                                            size="lg"
-                                                            p="md"
-                                                            radius="xl"
-                                                            className="font-black tracking-widest border border-teal-100 shadow-sm"
-                                                            leftSection={<Factory size={14} />}
-                                                        >
-                                                            LAND LEASE
-                                                        </Badge>
-                                                    </Tooltip>
-                                                ) : (
-                                                    <Tooltip label="Commercial Office Space" position="top" withArrow transitionProps={{ transition: 'pop' }}>
-                                                        <Badge
-                                                            variant="light"
-                                                            color="blue"
-                                                            size="lg"
-                                                            p="md"
-                                                            radius="xl"
-                                                            className="font-black tracking-widest border border-blue-100 shadow-sm"
-                                                            leftSection={<Briefcase size={14} />}
-                                                        >
-                                                            OFFICE RENT
-                                                        </Badge>
-                                                    </Tooltip>
-                                                )}
+                                                {/* ... (Badge logic) ... */}
+                                                <Group gap={4} justify="center">
+                                                    {inquiry.inquiryType === 'LAND_SUBLEASE' ? (
+                                                        <Badge variant="light" color="teal" size="lg" radius="xl" p="md" leftSection={<Factory size={14} />}>LAND LEASE</Badge>
+                                                    ) : (
+                                                        <Badge variant="light" color="blue" size="lg" radius="xl" p="md" leftSection={<Briefcase size={14} />}>OFFICE RENT</Badge>
+                                                    )}
+                                                </Group>
+                                            </td>
+                                            <td>
+                                                <Badge
+                                                    variant="filled"
+                                                    color="gray"
+                                                    size="lg"
+                                                    radius="md"
+                                                    className="font-black px-4"
+                                                    styles={{ label: { color: '#475569' } }}
+                                                >
+                                                    {inquiry.phase || 'Phase 1'}
+                                                </Badge>
+                                            </td>
+                                            <td className="text-center">
+                                                <Text size="xs" fw={800} c="slate.4" className="font-primary uppercase tracking-wider">
+                                                    {format(new Date(inquiry.applicationDate || inquiry.createdAt), 'MMM dd, yyyy')}
+                                                </Text>
                                             </td>
                                             <td>
                                                 <Group gap="xl">

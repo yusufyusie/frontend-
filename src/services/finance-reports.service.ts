@@ -11,7 +11,6 @@ export interface FinanceFilter {
     industry?: string;
 }
 
-// ... (other interfaces remain the same, keeping them for context in replacement)
 export interface KPISummary {
     totalCollectionsUsd: number;
     totalCollectionsEtb: number;
@@ -145,6 +144,22 @@ export interface DataCenterAgreement {
     monthsRemaining: number;
 }
 
+export interface LeaseDistribution {
+    name: string;
+    value: number;
+}
+
+export interface RevenueSource {
+    name: string;
+    value: number;
+}
+
+export interface PortfolioHealth {
+    name: string;
+    value: number;
+    fullMark: number;
+}
+
 class FinanceReportsService {
     private buildQueryString(filter: FinanceFilter): string {
         const params = new URLSearchParams();
@@ -215,6 +230,25 @@ class FinanceReportsService {
         const response = await api.get(`/reports/finance/datacenter-agreements?${query}`);
         return { data: response.data };
     }
+
+    async getLeaseDistribution(filter: FinanceFilter = {}): Promise<{ data: LeaseDistribution[] }> {
+        const query = this.buildQueryString(filter);
+        const response = await api.get(`/reports/finance/lease-distribution?${query}`);
+        return { data: response.data };
+    }
+
+    async getRevenueSources(filter: FinanceFilter = {}): Promise<{ data: RevenueSource[] }> {
+        const query = this.buildQueryString(filter);
+        const response = await api.get(`/reports/finance/revenue-sources?${query}`);
+        return { data: response.data };
+    }
+
+    async getPortfolioHealth(filter: FinanceFilter = {}): Promise<{ data: PortfolioHealth[] }> {
+        const query = this.buildQueryString(filter);
+        const response = await api.get(`/reports/finance/portfolio-health?${query}`);
+        return { data: response.data };
+    }
 }
 
 export const financeReportsService = new FinanceReportsService();
+export default financeReportsService;

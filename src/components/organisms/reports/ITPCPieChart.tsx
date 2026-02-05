@@ -10,6 +10,7 @@ interface ITPCPieChartProps {
     colors?: string[];
     innerRadius?: number;
     height?: number;
+    description?: string;
 }
 
 const ITPC_COLORS = [
@@ -29,6 +30,7 @@ export const ITPCPieChart: React.FC<ITPCPieChartProps> = ({
     colors = ITPC_COLORS,
     innerRadius = 0,
     height = 300,
+    description,
 }) => {
     const CustomTooltip = ({ active, payload }: any) => {
         if (active && payload && payload.length) {
@@ -75,12 +77,14 @@ export const ITPCPieChart: React.FC<ITPCPieChartProps> = ({
             <Stack gap="md" className="h-full">
                 <Group justify="space-between" align="center">
                     <Stack gap={2}>
-                        <Text size="xs" fw={900} className="text-[#0C7C92] uppercase tracking-[0.2em]">
-                            Distribution Analysis
-                        </Text>
-                        <Text size="lg" fw={950} className="text-slate-900">
+                        <Text size="lg" fw={950} className="text-slate-900 leading-none">
                             {title}
                         </Text>
+                        {description && (
+                            <Text size="xs" className="text-slate-500 max-w-xs leading-relaxed mt-1">
+                                {description}
+                            </Text>
+                        )}
                     </Stack>
                     <div className="h-0.5 w-8 bg-[#0C7C92] rounded-full" />
                 </Group>
@@ -96,10 +100,10 @@ export const ITPCPieChart: React.FC<ITPCPieChartProps> = ({
                             fill="#8884d8"
                             dataKey="value"
                             label={(props: any) => {
-                                const { name, percent } = props;
-                                return `${name}: ${(percent * 100).toFixed(0)}%`;
+                                const { name, value, percent } = props;
+                                return `${name}: ${(percent * 100).toFixed(1)}%`;
                             }}
-                            labelLine={false}
+                            labelLine={true}
                         >
                             {data.map((entry, index) => (
                                 <Cell

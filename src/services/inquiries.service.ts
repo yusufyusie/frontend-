@@ -33,6 +33,9 @@ export interface Inquiry {
     inquiryType?: string;
     tenantId: number;
     applicantName?: string;
+    legalName?: string;
+    tradingName?: string;
+    registrationNumber?: string;
     applicationDate: string;
     purpose?: string;
     requestedSize?: number;
@@ -67,8 +70,15 @@ export interface Inquiry {
     offerAcceptedDate?: string;
     offeredSpace?: number;
     offeredRate?: number;
+    offeredRateEtb?: number;
+    landPriceEtb?: number;
+    totalLandValue?: number;
     offeredCurrency?: string;
     offeredAmount?: number;
+    landTitleRef?: string;
+    phase?: string;
+    exchangeRate?: number;
+    rateType?: string;
 
     // Assigned Locations
     assignedZoneId?: number;

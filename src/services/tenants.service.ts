@@ -13,17 +13,24 @@ export interface TenantContact {
 
 export interface Tenant {
     id: number;
-    name: string;
+    name?: string; // Legacy: moved to tradingName
     companyRegNumber: string;
     tinNumber?: string;
     businessCategoryId?: number; // Legacy
     industryId?: number; // New: Top-level classification
     sectorId?: number; // New: Sub-classification
     statusId?: number;
+    legalName?: string;
+    registrationNumber?: string;
     email?: string;
     phone?: string;
     website?: string;
     address?: string;
+    tradingName?: string;
+    contactPerson?: string;
+    businessType?: string;
+    phase?: string;
+    activities?: string;
     regionId?: number;
     cityId?: number;
     metadata?: any;

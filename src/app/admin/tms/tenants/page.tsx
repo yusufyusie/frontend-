@@ -302,7 +302,7 @@ export default function TenantDirectoryPage() {
                                                             className="shadow-md border-2 border-white font-bold text-[#16284F]"
                                                             style={{ border: `2px solid ${track.color === 'teal' ? '#2dd4bf' : track.color === 'blue' ? '#60a5fa' : '#e2e8f0'}` }}
                                                         >
-                                                            {tenant.name.substring(0, 2).toUpperCase()}
+                                                            {(tenant.tradingName || tenant.legalName || 'UK').substring(0, 2).toUpperCase()}
                                                         </Avatar>
                                                         <div className={`absolute -bottom-1 -right-1 p-1 rounded-full border-2 border-white bg-${track.color}-500 shadow-sm`}>
                                                             <TrackIcon size={10} className="text-white" />
@@ -311,7 +311,7 @@ export default function TenantDirectoryPage() {
                                                     <Stack gap={2}>
                                                         <Group gap="xs">
                                                             <Text size="md" fw={800} className="text-brand-navy tracking-tight font-primary group-hover:text-brand-teal transition-colors leading-tight">
-                                                                {tenant.name}
+                                                                {tenant.tradingName || tenant.legalName || 'Unknown'}
                                                             </Text>
                                                             {tenant.website && (
                                                                 <Tooltip label="Visit Corporate Portal">

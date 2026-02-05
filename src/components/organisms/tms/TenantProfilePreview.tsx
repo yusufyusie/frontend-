@@ -96,8 +96,18 @@ export const TenantProfilePreview = ({ data, bizCategoryLabel, statusLabel }: Te
                     <Box>
                         <Text size="xs" fw={900} c="#0C7C92" tt="uppercase" lts="1.5px" mb={4}>Organization Profile</Text>
                         <Text size={rem(32)} fw={900} c="#16284F" lts="-1px" style={{ lineHeight: 1.05 }}>
-                            {data.name || 'Company Name'}
+                            {data.tradingName || data.legalName || 'Company Name'}
                         </Text>
+                        {data.tradingName && (
+                            <Text size="sm" fw={700} c="dimmed" mt={4}>
+                                T/A: {data.tradingName}
+                            </Text>
+                        )}
+                        {data.legalName && (
+                            <Text size="xs" fw={700} c="dimmed" mt={2} className="uppercase tracking-tight">
+                                Legal: {data.legalName}
+                            </Text>
+                        )}
                         <Group gap="xs" mt="lg">
                             <Badge color="#16284F" variant="filled" size="sm" radius="xs" fw={900} className="tracking-widest">CERTIFIED</Badge>
                             <Badge color="blue" variant="dot" size="sm" fw={800}>{bizCategoryLabel || 'GENERAL SECTOR'}</Badge>
@@ -111,6 +121,7 @@ export const TenantProfilePreview = ({ data, bizCategoryLabel, statusLabel }: Te
                                     STARTUP
                                 </Badge>
                             )}
+                            <Badge color="cyan" variant="filled" size="sm" fw={900}>{data.phase || 'Phase 1'}</Badge>
                         </Group>
                     </Box>
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Modal, Button, Stack, TextInput, NumberInput, Textarea, Group, Text, Title, Stepper, Select, Divider, Paper, Box, Badge, ScrollArea } from '@mantine/core';
+import { Modal, Button, Stack, TextInput, NumberInput, Textarea, Group, Text, Title, Stepper, Select, Divider, Paper, Box, Badge, ScrollArea, SimpleGrid, rem } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
 import {
     Send,
@@ -24,6 +24,8 @@ import {
 } from 'lucide-react';
 import { inquiriesService, Inquiry } from '@/services/inquiries.service';
 import { lookupsService, SystemLookup } from '@/services/lookups.service';
+import { exchangeRateService } from '@/services/exchange-rate.service';
+import { locationsService, LocationOption } from '@/services/locations.service';
 import { toast } from '@/components/Toast';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -95,6 +97,29 @@ export function PipelineUpdateModal({ opened, onClose, inquiry, onSuccess, tenan
     // Land Specific
     const [landTitleRef, setLandTitleRef] = useState<string>(targetInquiry?.landTitleRef || '');
     const [constructionStatusId, setConstructionStatusId] = useState<number | string>(targetInquiry?.constructionStatusId || '');
+    const [submissionDate, setSubmissionDate] = useState<Date | null>(targetInquiry?.proposalSubmissionDate ? new Date(targetInquiry.proposalSubmissionDate) : new Date());
+    const [offeredRateEtb, setOfferedRateEtb] = useState<number | string>(targetInquiry?.offeredRateEtb || 0);
+    const [landPriceEtb, setLandPriceEtb] = useState<number | string>(targetInquiry?.landPriceEtb || 0);
+    const [phase, setPhase] = useState<string>(targetInquiry?.phase || 'Phase 1');
+    const [exchangeRate, setExchangeRate] = useState<number>(targetInquiry?.exchangeRate || 1);
+    const [rateType, setRateType] = useState<string>(targetInquiry?.rateType || (isLand ? 'land_price' : 'monthly_rent'));
+
+    // Spatial State (Form B)
+    const [assignedZoneId, setAssignedZoneId] = useState<number | string>(targetInquiry?.assignedZoneId || '');
+    const [assignedBlockId, setAssignedBlockId] = useState<number | string>(targetInquiry?.assignedBlockId || '');
+    const [assignedPlotId, setAssignedPlotId] = useState<number | string>(targetInquiry?.assignedPlotId || '');
+    const [assignedBuildingId, setAssignedBuildingId] = useState<number | string>(targetInquiry?.assignedBuildingId || '');
+    const [assignedFloorId, setAssignedFloorId] = useState<number | string>(targetInquiry?.assignedFloorId || '');
+    const [assignedRoomId, setAssignedRoomId] = useState<number | string>(targetInquiry?.assignedRoomId || '');
+    const [assignedLandResourceId, setAssignedLandResourceId] = useState<number | string>(targetInquiry?.assignedLandResourceId || '');
+
+    const [zones, setZones] = useState<LocationOption[]>([]);
+    const [blocks, setBlocks] = useState<LocationOption[]>([]);
+    const [plots, setPlots] = useState<LocationOption[]>([]);
+    const [buildings, setBuildings] = useState<LocationOption[]>([]);
+    const [floors, setFloors] = useState<LocationOption[]>([]);
+    const [rooms, setRooms] = useState<LocationOption[]>([]);
+
 
     useEffect(() => {
         loadLookups();
@@ -102,12 +127,18 @@ export function PipelineUpdateModal({ opened, onClose, inquiry, onSuccess, tenan
 
     const loadLookups = async () => {
         try {
-            const [curRes, constRes] = await Promise.all([
+            const [curRes, constRes, rateRes, zoneRes] = await Promise.all([
                 lookupsService.getByCategory('CURRENCY_TYPES'),
-                lookupsService.getByCategory('LEASE_CONSTRUCTION_STATUS')
+                lookupsService.getByCategory('LEASE_CONSTRUCTION_STATUS'),
+                exchangeRateService.getLatest(),
+                locationsService.getZones()
             ]);
             setCurrencies((curRes as any).data || curRes);
             setConstructionStatuses((constRes as any).data || constRes);
+            setZones(zoneRes);
+            if (rateRes && rateRes.rate) {
+                setExchangeRate(rateRes.rate);
+            }
         } catch (e) {
             console.error('Failed to load specialized lookups');
         }
@@ -131,9 +162,86 @@ export function PipelineUpdateModal({ opened, onClose, inquiry, onSuccess, tenan
             setGracePeriodRemarks(targetInquiry.gracePeriodRemarks || '');
             setLandTitleRef(targetInquiry.landTitleRef || '');
             setConstructionStatusId(targetInquiry.constructionStatusId || '');
+            setSubmissionDate(targetInquiry.proposalSubmissionDate ? new Date(targetInquiry.proposalSubmissionDate) : new Date());
+            setOfferedRateEtb(targetInquiry.offeredRateEtb || 0);
+            setLandPriceEtb(targetInquiry.landPriceEtb || 0);
+            setPhase(targetInquiry.phase || 'Phase 1');
+            setExchangeRate(targetInquiry.exchangeRate || exchangeRate || 1);
+            setRateType(targetInquiry.rateType || (isLand ? 'land_price' : 'monthly_rent'));
+            setAssignedZoneId(targetInquiry.assignedZoneId || '');
+            setAssignedBlockId(targetInquiry.assignedBlockId || '');
+            setAssignedPlotId(targetInquiry.assignedPlotId || '');
+            setAssignedBuildingId(targetInquiry.assignedBuildingId || '');
+            setAssignedFloorId(targetInquiry.assignedFloorId || '');
+            setAssignedRoomId(targetInquiry.assignedRoomId || '');
+            setAssignedLandResourceId(targetInquiry.assignedLandResourceId || '');
             setRemarks(''); // Reset remarks on inquiry change
         }
     }, [targetInquiry?.id, targetInquiry?.status, isLand]);
+
+    // Cascading Spatial Fetchers
+    useEffect(() => {
+        if (assignedZoneId) {
+            locationsService.getBlocks(Number(assignedZoneId)).then(setBlocks);
+        } else {
+            setBlocks([]);
+        }
+    }, [assignedZoneId]);
+
+    useEffect(() => {
+        if (assignedBlockId) {
+            locationsService.getPlots(Number(assignedBlockId)).then(setPlots);
+        } else {
+            setPlots([]);
+        }
+    }, [assignedBlockId]);
+
+    useEffect(() => {
+        if (assignedPlotId) {
+            locationsService.getBuildings({ plotId: Number(assignedPlotId) }).then(setBuildings);
+        } else {
+            setBuildings([]);
+        }
+    }, [assignedPlotId]);
+
+    useEffect(() => {
+        if (assignedBuildingId) {
+            locationsService.getFloors(Number(assignedBuildingId)).then(setFloors);
+        } else {
+            setFloors([]);
+        }
+    }, [assignedBuildingId]);
+
+    useEffect(() => {
+        if (assignedFloorId) {
+            locationsService.getRooms(Number(assignedFloorId)).then(setRooms);
+        } else {
+            setRooms([]);
+        }
+    }, [assignedFloorId]);
+
+    // --- Dynamic Pricing Engine ---
+    const handleOfferedRateChange = (val: number | string) => {
+        const numVal = Number(val);
+        setOfferedRate(numVal);
+        if (exchangeRate > 0) {
+            setOfferedRateEtb((numVal * exchangeRate).toFixed(4));
+        }
+    };
+
+    const handleOfferedRateEtbChange = (val: number | string) => {
+        const numVal = Number(val);
+        setOfferedRateEtb(numVal);
+        if (exchangeRate > 0) {
+            setOfferedRate((numVal / exchangeRate).toFixed(4));
+        }
+    };
+
+    const handleLandPriceEtbChange = (val: number | string) => {
+        setLandPriceEtb(val);
+    };
+
+    const totalLandValue = (Number(landPriceEtb) * Number(offeredSpace));
 
     if (!targetInquiry) return null;
 
@@ -143,7 +251,8 @@ export function PipelineUpdateModal({ opened, onClose, inquiry, onSuccess, tenan
             await inquiriesService.submitProposal(targetInquiry.id, {
                 capexFDI: Number(capexFDI),
                 estimatedJobs: Number(estimatedJobs),
-                remarks: remarks
+                remarks: remarks,
+                submissionDate: submissionDate?.toISOString()
             });
             toast.success('Proposal submitted successfully');
             handleSuccess && handleSuccess();
@@ -175,9 +284,21 @@ export function PipelineUpdateModal({ opened, onClose, inquiry, onSuccess, tenan
             await inquiriesService.generateOffer(targetInquiry.id, {
                 offeredSpace: Number(offeredSpace),
                 offeredRate: Number(offeredRate),
+                offeredRateEtb: Number(offeredRateEtb),
+                landPriceEtb: Number(landPriceEtb),
+                totalLandValue: totalLandValue,
+                exchangeRate: Number(exchangeRate),
+                rateType: rateType,
                 offeredCurrency,
                 validUntil: validUntil?.toISOString(),
-                remarks: remarks
+                remarks: remarks,
+                assignedZoneId: assignedZoneId ? Number(assignedZoneId) : undefined,
+                assignedBlockId: assignedBlockId ? Number(assignedBlockId) : undefined,
+                assignedPlotId: assignedPlotId ? Number(assignedPlotId) : undefined,
+                assignedBuildingId: assignedBuildingId ? Number(assignedBuildingId) : undefined,
+                assignedFloorId: assignedFloorId ? Number(assignedFloorId) : undefined,
+                assignedRoomId: assignedRoomId ? Number(assignedRoomId) : undefined,
+                assignedLandResourceId: assignedLandResourceId ? Number(assignedLandResourceId) : undefined,
             });
             toast.success('Official offer letter generated');
             handleSuccess && handleSuccess();
@@ -217,6 +338,12 @@ export function PipelineUpdateModal({ opened, onClose, inquiry, onSuccess, tenan
                 gracePeriodOffset: Number(gracePeriodOffset),
                 gracePeriodRemarks: gracePeriodRemarks,
                 landTitleRef,
+                phase,
+                exchangeRate: Number(exchangeRate),
+                rateType: rateType,
+                offeredRateEtb: Number(offeredRateEtb),
+                landPriceEtb: Number(landPriceEtb),
+                totalLandValue: totalLandValue,
                 constructionStatusId: constructionStatusId ? Number(constructionStatusId) : undefined
             });
             toast.success('Contract fulfilled & lease activated');
@@ -311,6 +438,16 @@ export function PipelineUpdateModal({ opened, onClose, inquiry, onSuccess, tenan
 
                         <Paper withBorder p="xl" radius="2rem" className="bg-slate-50/30">
                             <Stack gap="md">
+                                <DateInput
+                                    label="Proposal Submission Date"
+                                    description="Official date recorded on application"
+                                    value={submissionDate}
+                                    onChange={setSubmissionDate}
+                                    radius="md"
+                                    size="md"
+                                    leftSection={<Calendar size={16} />}
+                                    mb="md"
+                                />
                                 <Textarea
                                     label="Administrative Evaluation Verdict"
                                     placeholder="Explain the technical and commercial justification for approval or rejection..."
@@ -372,11 +509,94 @@ export function PipelineUpdateModal({ opened, onClose, inquiry, onSuccess, tenan
                                         size="md"
                                         leftSection={<Maximize size={16} />}
                                     />
+                                </Group>
+
+                                <Divider label="Spatial Allocation (Form B)" labelPosition="center" />
+
+                                <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+                                    <Select
+                                        label="Target Zone"
+                                        placeholder="Select Zone"
+                                        data={zones.map(z => ({ value: z.id.toString(), label: z.name }))}
+                                        value={assignedZoneId.toString()}
+                                        onChange={(val) => {
+                                            setAssignedZoneId(val || '');
+                                            setAssignedBlockId('');
+                                            setAssignedPlotId('');
+                                        }}
+                                        radius="md"
+                                    />
+                                    <Select
+                                        label="Strategic Block"
+                                        placeholder="Select Block"
+                                        data={blocks.map(b => ({ value: b.id.toString(), label: b.name }))}
+                                        value={assignedBlockId.toString()}
+                                        onChange={(val) => {
+                                            setAssignedBlockId(val || '');
+                                            setAssignedPlotId('');
+                                        }}
+                                        disabled={!assignedZoneId}
+                                        radius="md"
+                                    />
+                                    <Select
+                                        label={isLand ? "Industrial Plot" : "Building Plot"}
+                                        placeholder="Select Plot"
+                                        data={plots.map(p => ({ value: p.id.toString(), label: p.code }))}
+                                        value={assignedPlotId.toString()}
+                                        onChange={(val) => {
+                                            setAssignedPlotId(val || '');
+                                            setAssignedBuildingId('');
+                                        }}
+                                        disabled={!assignedBlockId}
+                                        radius="md"
+                                    />
+                                    {!isLand && (
+                                        <Select
+                                            label="Building Registry"
+                                            placeholder="Select Building"
+                                            data={buildings.map(b => ({ value: b.id.toString(), label: b.name }))}
+                                            value={assignedBuildingId.toString()}
+                                            onChange={(val) => {
+                                                setAssignedBuildingId(val || '');
+                                                setAssignedFloorId('');
+                                            }}
+                                            disabled={!assignedPlotId}
+                                            radius="md"
+                                        />
+                                    )}
+                                    {!isLand && (
+                                        <Select
+                                            label="Target Level / Floor"
+                                            placeholder="Select Floor"
+                                            data={floors.map(f => ({ value: f.id.toString(), label: `Floor ${f.floorNumber}` }))}
+                                            value={assignedFloorId.toString()}
+                                            onChange={(val) => {
+                                                setAssignedFloorId(val || '');
+                                                setAssignedRoomId('');
+                                            }}
+                                            disabled={!assignedBuildingId}
+                                            radius="md"
+                                        />
+                                    )}
+                                    {!isLand && (
+                                        <Select
+                                            label="Specific Unit / Room"
+                                            placeholder="Select Unit"
+                                            data={rooms.map(r => ({ value: r.id.toString(), label: r.code }))}
+                                            value={assignedRoomId.toString()}
+                                            onChange={(val) => setAssignedRoomId(val || '')}
+                                            disabled={!assignedFloorId}
+                                            radius="md"
+                                        />
+                                    )}
+                                </SimpleGrid>
+
+                                <Group grow>
                                     <NumberInput
                                         label={trackConfig.rateLabel}
                                         description={isLand ? "Institutional annual rate" : "Standard commercial rate"}
                                         value={offeredRate}
-                                        onChange={setOfferedRate}
+                                        onChange={handleOfferedRateChange}
                                         radius="md"
                                         size="md"
                                         leftSection={<DollarSign size={16} />}
@@ -402,6 +622,40 @@ export function PipelineUpdateModal({ opened, onClose, inquiry, onSuccess, tenan
                                         leftSection={<Calendar size={16} />}
                                     />
                                 </Group>
+
+                                <Group grow>
+                                    <NumberInput
+                                        label="Rate in ETB (Indicative)"
+                                        description={`Live at 1 USD = ${exchangeRate.toFixed(2)} ETB`}
+                                        value={offeredRateEtb}
+                                        onChange={handleOfferedRateEtbChange}
+                                        radius="md"
+                                        size="md"
+                                        leftSection={<Coins size={16} />}
+                                    />
+                                    {isLand && (
+                                        <NumberInput
+                                            label="Land Price per m² (ETB)"
+                                            description="Institutional lease base rate"
+                                            value={landPriceEtb}
+                                            onChange={handleLandPriceEtbChange}
+                                            radius="md"
+                                            size="md"
+                                            leftSection={<Factory size={16} />}
+                                        />
+                                    )}
+                                </Group>
+
+                                {isLand && (
+                                    <Paper p="md" radius="lg" bg="slate.0" withBorder>
+                                        <Group justify="space-between">
+                                            <Text size="sm" fw={700}>Projected Total Land Value (ETB):</Text>
+                                            <Text size="lg" fw={900} c="brand-navy">
+                                                {(Number(landPriceEtb) * Number(offeredSpace)).toLocaleString('en-US', { minimumFractionDigits: 2 })} ETB
+                                            </Text>
+                                        </Group>
+                                    </Paper>
+                                )}
                             </Stack>
                         </Paper>
 
@@ -543,6 +797,14 @@ export function PipelineUpdateModal({ opened, onClose, inquiry, onSuccess, tenan
                                             radius="md"
                                         />
                                     </Group>
+                                    <Select
+                                        label="Target Phase"
+                                        data={['Phase 1', 'Phase 2', 'Phase 3', 'Phase 4']}
+                                        value={phase}
+                                        onChange={(val) => setPhase(val || 'Phase 1')}
+                                        radius="md"
+                                        mt="md"
+                                    />
                                 </Stack>
                             )}
                         </Paper>

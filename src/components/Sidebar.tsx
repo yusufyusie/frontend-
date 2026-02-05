@@ -102,70 +102,12 @@ export function Sidebar({ isOpen = true, isCollapsed = false, onClose }: Sidebar
         // Check if sidebar is effectively expanded (either not collapsed or hovered)
         const isEffectivelyExpanded = !isCollapsed || isHovered;
 
-        // Collapsed view - icons only with tooltips (unless hovered)
-        if (isCollapsed && !isHovered && depth === 0) {
-            return (
-                <div
-                    key={item.id}
-                    className="relative group mb-2"
-                    onMouseEnter={() => setIsHovered(true)}
-                    onMouseLeave={() => setTimeout(() => setIsHovered(false), 100)}
-                >
-                    <Link
-                        href={item.path || '#'}
-                        className={`flex items-center justify-center p-3.5 rounded-xl transition-all duration-300 group relative overflow-hidden ${isActiveItem
-                            ? 'bg-secondary text-white shadow-xl shadow-secondary/40 scale-105 ring-2 ring-accent/50'
-                            : 'text-white bg-primary-600/30 hover:bg-accent/40 hover:text-white hover:scale-110 hover:shadow-xl hover:shadow-accent/20 hover:ring-2 hover:ring-accent/30'
-                            }`}
-                        title={item.name}
-                        aria-label={item.name}
-                        aria-current={isActiveItem ? 'page' : undefined}
-                    >
-                        {/* Active indicator glow */}
-                        <span className="absolute inset-0 bg-transparent" aria-hidden="true" />
-
-                        {Icon ? (
-                            <Icon className="w-6 h-6 relative z-10 transition-all duration-300 group-hover:rotate-12 group-hover:scale-110" aria-hidden="true" />
-                        ) : (
-                            <MenuIcon className="w-6 h-6 relative z-10 transition-all duration-300 group-hover:rotate-12 group-hover:scale-110" aria-hidden="true" />
-                        )}
-
-                        {/* Active indicator - enhanced */}
-                        {isActiveItem && (
-                            <>
-                                <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-10 bg-accent rounded-r-full shadow-lg shadow-accent/50" aria-hidden="true" />
-                                <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-10 bg-accent rounded-r-full shadow-lg shadow-accent/50 animate-pulse" aria-hidden="true" />
-                            </>
-                        )}
-
-                        {/* Badge - enhanced */}
-                        {item.badge && (
-                            <span className="absolute -top-1 -right-1 px-1.5 py-0.5 text-[10px] font-bold bg-error text-white rounded-full shadow-lg shadow-error/50 animate-pulse" aria-label={item.badge}>
-                                {item.badge}
-                            </span>
-                        )}
-                    </Link>
-
-                    {/* Enhanced Tooltip with animation */}
-                    <div className="absolute left-full ml-4 top-1/2 -translate-y-1/2 px-4 py-2.5 bg-secondary text-white text-sm font-medium rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible group-hover:ml-3 transition-all duration-300 whitespace-nowrap z-50 pointer-events-none backdrop-blur-sm border border-accent/20">
-                        <span className="relative z-10">{item.name}</span>
-                        {/* Tooltip arrow */}
-                        <div className="absolute right-full top-1/2 -translate-y-1/2 border-[6px] border-transparent border-r-secondary" aria-hidden="true" />
-                        {/* Tooltip glow */}
-                        <div className="absolute inset-0 bg-accent/10 rounded-xl blur-sm" aria-hidden="true" />
-                    </div>
-                </div>
-            );
-        }
-
         // Parent item with children
         if (hasChildren) {
             return (
                 <div
                     key={item.id}
                     className={depth > 0 ? 'ml-4' : 'mb-1'}
-                    onMouseEnter={() => isCollapsed && setIsHovered(true)}
-                    onMouseLeave={() => isCollapsed && setTimeout(() => setIsHovered(false), 100)}
                 >
                     <button
                         onClick={() => toggleMenu(item.id)}
@@ -177,31 +119,37 @@ export function Sidebar({ isOpen = true, isCollapsed = false, onClose }: Sidebar
                         aria-label={`${item.name} menu`}
                     >
                         {Icon && <Icon className="w-5 h-5 flex-shrink-0 transition-transform duration-300 group-hover:scale-110" aria-hidden="true" />}
-                        <span className="flex-1 text-left font-medium truncate text-sm">{item.name}</span>
-                        {item.badge && (
-                            <span className={`px-2 py-0.5 text-[10px] font-bold rounded-full flex-shrink-0 ${item.badgeColor === 'red' ? 'bg-error' :
-                                item.badgeColor === 'green' ? 'bg-success' :
-                                    item.badgeColor === 'blue' ? 'bg-info' :
-                                        'bg-accent'
-                                } text-white shadow-sm`} aria-label={item.badge}>
-                                {item.badge}
-                            </span>
+                        {isEffectivelyExpanded && (
+                            <>
+                                <span className="flex-1 text-left font-medium truncate text-sm">{item.name}</span>
+                                {item.badge && (
+                                    <span className={`px-2 py-0.5 text-[10px] font-bold rounded-full flex-shrink-0 ${item.badgeColor === 'red' ? 'bg-error' :
+                                        item.badgeColor === 'green' ? 'bg-success' :
+                                            item.badgeColor === 'blue' ? 'bg-info' :
+                                                'bg-accent'
+                                        } text-white shadow-sm`} aria-label={item.badge}>
+                                        {item.badge}
+                                    </span>
+                                )}
+                                <ChevronDown
+                                    className={`w-4 h-4 flex-shrink-0 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}
+                                    aria-hidden="true"
+                                />
+                            </>
                         )}
-                        <ChevronDown
-                            className={`w-4 h-4 flex-shrink-0 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}
-                            aria-hidden="true"
-                        />
                     </button>
 
                     {/* Submenu with smooth animation */}
-                    <div
-                        className={`overflow-hidden transition-all duration-300 ${isExpanded ? 'max-h-[500px] opacity-100 mt-1' : 'max-h-0 opacity-0'}`}
-                        role="menu"
-                    >
-                        <div className="space-y-1 pl-4 border-l-2 border-accent/20 ml-6">
-                            {item.children?.map(child => renderMenuItem(child, depth + 1))}
+                    {isEffectivelyExpanded && (
+                        <div
+                            className={`overflow-hidden transition-all duration-300 ${isExpanded ? 'max-h-[500px] opacity-100 mt-1' : 'max-h-0 opacity-0'}`}
+                            role="menu"
+                        >
+                            <div className="space-y-1 pl-4 border-l-2 border-accent/20 ml-6">
+                                {item.children?.map(child => renderMenuItem(child, depth + 1))}
+                            </div>
                         </div>
-                    </div>
+                    )}
                 </div>
             );
         }
@@ -214,42 +162,50 @@ export function Sidebar({ isOpen = true, isCollapsed = false, onClose }: Sidebar
                 target={item.isExternal ? '_blank' : undefined}
                 rel={item.isExternal ? 'noopener noreferrer' : undefined}
                 className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 group relative mb-1 ${isActiveItem
-                    ? 'bg-secondary text-white shadow-lg shadow-secondary/30 scale-[1.02]'
+                    ? 'bg-secondary text-white shadow-xl shadow-secondary/40 scale-[1.02] ring-2 ring-accent/30'
                     : hasActivePath
                         ? 'bg-accent/10 text-white'
                         : 'text-white/80 hover:bg-accent/20 hover:text-white hover:translate-x-1'
-                    } ${depth > 0 ? 'ml-4' : ''}`}
+                    } ${depth > 0 ? 'ml-4' : ''} ${isCollapsed && !isHovered ? 'justify-center' : ''}`}
                 aria-current={isActiveItem ? 'page' : undefined}
                 role="menuitem"
-                onMouseEnter={() => isCollapsed && setIsHovered(true)}
-                onMouseLeave={() => isCollapsed && setTimeout(() => setIsHovered(false), 100)}
+                title={!isEffectivelyExpanded ? item.name : undefined}
             >
                 {/* Active indicator */}
                 {isActiveItem && (
-                    <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-accent rounded-r-full shadow-lg shadow-accent/50" aria-hidden="true" />
+                    <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-8 bg-accent rounded-r-full shadow-lg shadow-accent/50" aria-hidden="true" />
                 )}
 
-                {Icon && (
+                {Icon ? (
                     <Icon className="w-5 h-5 flex-shrink-0 transition-transform duration-300 group-hover:scale-110" aria-hidden="true" />
+                ) : (
+                    <MenuIcon className="w-5 h-5 flex-shrink-0 transition-transform duration-300 group-hover:scale-110" aria-hidden="true" />
                 )}
 
-                <span className="flex-1 font-medium truncate text-sm">{item.name}</span>
+                {isEffectivelyExpanded && (
+                    <>
+                        <span className="flex-1 font-medium truncate text-sm">{item.name}</span>
 
-                {item.badge && (
-                    <span className={`px-2 py-0.5 text-[10px] font-bold rounded-full flex-shrink-0 ${item.badgeColor === 'red' ? 'bg-error' :
-                        item.badgeColor === 'green' ? 'bg-success' :
-                            item.badgeColor === 'blue' ? 'bg-info' :
-                                'bg-accent'
-                        } text-white shadow-sm`} aria-label={item.badge}>
-                        {item.badge}
-                    </span>
-                )}
+                        {item.badge && (
+                            <span className={`px-2 py-0.5 text-[10px] font-bold rounded-full flex-shrink-0 ${item.badgeColor === 'red' ? 'bg-error' :
+                                item.badgeColor === 'green' ? 'bg-success' :
+                                    item.badgeColor === 'blue' ? 'bg-info' :
+                                        'bg-accent'
+                                } text-white shadow-sm`} aria-label={item.badge}>
+                                {item.badge}
+                            </span>
+                        )}
 
-                {item.isExternal && (
-                    <ExternalLink className="w-4 h-4 opacity-50" aria-label="Opens in new tab" />
+                        {item.isExternal && (
+                            <ExternalLink className="w-4 h-4 opacity-50" aria-label="Opens in new tab" />
+                        )}
+                    </>
                 )}
             </Link>
         );
+
+        // Regular menu item
+        return null; // Handled by the simplified logic above
     };
 
     return (
@@ -267,10 +223,12 @@ export function Sidebar({ isOpen = true, isCollapsed = false, onClose }: Sidebar
             <aside
                 className={`fixed left-0 top-16 bottom-0 bg-primary text-white shadow-2xl border-r border-primary-700 z-40 transition-all duration-300 overflow-x-hidden ${isCollapsed && !isHovered ? 'w-20' : 'w-72'
                     } ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}
+                onMouseEnter={() => isCollapsed && setIsHovered(true)}
+                onMouseLeave={() => isCollapsed && setIsHovered(false)}
                 role="navigation"
                 aria-label="Main navigation"
             >
-                <nav className={`h-full px-3 pt-3 pb-20 overflow-y-auto overflow-x-hidden scrollbar-custom ${isCollapsed && !isHovered ? 'scrollbar-thin' : ''}`} role="menu">
+                <nav className={`h-full px-3 pt-3 pb-24 overflow-y-auto overflow-x-hidden scrollbar-custom ${isCollapsed && !isHovered ? 'scrollbar-none' : ''}`} role="menu">
                     {loading ? (
                         <div className="flex flex-col items-center justify-center py-12 gap-3" role="status">
                             <div className="w-10 h-10 border-4 border-accent border-t-transparent rounded-full animate-spin" aria-hidden="true" />

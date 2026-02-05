@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Group, Stack, Text, Box, Paper, Title, Button, TextInput, Select, NumberInput, Textarea, Alert, Badge, Divider } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
-import { Mail, Calendar, MapPin, Building2, LayoutGrid, DollarSign, Clock, Send, Sparkles, Factory, Home, Info, Users, Target, CheckCircle2 } from 'lucide-react';
+import { Mail, Calendar, MapPin, Building2, LayoutGrid, DollarSign, Clock, Send, Sparkles, Factory, Home, Info, Users, Target, CheckCircle2, Fingerprint } from 'lucide-react';
 import { lookupsService, SystemLookup } from '@/services/lookups.service';
 import { tenantsService, Tenant } from '@/services/tenants.service';
 import { inquiriesService } from '@/services/inquiries.service';
@@ -31,6 +31,16 @@ export default function InquiryFormPage() {
         purpose: '',
         industry: '',
         sector: '',
+        legalName: '',
+        registrationNumber: '',
+        tradingName: '',
+        contactPerson: '',
+        email: '',
+        phone: '',
+        activities: '',
+        applicationDate: new Date().toISOString().split('T')[0],
+        phase: 'Phase 1',
+        landPriceEtb: 0,
     });
 
     useEffect(() => {
@@ -49,7 +59,7 @@ export default function InquiryFormPage() {
                 ...formData,
                 minArea: formData.requestedSize, // Map to minArea for backend compatibility if needed
                 maxArea: formData.requestedSize,
-                tenantId: Number(formData.tenantId),
+                tenantId: formData.tenantId ? Number(formData.tenantId) : undefined,
                 propertyTypeId: formData.propertyTypeId ? Number(formData.propertyTypeId) : undefined,
                 furnitureStatusId: formData.furnitureStatusId ? Number(formData.furnitureStatusId) : undefined,
                 officeSpreadId: formData.officeSpreadId ? Number(formData.officeSpreadId) : undefined,
@@ -97,15 +107,28 @@ export default function InquiryFormPage() {
 
                         <Stack gap="lg">
                             <Select
-                                label="Requesting Organization"
-                                description="Select the registered tenant entity making this inquiry"
+                                label="Requesting Organization (Existing)"
+                                description="Select if the tenant already exists in the system registry"
                                 placeholder="Choose tenant from registry"
                                 data={tenants.map(t => ({ value: t.id.toString(), label: `${t.name} (${t.companyRegNumber})` }))}
                                 value={formData.tenantId}
-                                onChange={(val) => setFormData({ ...formData, tenantId: val || '' })}
-                                required
+                                onChange={(val) => {
+                                    const tenant = tenants.find(t => t.id.toString() === val);
+                                    setFormData({
+                                        ...formData,
+                                        tenantId: val || '',
+                                        legalName: tenant?.legalName || '',
+                                        registrationNumber: tenant?.registrationNumber || '',
+                                        tradingName: tenant?.tradingName || tenant?.name || '',
+                                        contactPerson: tenant?.contactPerson || '',
+                                        email: tenant?.email || '',
+                                        phone: tenant?.phone || '',
+                                        activities: tenant?.activities || '',
+                                    });
+                                }}
                                 styles={inputStyles}
                                 searchable
+                                clearable
                                 leftSection={<Building2 size={16} className="text-slate-400" />}
                             />
 
@@ -151,7 +174,90 @@ export default function InquiryFormPage() {
                                 </div>
                             </div>
 
+                            <Divider label="Identity & Contact Information" labelPosition="center" />
 
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <TextInput
+                                    label="Legal Company Name"
+                                    placeholder="Enter full legal name"
+                                    value={formData.legalName}
+                                    onChange={(e) => setFormData({ ...formData, legalName: e.target.value })}
+                                    styles={inputStyles}
+                                    required={!formData.tenantId}
+                                    leftSection={<Info size={16} className="text-slate-400" />}
+                                />
+                                <TextInput
+                                    label="Registration Number"
+                                    placeholder="e.g. EITP-REG-001"
+                                    value={formData.registrationNumber}
+                                    onChange={(e) => setFormData({ ...formData, registrationNumber: e.target.value })}
+                                    styles={inputStyles}
+                                    required={!formData.tenantId}
+                                    leftSection={<Fingerprint size={16} className="text-slate-400" />}
+                                />
+                                <TextInput
+                                    label="Trading Name"
+                                    placeholder="Enter commercial name"
+                                    value={formData.tradingName}
+                                    onChange={(e) => setFormData({ ...formData, tradingName: e.target.value })}
+                                    styles={inputStyles}
+                                />
+                                <TextInput
+                                    label="Contact Person Name"
+                                    placeholder="Mr/Ms. Full Name"
+                                    value={formData.contactPerson}
+                                    onChange={(e) => setFormData({ ...formData, contactPerson: e.target.value })}
+                                    styles={inputStyles}
+                                    required
+                                    leftSection={<Users size={16} className="text-slate-400" />}
+                                />
+                                <TextInput
+                                    label="Phone Number"
+                                    placeholder="e.g. 0912501791"
+                                    value={formData.phone}
+                                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                                    styles={inputStyles}
+                                    required
+                                    leftSection={<Clock size={16} className="text-slate-400" />}
+                                />
+                                <TextInput
+                                    label="Email Address"
+                                    placeholder="company@example.com"
+                                    value={formData.email}
+                                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                    styles={inputStyles}
+                                    required
+                                    leftSection={<Mail size={16} className="text-slate-400" />}
+                                />
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <Select
+                                    label="Target Phase"
+                                    data={['Phase 1', 'Phase 2', 'Phase 3', 'Phase 4']}
+                                    value={formData.phase}
+                                    onChange={(val) => setFormData({ ...formData, phase: val || 'Phase 1' })}
+                                    styles={inputStyles}
+                                />
+                                <DateInput
+                                    label="Application Date"
+                                    placeholder="Pick date"
+                                    value={formData.applicationDate ? new Date(formData.applicationDate) : null}
+                                    onChange={(val) => setFormData({ ...formData, applicationDate: val?.toISOString().split('T')[0] || '' })}
+                                    styles={inputStyles}
+                                    leftSection={<Calendar size={16} />}
+                                />
+                            </div>
+
+                            <Textarea
+                                label="Business Activities"
+                                description="Specify primary commercial or manufacturing operations"
+                                placeholder="Software development, Manufacturing of..."
+                                value={formData.activities}
+                                onChange={(e) => setFormData({ ...formData, activities: e.target.value })}
+                                styles={inputStyles}
+                                rows={3}
+                            />
                         </Stack>
                     </Paper>
 
@@ -196,15 +302,29 @@ export default function InquiryFormPage() {
                                         styles={inputStyles}
                                     />
                                     <NumberInput
-                                        label="Estimated Capital Investment (USD)"
-                                        description="Expected CapEx/FDI for the project"
-                                        placeholder="e.g., 500000"
-                                        value={formData.capexFDI}
-                                        onChange={(val) => setFormData({ ...formData, capexFDI: Number(val) })}
+                                        label="Total Land Value (ETB)"
+                                        description="Calculated based on price per m²"
+                                        placeholder="Auto-calculated"
+                                        value={formData.landPriceEtb * formData.requestedSize}
+                                        disabled
                                         styles={inputStyles}
                                         leftSection={<DollarSign size={16} />}
-                                        min={0}
                                     />
+                                </Group>
+                            )}
+
+                            {isLandType && (
+                                <Group grow>
+                                    <NumberInput
+                                        label="Land Price per m² (ETB)"
+                                        description="Institutional ground rate"
+                                        placeholder="e.g. 221.22"
+                                        value={formData.landPriceEtb}
+                                        onChange={(val) => setFormData({ ...formData, landPriceEtb: Number(val) })}
+                                        styles={inputStyles}
+                                        leftSection={<DollarSign size={16} />}
+                                    />
+                                    <div /> {/* Spacer */}
                                 </Group>
                             )}
 

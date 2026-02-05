@@ -14,10 +14,15 @@ export function FinanceSnapshot() {
     useEffect(() => {
         const loadSnapshotData = async () => {
             try {
+                // Fiscal year starts in July. If current month < July, we are in the fiscal year that started last year.
+                const now = new Date();
+                const currentFiscalYear = now.getMonth() < 6 ? now.getFullYear() - 1 : now.getFullYear();
+
                 const [summary, trendData] = await Promise.all([
-                    financeReportsService.getFinanceSummary({ fiscalYear: new Date().getFullYear() }),
-                    financeReportsService.getRevenueTrends({ fiscalYear: new Date().getFullYear() }, 6)
+                    financeReportsService.getFinanceSummary({ fiscalYear: currentFiscalYear }),
+                    financeReportsService.getRevenueTrends({ fiscalYear: currentFiscalYear }, 6)
                 ]);
+
                 setStats(summary.data);
                 setTrends(trendData.data);
             } catch (error) {
@@ -34,7 +39,10 @@ export function FinanceSnapshot() {
         const monthMap: { [key: string]: string } = {
             'January': '01', 'February': '02', 'March': '03', 'April': '04',
             'May': '05', 'June': '06', 'July': '07', 'August': '08',
-            'September': '09', 'October': '10', 'November': '11', 'December': '12'
+            'September': '09', 'October': '10', 'November': '11', 'December': '12',
+            'Jan': '01', 'Feb': '02', 'Mar': '03', 'Apr': '04',
+            'Jun': '06', 'Jul': '07', 'Aug': '08', 'Sep': '09',
+            'Oct': '10', 'Nov': '11', 'Dec': '12'
         };
 
         return (trends || []).map(t => ({
@@ -57,20 +65,9 @@ export function FinanceSnapshot() {
 
             <Stack gap="xl">
                 <Group justify="space-between" align="center">
-                    <Stack gap={2}>
-                        <Group gap="xs">
-                            <Box className="bg-[#0C7C92]/10 p-2 rounded-xl text-[#0C7C92]">
-                                <Activity size={18} />
-                            </Box>
-                            <Text fw={900} size="xs" className="uppercase tracking-[0.25em] text-[#0C7C92]">
-                                Global Portfolio Pulse
-                            </Text>
-                        </Group>
-                        <Title order={3} className="text-2xl font-[950] text-slate-900 tracking-tight mt-1">
-                            Current Financial Performance
-                        </Title>
-                    </Stack>
-                    <Badge variant="filled" color="teal" size="lg" radius="xl" className="bg-emerald-500 font-black shadow-lg shadow-emerald-500/20">OPERATIONAL</Badge>
+                    <Title order={3} className="text-2xl font-[950] text-slate-900 tracking-tight">
+                        Financial Overview
+                    </Title>
                 </Group>
 
                 <Grid grow gutter="lg">

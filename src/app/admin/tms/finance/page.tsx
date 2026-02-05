@@ -129,8 +129,8 @@ export default function FinanceLedgerPage() {
     }, {} as Record<number, { lease: any, months: Record<number, LeasePayment> }>);
 
     const filteredLeases = Object.values(groupedPayments).filter(item =>
-        item.lease?.tenant?.name.toLowerCase().includes(search.toLowerCase()) ||
-        item.lease?.contractNumber.toLowerCase().includes(search.toLowerCase())
+        (item.lease?.tenant?.name || '').toLowerCase().includes(search.toLowerCase()) ||
+        (item.lease?.contractNumber || '').toLowerCase().includes(search.toLowerCase())
     ).map(item => {
         // Calculate fiscal sum for this lease
         const monthsSum = Object.values(item.months).reduce((sum, p) =>

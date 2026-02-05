@@ -50,10 +50,7 @@ export const ITPCRadarChart: React.FC<ITPCRadarChartProps> = ({
             <Stack gap="md" className="h-full">
                 <Group justify="space-between" align="center">
                     <Stack gap={2}>
-                        <Text size="xs" fw={900} className="text-[#0C7C92] uppercase tracking-[0.2em]">
-                            Risk & Efficiency
-                        </Text>
-                        <Text size="lg" fw={950} className="text-slate-900">
+                        <Text size="lg" fw={950} className="text-slate-900 leading-none">
                             {title}
                         </Text>
                     </Stack>

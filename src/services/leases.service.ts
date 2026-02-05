@@ -65,6 +65,10 @@ class LeasesService {
     async getSummary() {
         return api.get<any>(`${this.endpoint}/summary/occupancy`);
     }
+
+    async recordPayment(leaseId: number, data: any) {
+        return api.post<any>(`${this.endpoint}/${leaseId}/payments`, data);
+    }
 }
 
 export const leasesService = new LeasesService();

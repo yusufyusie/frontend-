@@ -15,7 +15,7 @@ export const TenantTableRow = ({ tenant, onDelete }: Props) => {
             <Table.Td>
                 <Group gap="sm">
                     <Avatar color="blue" radius="xl">
-                        {tenant.name.substring(0, 2).toUpperCase()}
+                        {tenant.name?.substring(0, 2).toUpperCase() || '??'}
                     </Avatar>
                     <Box>
                         <Text size="sm" fw={700}>{tenant.name}</Text>
